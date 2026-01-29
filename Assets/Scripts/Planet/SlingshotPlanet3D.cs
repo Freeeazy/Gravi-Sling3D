@@ -25,6 +25,7 @@ public class SlingshotPlanet3D : MonoBehaviour
 
     [Header("Orbit / Launch")]
     public GameObject Bubble;
+    public PreGravityPullZone preGravityZone;
     public float baseOrbitSpeedDegPerSec = 180f;
     public float baseLaunchSpeed = 12f;
 
@@ -94,6 +95,7 @@ public class SlingshotPlanet3D : MonoBehaviour
     private float chargeTimer;
     private float orbitTangentialSpeed; // units/sec along the arc
     private float orbitStartTime;
+    public bool IsOrbiting => isOrbiting;
 
     private void Reset()
     {
@@ -315,6 +317,8 @@ public class SlingshotPlanet3D : MonoBehaviour
             if (SpeedHUD.Instance)
                 SpeedHUD.Instance.SetSpeed(orbitTangentialSpeed);
 
+            if (SpeedometerHUD.Instance) SpeedometerHUD.Instance.SetSpeed(orbitTangentialSpeed);
+
             // Orientation: ship "bottom" points toward the planet (i.e., along -radialDir).
             Vector3 tangent2 = Vector3.Cross(orbitAxis, radialDir).normalized;
             Vector3 desiredBottomDir = orbitInverted ? radialDir : -radialDir; // inverted flips which side faces planet
@@ -336,10 +340,16 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (PlayerThrustManager.Instance)
             PlayerThrustManager.Instance.OnLaunch();
 
-        rb.linearVelocity = tangent * launchSpeed;
+        rb.linearVelocity = tangent * launchSpeed;                                          // LAUNCH
+
+        // Prevent pre-gravity from tugging us immediately after launch.
+        if (preGravityZone) preGravityZone.DisablePostLaunch();
 
         if (SpeedHUD.Instance)
             SpeedHUD.Instance.SetSpeed(rb.linearVelocity.magnitude);
+
+        if (SpeedometerHUD.Instance) 
+            SpeedometerHUD.Instance.ClearExternalSpeed();
 
         if (BoostManager.Instance)
             BoostManager.Instance.SetMode(BoostManager.Mode.FreeFlight);

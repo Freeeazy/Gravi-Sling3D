@@ -279,6 +279,7 @@ GameObject:
   m_Component:
   - component: {fileID: 22637973}
   - component: {fileID: 22637974}
+  - component: {fileID: 22637975}
   m_Layer: 5
   m_Name: Speedometer
   m_TagString: Untagged
@@ -314,6 +315,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 22637972}
   m_CullTransparentMesh: 1
+--- !u!114 &22637975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 22637972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0de4b68cbcefac54390e8fd5b0b4bb08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  meterRoot: {fileID: 2098999551}
+  shipRb: {fileID: 1616803247}
+  greenOn: {fileID: 2100000, guid: b2723b39d9a523c4ea9c48f9187479ec, type: 2}
+  greenOff: {fileID: 2100000, guid: 8664632f2dd88074a89157a5ca1c5444, type: 2}
+  redOn: {fileID: 2100000, guid: 3566fc55733e5304093afb0d6316f2f0, type: 2}
+  redOff: {fileID: 2100000, guid: dcc1d336ab193f74796a8d70b0e0eca0, type: 2}
+  freeFlightMaxSpeed: 200
+  freeFlightFillPortion: 0.25
+  redlineSpeed: 1100
+  maxSpeed: 1100
+  redlineStart01: 0.78
+  flickerHzMin: 3
+  flickerHzMax: 18
+  flickerDuty: 0.75
+  overspeedFillBias: 0.35
+  speedSmooth: 12
 --- !u!1 &28171076
 GameObject:
   m_ObjectHideFlags: 0
@@ -1201,7 +1230,7 @@ MonoBehaviour:
     maxCellPicks: 1500
   planetCellSize: 1000
   planetAvoidRadius: 220
-  planetSpawnChance: 0.4
+  planetSpawnChance: 0.3
   generateOnStart: 1
   logChunkCreates: 1
 --- !u!4 &103438303
@@ -3572,7 +3601,7 @@ MonoBehaviour:
   pickAttempts: 6
   planetCellSize: 1000
   planetAvoidRadius: 220
-  planetSpawnChance: 0.4
+  planetSpawnChance: 0.3
   beaconDepthFrac: 0.8
   beaconMaxDistance: 800
   armTriggerDistance: 900
@@ -11425,7 +11454,6 @@ GameObject:
   m_Component:
   - component: {fileID: 584186170}
   - component: {fileID: 584186167}
-  - component: {fileID: 584186169}
   - component: {fileID: 584186168}
   m_Layer: 0
   m_Name: UICamera
@@ -11529,14 +11557,6 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!81 &584186169
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 584186166}
-  m_Enabled: 1
 --- !u!4 &584186170
 Transform:
   m_ObjectHideFlags: 0
@@ -13900,6 +13920,8 @@ MonoBehaviour:
   lod0VoxelCellSize: 0.4
   lod1VoxelCellSize: 0.8
   lod2VoxelCellSize: 1
+  chunkBoundsPadding: 50
+  posManager: {fileID: 103438302}
 --- !u!4 &821560724
 Transform:
   m_ObjectHideFlags: 0
@@ -34343,9 +34365,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -250, y: 150}
+  m_AnchoredPosition: {x: -500, y: 150}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 1, y: 0}
+  m_Pivot: {x: 0, y: 0}
 --- !u!1 &1403356620
 GameObject:
   m_ObjectHideFlags: 0
@@ -37967,15 +37989,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1616803246}
-  planetPrefab: {fileID: 4370263807525258910, guid: 714181eb6ea84da4ba829cc76a3725e7, type: 3}
+  planetPrefab: {fileID: 9109082205529922646, guid: ed7cd37768ca45444956ef7e7d50cbcc, type: 3}
   globalSeed: 123456
   planetCellSize: 1000
   planetAvoidRadius: 220
-  planetSpawnChance: 0.4
+  planetSpawnChance: 0.3
   renderRadius: 2500
   refreshInterval: 0.35
   worldSpace: 1
-  prewarmCount: 20
+  prewarmCount: 30
   drawDebugSphere: 0
 --- !u!1 &1642404727
 GameObject:
@@ -54132,6 +54154,10 @@ PrefabInstance:
     - target: {fileID: 4370263807525258910, guid: 714181eb6ea84da4ba829cc76a3725e7, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9121769558674126073, guid: 714181eb6ea84da4ba829cc76a3725e7, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

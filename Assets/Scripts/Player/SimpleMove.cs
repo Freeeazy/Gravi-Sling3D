@@ -88,6 +88,10 @@ public class SimpleMove : MonoBehaviour
     private float _wobbleT;
     private float boostCharge = 0f;
 
+    private string _velFormat;
+    private int _cachedDecimals = -1;
+    private float _lastSpeed = float.NaN;
+
     private void Awake()
     {
         if (!rb)
@@ -285,25 +289,21 @@ public class SimpleMove : MonoBehaviour
         if (!debugVelocity || velocityText == null || rb == null)
             return;
 
-        Vector3 vel = rb.linearVelocity;
+        float speed = rb.linearVelocity.magnitude;
 
-        if (showMagnitudeOnly)
-        {
-            velocityText.text =
-                $"Speed: {vel.magnitude.ToString($"F{velocityDecimals}")}";
-        }
-        else
-        {
-            velocityText.text =
-                $"Speed:\n" +
-                $"X {vel.x.ToString($"F{velocityDecimals}")}\n" +
-                $"Y {vel.y.ToString($"F{velocityDecimals}")}\n" +
-                $"Z {vel.z.ToString($"F{velocityDecimals}")}\n" +
-                $"|V| {vel.magnitude.ToString($"F{velocityDecimals}")}";
-        }
+        if (!float.IsNaN(_lastSpeed) && Mathf.Abs(speed - _lastSpeed) < 0.02f)
+            return;
 
-        float t = Mathf.InverseLerp(0f, maxSpeed + boostMaxSpeedAdd, vel.magnitude);
-        velocityText.color = Color.Lerp(Color.cyan, Color.red, t);
+        _lastSpeed = speed;
+
+        switch (velocityDecimals)
+        {
+            case 0: velocityText.SetText("Speed: {0:0} m/s", speed); break;
+            case 1: velocityText.SetText("Speed: {0:0.0} m/s", speed); break;
+            case 2: velocityText.SetText("Speed: {0:0.00} m/s", speed); break;
+            case 3: velocityText.SetText("Speed: {0:0.000} m/s", speed); break;
+            default: velocityText.SetText("Speed: {0:0.0000} m/s", speed); break;
+        }
     }
 
     private Quaternion ComputeFacing3D(Vector3 dir)

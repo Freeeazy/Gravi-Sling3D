@@ -231,6 +231,8 @@ public class AsteroidPosManager : MonoBehaviour
             chunkSize,
             seed,
             _tmpPlanets);
+
+        OnChunkCreated?.Invoke(coord, data);
     }
     private void UpdateCollisionChunk(Vector3Int centerChunk)
     {

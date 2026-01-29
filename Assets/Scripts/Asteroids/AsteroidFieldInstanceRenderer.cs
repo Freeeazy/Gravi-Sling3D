@@ -65,35 +65,46 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
     public float lod1VoxelCellSize = 0.5f;
     public float lod2VoxelCellSize = 1.0f;
 
-    // Internal cached matrices (one per instance)
-    private Matrix4x4[] _matrices;
-    private Quaternion[] _runtimeRotations; // only used if drift is enabled
-    private bool _initialized;
+    [Header("Chunk Culling")]
+    [Tooltip("Pads the computed chunk bounds by this many meters to reduce pop-in at edges.")]
+    public float chunkBoundsPadding = 10f;
 
-    // Buckets: [typeId, lodIndex] -> list of matrices
-    private List<Matrix4x4>[,] _buckets;
+    [Header("Optional: Auto hook PosManager")]
+    public AsteroidPosManager posManager;
 
     private const int MaxInstancesPerCall = 1023;
 
     private Dictionary<AsteroidFieldData, BitArray> _hiddenByData;
-
     private static readonly int VoxelCellSizeID = Shader.PropertyToID("_VoxelCellSize");
     private MaterialPropertyBlock _mpb;
 
+    // Per-chunk cache
+    private readonly Plane[] _frustumPlanes = new Plane[6];
+    private sealed class ChunkCache
+    {
+        public int count;
+        public Matrix4x4[] matrices;
+        public Quaternion[] runtimeRotations;
+        public List<Matrix4x4>[,] buckets;
+        public Bounds bounds;
+        public bool initialized;
+    }
+
+    private readonly Dictionary<AsteroidFieldData, ChunkCache> _cacheByData = new();
+
     private void OnEnable()
     {
-        if (_hiddenByData == null)
-            _hiddenByData = new Dictionary<AsteroidFieldData, BitArray>();
+        _hiddenByData ??= new Dictionary<AsteroidFieldData, BitArray>();
 
         _mpb ??= new MaterialPropertyBlock();
+
+        if (posManager) posManager.OnChunkCreated += HandleChunkCreated;
     }
 
     private void OnDisable()
     {
-        _initialized = false;
-        _matrices = null;
-        _runtimeRotations = null;
-        _buckets = null;
+        if (posManager) posManager.OnChunkCreated -= HandleChunkCreated;
+        _cacheByData.Clear();
     }
 
     private void Update()
@@ -108,34 +119,68 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         if (!cam)
             return;
 
+        // Compute frustum planes once per frame
+        GeometryUtility.CalculateFrustumPlanes(cam, _frustumPlanes);
+
+        // Optional: cleanup dead entries (if chunks are destroyed/replaced)
+        CleanupCache();
+
         foreach (var data in fieldDatas)
         {
             if (data == null || data.count <= 0)
                 continue;
 
-            InitIfNeeded(data, force: false);
+            var cache = GetOrInitCache(data);
+
+            // Frustum short-circuit (chunk-level)
+            if (!GeometryUtility.TestPlanesAABB(_frustumPlanes, cache.bounds))
+                continue;
 
             if (applyRotationDriftInPlayMode && Application.isPlaying)
-                ApplyRotationDrift(data, Time.deltaTime);
+                ApplyRotationDrift(data, cache, Time.deltaTime);
 
-            Render(data, cam);
+            Render(data, cache, cam);
         }
     }
-    private void InitIfNeeded(AsteroidFieldData fieldData, bool force)
+    private void CleanupCache()
     {
-        if (!force && _initialized)
-            return;
-
-        if (fieldData == null)
+        // Remove cache entries whose data is gone or not referenced anymore
+        // (keeps memory stable if you replace chunk objects)
+        var toRemove = ListPool<AsteroidFieldData>.Get();
+        foreach (var kvp in _cacheByData)
         {
-            _initialized = false;
-            return;
+            if (kvp.Key == null || fieldDatas == null || !fieldDatas.Contains(kvp.Key))
+                toRemove.Add(kvp.Key);
+        }
+        foreach (var d in toRemove)
+            _cacheByData.Remove(d);
+        ListPool<AsteroidFieldData>.Release(toRemove);
+    }
+    private ChunkCache GetOrInitCache(AsteroidFieldData data)
+    {
+        if (!_cacheByData.TryGetValue(data, out var cache) || cache == null)
+        {
+            cache = new ChunkCache();
+            _cacheByData[data] = cache;
         }
 
-        int n = fieldData.count;
+        // Re-init if count changed (or never init)
+        if (!cache.initialized || cache.count != data.count)
+            InitCache(data, cache);
 
-        _matrices = new Matrix4x4[n];
-        _runtimeRotations = new Quaternion[n];
+        return cache;
+    }
+    private void InitCache(AsteroidFieldData fieldData, ChunkCache cache)
+    {
+        int n = fieldData.count;
+        cache.count = n;
+
+        cache.matrices = new Matrix4x4[n];
+        cache.runtimeRotations = new Quaternion[n];
+
+        // Build matrices + compute bounds in the same pass
+        bool boundsInit = false;
+        Bounds b = default;
 
         for (int i = 0; i < n; i++)
         {
@@ -143,73 +188,74 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             Quaternion rot = fieldData.rotations[i];
             float s = fieldData.scales[i];
 
-            // Sanitize rotation
-            if (!IsFinite(rot) ||
-                (rot.x == 0f && rot.y == 0f && rot.z == 0f && rot.w == 0f))
-            {
+            if (!IsFinite(rot) || (rot.x == 0f && rot.y == 0f && rot.z == 0f && rot.w == 0f))
                 rot = Quaternion.identity;
+            else
+                rot = Quaternion.Normalize(rot);
+
+            cache.runtimeRotations[i] = rot;
+            cache.matrices[i] = Matrix4x4.TRS(pos, rot, Vector3.one * s);
+
+            if (!boundsInit)
+            {
+                b = new Bounds(pos, Vector3.zero);
+                boundsInit = true;
             }
             else
             {
-                rot = Quaternion.Normalize(rot);
+                b.Encapsulate(pos);
             }
-
-            _runtimeRotations[i] = rot;
-            _matrices[i] = Matrix4x4.TRS(pos, rot, Vector3.one * s);
         }
 
-        int typeCount = (typeRenders != null) ? typeRenders.Length : 0;
-        if (typeCount <= 0) typeCount = 15;
+        // Pad bounds to account for scale + reduce edge popping.
+        // This is intentionally generous; frustum culling is coarse.
+        float pad = Mathf.Max(0f, chunkBoundsPadding);
+        b.Expand(pad * 2f);
+        cache.bounds = b;
 
-        _buckets = new List<Matrix4x4>[typeCount, 3];
+        int typeCount = (typeRenders != null && typeRenders.Length > 0) ? typeRenders.Length : 15;
+        cache.buckets = new List<Matrix4x4>[typeCount, 3];
         for (int t = 0; t < typeCount; t++)
         {
             for (int l = 0; l < 3; l++)
-                _buckets[t, l] = new List<Matrix4x4>(256);
+                cache.buckets[t, l] = new List<Matrix4x4>(256);
         }
 
-        _initialized = true;
+        cache.initialized = true;
     }
-
-    private void ApplyRotationDrift(AsteroidFieldData fieldData, float dt)
+    private void ApplyRotationDrift(AsteroidFieldData fieldData, ChunkCache cache, float dt)
     {
-        // Rebuild matrices if rotation drift changes rotations
-        // NOTE: This is O(N) and fine for hundreds/thousands. For 50k+, we'd move this to a cheaper path.
         int n = fieldData.count;
-
         var ang = fieldData.angularVelocityDeg;
         if (ang == null || ang.Length != n)
             return;
 
         for (int i = 0; i < n; i++)
         {
-            Vector3 av = ang[i]; // degrees/sec per axis
+            Vector3 av = ang[i];
             if (av.sqrMagnitude < 0.000001f)
                 continue;
 
             Quaternion delta = Quaternion.Euler(av * dt);
-            Quaternion q = _runtimeRotations[i] * delta;
+            Quaternion q = cache.runtimeRotations[i] * delta;
 
-            // normalize + recover if it ever goes weird
             if (!IsFinite(q) || (q.x == 0f && q.y == 0f && q.z == 0f && q.w == 0f))
                 q = Quaternion.identity;
             else
                 q = Quaternion.Normalize(q);
 
-            _runtimeRotations[i] = q;
-            _matrices[i] = Matrix4x4.TRS(fieldData.positions[i], q, Vector3.one * fieldData.scales[i]);
+            cache.runtimeRotations[i] = q;
+            cache.matrices[i] = Matrix4x4.TRS(fieldData.positions[i], q, Vector3.one * fieldData.scales[i]);
         }
     }
-
-    private void Render(AsteroidFieldData fieldData, Camera cam)
+    private void Render(AsteroidFieldData fieldData, ChunkCache cache, Camera cam)
     {
-        // Clear buckets without reallocating
-        int typeCount = _buckets.GetLength(0);
+        var buckets = cache.buckets;
+
+        int typeCount = buckets.GetLength(0);
         for (int t = 0; t < typeCount; t++)
-        {
             for (int l = 0; l < 3; l++)
-                _buckets[t, l].Clear();
-        }
+                buckets[t, l].Clear();
 
         Vector3 camPos = cam.transform.position;
         float d0 = Mathf.Max(0f, lod0Distance);
@@ -218,7 +264,6 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         int n = fieldData.count;
         var typeIds = fieldData.typeIds;
 
-        // Bucketize
         for (int i = 0; i < n; i++)
         {
             if (IsHidden(fieldData, i))
@@ -228,65 +273,56 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             if (typeId < 0 || typeId >= typeCount)
                 continue;
 
-            // Skip invalid type entries (prevents errors / wasted work)
             var tr = typeRenders != null && typeId < typeRenders.Length ? typeRenders[typeId] : null;
             if (tr == null || !tr.IsValid)
                 continue;
 
             Vector3 pos = fieldData.positions[i];
             float dist = Vector3.Distance(camPos, pos);
-
             int lod = (dist < d0) ? 0 : (dist < d1 ? 1 : 2);
-            _buckets[typeId, lod].Add(_matrices[i]);
+
+            buckets[typeId, lod].Add(cache.matrices[i]);
         }
 
-        // Draw each bucket
         for (int typeId = 0; typeId < typeCount; typeId++)
         {
             var tr = typeRenders != null && typeId < typeRenders.Length ? typeRenders[typeId] : null;
             if (tr == null || !tr.IsValid)
                 continue;
 
-            DrawBucket(tr.lod0Mesh, tr.material, _buckets[typeId, 0], lod0VoxelCellSize);
-            DrawBucket(tr.lod1Mesh, tr.material, _buckets[typeId, 1], lod1VoxelCellSize);
-            DrawBucket(tr.lod2Mesh, tr.material, _buckets[typeId, 2], lod2VoxelCellSize);
+            DrawBucket(tr.lod0Mesh, tr.material, buckets[typeId, 0], lod0VoxelCellSize, cam);
+            DrawBucket(tr.lod1Mesh, tr.material, buckets[typeId, 1], lod1VoxelCellSize, cam);
+            DrawBucket(tr.lod2Mesh, tr.material, buckets[typeId, 2], lod2VoxelCellSize, cam);
         }
     }
 
-    private void DrawBucket(Mesh mesh, Material mat, List<Matrix4x4> matrices, float voxelCellSize)
+    private void DrawBucket(Mesh mesh, Material mat, List<Matrix4x4> matrices, float voxelCellSize, Camera cam)
     {
         int count = matrices.Count;
-        if (count <= 0)
-            return;
+        if (count <= 0) return;
 
         _mpb.SetFloat(VoxelCellSizeID, voxelCellSize);
 
-        // Chunk because DrawMeshInstanced caps at 1023
         int offset = 0;
         while (offset < count)
         {
             int batchCount = Mathf.Min(MaxInstancesPerCall, count - offset);
-
-            // Copy into a temporary array without allocations:
-            // We can reuse a static buffer sized 1023.
-            // BUT Unity requires an array, so we do a shared static.
-            Matrix4x4[] buffer = MatrixBufferCache.Get(batchCount);
+            Matrix4x4[] buffer = MatrixBufferCache.Get();
             matrices.CopyTo(offset, buffer, 0, batchCount);
-
 
             Graphics.DrawMeshInstanced(
                 mesh,
-                submeshIndex: 0,
-                material: mat,
-                matrices: buffer,
-                count: batchCount,
-                properties: _mpb,
-                castShadows: shadowCasting,
-                receiveShadows: receiveShadows,
-                layer: renderLayer,
-                camera: null, // null = render for all cameras; you can set to cam if you want strict control
-                lightProbeUsage: LightProbeUsage.Off,
-                lightProbeProxyVolume: null
+                0,
+                mat,
+                buffer,
+                batchCount,
+                _mpb,
+                shadowCasting,
+                receiveShadows,
+                renderLayer,
+                cam, // IMPORTANT: use the chosen camera, not "all cameras"
+                LightProbeUsage.Off,
+                null
             );
 
             offset += batchCount;
@@ -299,13 +335,10 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
     private static class MatrixBufferCache
     {
         private static Matrix4x4[] _buffer1023;
-
-        public static Matrix4x4[] Get(int needed)
+        public static Matrix4x4[] Get()
         {
-            // Always return the same big buffer; caller uses first "needed" entries.
             if (_buffer1023 == null || _buffer1023.Length != MaxInstancesPerCall)
                 _buffer1023 = new Matrix4x4[MaxInstancesPerCall];
-
             return _buffer1023;
         }
     }
@@ -323,16 +356,12 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         if (!_hiddenByData.TryGetValue(data, out var mask) || mask == null)
             return false;
 
-        if (index < 0 || index >= mask.Length)
-            return false;
-
-        return mask[index];
+        return (index >= 0 && index < mask.Length) && mask[index];
     }
 
     public void SetInstanceHidden(AsteroidFieldData data, int index, bool hidden)
     {
         if (data == null || data.count <= 0) return;
-
         int n = data.count;
         if (index < 0 || index >= n) return;
 
@@ -343,5 +372,26 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         }
 
         mask[index] = hidden;
+    }
+    private void HandleChunkCreated(Vector3Int coord, AsteroidFieldData data)
+    {
+        if (data == null) return;
+
+        if (_cacheByData.TryGetValue(data, out var cache) && cache != null)
+        {
+            cache.initialized = false; // force InitCache next Update
+        }
+        else
+        {
+            // If it wasn't cached yet, nothing to do.
+            // (InitCache will happen naturally.)
+        }
+    }
+    // tiny pooled list helper so CleanupCache doesn't allocate garbage every Update
+    private static class ListPool<T>
+    {
+        private static readonly Stack<List<T>> _pool = new();
+        public static List<T> Get() => _pool.Count > 0 ? _pool.Pop() : new List<T>(64);
+        public static void Release(List<T> list) { list.Clear(); _pool.Push(list); }
     }
 }

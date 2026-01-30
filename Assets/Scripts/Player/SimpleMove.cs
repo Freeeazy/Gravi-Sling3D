@@ -88,8 +88,6 @@ public class SimpleMove : MonoBehaviour
     private float _wobbleT;
     private float boostCharge = 0f;
 
-    private string _velFormat;
-    private int _cachedDecimals = -1;
     private float _lastSpeed = float.NaN;
 
     private void Awake()

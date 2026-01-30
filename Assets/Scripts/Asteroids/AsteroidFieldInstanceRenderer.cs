@@ -85,7 +85,7 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         public int count;
         public Matrix4x4[] matrices;
         public Quaternion[] runtimeRotations;
-        public List<Matrix4x4>[,] buckets;
+        public List<int>[,] buckets; 
         public Bounds bounds;
         public bool initialized;
     }
@@ -214,11 +214,12 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         cache.bounds = b;
 
         int typeCount = (typeRenders != null && typeRenders.Length > 0) ? typeRenders.Length : 15;
-        cache.buckets = new List<Matrix4x4>[typeCount, 3];
+        cache.buckets = new List<int>[typeCount, 3];
+
         for (int t = 0; t < typeCount; t++)
         {
             for (int l = 0; l < 3; l++)
-                cache.buckets[t, l] = new List<Matrix4x4>(256);
+                cache.buckets[t, l] = new List<int>(256); // you can tune this
         }
 
         cache.initialized = true;
@@ -281,7 +282,7 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             float dist = Vector3.Distance(camPos, pos);
             int lod = (dist < d0) ? 0 : (dist < d1 ? 1 : 2);
 
-            buckets[typeId, lod].Add(cache.matrices[i]);
+            buckets[typeId, lod].Add(i);
         }
 
         for (int typeId = 0; typeId < typeCount; typeId++)
@@ -290,15 +291,15 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             if (tr == null || !tr.IsValid)
                 continue;
 
-            DrawBucket(tr.lod0Mesh, tr.material, buckets[typeId, 0], lod0VoxelCellSize, cam);
-            DrawBucket(tr.lod1Mesh, tr.material, buckets[typeId, 1], lod1VoxelCellSize, cam);
-            DrawBucket(tr.lod2Mesh, tr.material, buckets[typeId, 2], lod2VoxelCellSize, cam);
+            DrawBucket(tr.lod0Mesh, tr.material, buckets[typeId, 0], cache, lod0VoxelCellSize, cam);
+            DrawBucket(tr.lod1Mesh, tr.material, buckets[typeId, 1], cache, lod1VoxelCellSize, cam);
+            DrawBucket(tr.lod2Mesh, tr.material, buckets[typeId, 2], cache, lod2VoxelCellSize, cam);
         }
     }
 
-    private void DrawBucket(Mesh mesh, Material mat, List<Matrix4x4> matrices, float voxelCellSize, Camera cam)
+    private void DrawBucket(Mesh mesh, Material mat, List<int> indices, ChunkCache cache, float voxelCellSize, Camera cam)
     {
-        int count = matrices.Count;
+        int count = indices.Count;
         if (count <= 0) return;
 
         _mpb.SetFloat(VoxelCellSizeID, voxelCellSize);
@@ -308,21 +309,17 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         {
             int batchCount = Mathf.Min(MaxInstancesPerCall, count - offset);
             Matrix4x4[] buffer = MatrixBufferCache.Get();
-            matrices.CopyTo(offset, buffer, 0, batchCount);
+
+            // Fill buffer directly from cache.matrices using indices
+            for (int j = 0; j < batchCount; j++)
+                buffer[j] = cache.matrices[indices[offset + j]];
 
             Graphics.DrawMeshInstanced(
-                mesh,
-                0,
-                mat,
-                buffer,
-                batchCount,
-                _mpb,
-                shadowCasting,
-                receiveShadows,
-                renderLayer,
-                cam, // IMPORTANT: use the chosen camera, not "all cameras"
-                LightProbeUsage.Off,
-                null
+                mesh, 0, mat,
+                buffer, batchCount,
+                _mpb, shadowCasting, receiveShadows,
+                renderLayer, cam,
+                LightProbeUsage.Off, null
             );
 
             offset += batchCount;

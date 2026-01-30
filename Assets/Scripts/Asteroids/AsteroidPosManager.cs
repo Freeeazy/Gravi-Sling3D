@@ -242,7 +242,7 @@ public class AsteroidPosManager : MonoBehaviour
         if (_chunks.TryGetValue(centerChunk, out var data))
         {
             collisionDetector.fieldData = data;
-            collisionDetector.Rebuild(); // we'll add this method next
+            collisionDetector.Rebuild();
         }
     }
 

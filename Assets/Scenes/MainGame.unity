@@ -37955,7 +37955,7 @@ GameObject:
   - component: {fileID: 1632884797}
   - component: {fileID: 1632884798}
   m_Layer: 0
-  m_Name: PlanetSectorManager
+  m_Name: PlanetSectorManager-Renderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

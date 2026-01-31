@@ -85,8 +85,10 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         public int count;
         public Matrix4x4[] matrices;
         public Quaternion[] runtimeRotations;
-        public List<int>[,] buckets; 
-        public Bounds bounds;
+        public List<int>[,] buckets;
+        public Bounds localBounds;     // <-- local-space bounds
+        public Bounds worldBounds;     // <-- cached world bounds for this frame/coord
+        public Vector3 worldOrigin;    // <-- where this chunk is in world space
         public bool initialized;
     }
 
@@ -112,7 +114,11 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         if (onlyRenderInPlayMode && !Application.isPlaying)
             return;
 
-        if (fieldDatas == null || fieldDatas.Count == 0)
+        if (posManager == null)
+            return;
+
+        var chunks = posManager.Chunks;
+        if (chunks == null || chunks.Count == 0)
             return;
 
         var cam = renderCamera ? renderCamera : Camera.main;
@@ -125,15 +131,22 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         // Optional: cleanup dead entries (if chunks are destroyed/replaced)
         CleanupCache();
 
-        foreach (var data in fieldDatas)
+        foreach (var kv in posManager.Chunks) // coord -> data
         {
-            if (data == null || data.count <= 0)
-                continue;
+            var coord = kv.Key;
+            var data = kv.Value;
+            if (data == null || data.count <= 0) continue;
+
+            Vector3 origin = posManager.ChunkCoordToWorldOrigin(coord);
 
             var cache = GetOrInitCache(data);
+            cache.worldOrigin = origin;
 
-            // Frustum short-circuit (chunk-level)
-            if (!GeometryUtility.TestPlanesAABB(_frustumPlanes, cache.bounds))
+            // Update world bounds from local bounds
+            cache.worldBounds = cache.localBounds;
+            cache.worldBounds.center += origin;
+
+            if (!GeometryUtility.TestPlanesAABB(_frustumPlanes, cache.worldBounds))
                 continue;
 
             if (applyRotationDriftInPlayMode && Application.isPlaying)
@@ -141,6 +154,13 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
 
             Render(data, cache, cam);
         }
+    }
+    public void ClearHidden(AsteroidFieldData data)
+    {
+        if (data == null) return;
+
+        if (_hiddenByData != null && _hiddenByData.TryGetValue(data, out var mask) && mask != null)
+            mask.SetAll(false);
     }
     private void CleanupCache()
     {
@@ -178,13 +198,14 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         cache.matrices = new Matrix4x4[n];
         cache.runtimeRotations = new Quaternion[n];
 
-        // Build matrices + compute bounds in the same pass
+        // Build matrices + compute bounds in the same pass (LOCAL bounds)
         bool boundsInit = false;
         Bounds b = default;
 
         for (int i = 0; i < n; i++)
         {
-            Vector3 pos = fieldData.positions[i];
+            Vector3 localPos = fieldData.positions[i];
+
             Quaternion rot = fieldData.rotations[i];
             float s = fieldData.scales[i];
 
@@ -194,36 +215,36 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
                 rot = Quaternion.Normalize(rot);
 
             cache.runtimeRotations[i] = rot;
-            cache.matrices[i] = Matrix4x4.TRS(pos, rot, Vector3.one * s);
+
+            Vector3 worldPos = cache.worldOrigin + localPos;
+            cache.matrices[i] = Matrix4x4.TRS(worldPos, rot, Vector3.one * s);
 
             if (!boundsInit)
             {
-                b = new Bounds(pos, Vector3.zero);
+                b = new Bounds(localPos, Vector3.zero);
                 boundsInit = true;
             }
             else
             {
-                b.Encapsulate(pos);
+                b.Encapsulate(localPos);
             }
         }
 
-        // Pad bounds to account for scale + reduce edge popping.
-        // This is intentionally generous; frustum culling is coarse.
+        // Pad LOCAL bounds (world bounds handled per-frame in Update)
         float pad = Mathf.Max(0f, chunkBoundsPadding);
         b.Expand(pad * 2f);
-        cache.bounds = b;
+        cache.localBounds = b;
 
         int typeCount = (typeRenders != null && typeRenders.Length > 0) ? typeRenders.Length : 15;
         cache.buckets = new List<int>[typeCount, 3];
 
         for (int t = 0; t < typeCount; t++)
-        {
             for (int l = 0; l < 3; l++)
-                cache.buckets[t, l] = new List<int>(256); // you can tune this
-        }
+                cache.buckets[t, l] = new List<int>(256);
 
         cache.initialized = true;
     }
+
     private void ApplyRotationDrift(AsteroidFieldData fieldData, ChunkCache cache, float dt)
     {
         int n = fieldData.count;
@@ -246,7 +267,8 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
                 q = Quaternion.Normalize(q);
 
             cache.runtimeRotations[i] = q;
-            cache.matrices[i] = Matrix4x4.TRS(fieldData.positions[i], q, Vector3.one * fieldData.scales[i]);
+            Vector3 worldPos = cache.worldOrigin + fieldData.positions[i];
+            cache.matrices[i] = Matrix4x4.TRS(worldPos, q, Vector3.one * fieldData.scales[i]);
         }
     }
     private void Render(AsteroidFieldData fieldData, ChunkCache cache, Camera cam)
@@ -278,8 +300,8 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             if (tr == null || !tr.IsValid)
                 continue;
 
-            Vector3 pos = fieldData.positions[i];
-            float dist = Vector3.Distance(camPos, pos);
+            Vector3 worldPos = cache.worldOrigin + fieldData.positions[i];
+            float dist = Vector3.Distance(camPos, worldPos);
             int lod = (dist < d0) ? 0 : (dist < d1 ? 1 : 2);
 
             buckets[typeId, lod].Add(i);
@@ -374,15 +396,11 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
     {
         if (data == null) return;
 
+        // Reset any "destroyed/hidden" visual state when this data is reused elsewhere
+        ClearHidden(data);
+
         if (_cacheByData.TryGetValue(data, out var cache) && cache != null)
-        {
-            cache.initialized = false; // force InitCache next Update
-        }
-        else
-        {
-            // If it wasn't cached yet, nothing to do.
-            // (InitCache will happen naturally.)
-        }
+            cache.initialized = false;
     }
     // tiny pooled list helper so CleanupCache doesn't allocate garbage every Update
     private static class ListPool<T>

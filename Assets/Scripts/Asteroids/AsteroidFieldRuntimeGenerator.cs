@@ -81,7 +81,7 @@ public static class AsteroidFieldRuntimeGenerator
         Vector3 chunkOrigin,
         float chunkSize,
         int seed,
-        IReadOnlyList<PlanetSectorGenerator.PlanetNode> planets)
+        bool localSpace = true)
     {
         if (!CanGenerate(settings))
             throw new InvalidOperationException("AsteroidFieldRuntimeGenerator: invalid settings (types/weights/count).");
@@ -91,7 +91,11 @@ public static class AsteroidFieldRuntimeGenerator
         data.Clear(); // uses your built-in Clear() :contentReference[oaicite:2]{index=2}
 
         Vector3 fieldSize = new Vector3(chunkSize, chunkSize, chunkSize);
-        Vector3 fieldCenter = chunkOrigin + fieldSize * 0.5f;
+
+        // --- NEW: choose space ---
+        Vector3 effectiveOrigin = localSpace ? Vector3.zero : chunkOrigin;
+        Vector3 fieldCenter = effectiveOrigin + fieldSize * 0.5f;
+        Vector3 gridOrigin = effectiveOrigin; // min corner for cell computations
 
         data.fieldCenter = fieldCenter;
         data.fieldSize = fieldSize;
@@ -115,7 +119,6 @@ public static class AsteroidFieldRuntimeGenerator
             : Mathf.Max(0.0001f, settings.gridCellSize);
 
         float maxPossibleRadius = ComputeMaxPossibleRadius(settings);
-        Vector3 gridOrigin = fieldCenter - fieldSize * 0.5f; // == chunkOrigin
 
         var placed = new List<PlacedSphere>(Mathf.Max(128, settings.count));
         var hash = new PlacementHash(Mathf.Max(32, settings.count / 2));
@@ -127,8 +130,7 @@ public static class AsteroidFieldRuntimeGenerator
                 gridOrigin, fieldCenter, fieldSize,
                 cellSize, maxPossibleRadius,
                 positions, rotations, scales, typeIds, angularVel, baseRadii,
-                placed, hash,
-                planets
+                placed, hash         
             );
         }
         else
@@ -404,8 +406,7 @@ public static class AsteroidFieldRuntimeGenerator
     Settings settings,
     Vector3 chunkOrigin,
     float chunkSize,
-    int seed,
-    IReadOnlyList<PlanetSectorGenerator.PlanetNode> planets)
+    int seed)
     {
         if (!CanGenerate(settings))
             throw new InvalidOperationException("AsteroidFieldRuntimeGenerator: invalid settings.");
@@ -448,8 +449,7 @@ public static class AsteroidFieldRuntimeGenerator
                 gridOrigin, fieldCenter, fieldSize,
                 cellSize, maxPossibleRadius,
                 positions, rotations, scales, typeIds, angularVel, baseRadii,
-                placed, hash,
-                planets
+                placed, hash              
             );
         }
         else
@@ -574,8 +574,7 @@ public static class AsteroidFieldRuntimeGenerator
     Vector3[] angularVel,
     float[] baseRadii,
     List<PlacedSphere> placed,
-    PlacementHash hash,
-    IReadOnlyList<PlanetSectorGenerator.PlanetNode> planets)
+    PlacementHash hash)
     {
         int target = s.count;
         int placedCount = 0;
@@ -620,12 +619,6 @@ public static class AsteroidFieldRuntimeGenerator
                 float scale = RandomRange(rng, s.uniformScaleRange.x, s.uniformScaleRange.y);
                 float baseRadius = Mathf.Max(0.0001f, entry.baseRadius);
                 float radius = baseRadius * scale;
-
-                if (planets != null && planets.Count > 0)
-                {
-                    if (IsInsideAnyPlanetAvoid(pos, radius, planets))
-                        continue;
-                }
 
                 if (IsOverlappingHashed(pos, radius, gridOrigin, cellSize, maxPossibleRadius, pad, placed, hash.cellToIndices))
                     continue;

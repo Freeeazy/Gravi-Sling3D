@@ -23,6 +23,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     [Tooltip("Cell size for spatial hashing. Start with 20.")]
     public float cellSize = 20f;
 
+    [Header("Chunk Space (local->world)")]
+    public Vector3 chunkWorldOrigin;
+
     [Tooltip("How many neighbor cells to scan in each axis (1 = 3x3x3 = 27 cells).")]
     [Range(0, 3)] public int neighborRadius = 1;
 
@@ -86,8 +89,6 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 
         if (!playerBox)
             playerBox = GetComponentInChildren<BoxCollider>();
-
-        BuildIndex();
     }
 
     private void OnEnable()
@@ -109,10 +110,11 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 
         int n = fieldData.count;
         _destroyed = new BitArray(n, false);
+        cellSize = (fieldData.cellSize > 0.0001f) ? fieldData.cellSize : cellSize;
         cellSize = Mathf.Max(0.0001f, cellSize);
 
         // Use field bounds min as a stable origin (matches how your generator defines volume bounds)
-        _gridOrigin = fieldData.fieldCenter - fieldData.fieldSize * 0.5f;
+        _gridOrigin = chunkWorldOrigin;
 
         _cellToIndices = new Dictionary<long, List<int>>(Mathf.Max(16, n / 8));
         _radii = new float[n];
@@ -131,7 +133,8 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             _radii[i] = r;
             if (r > _maxRadius) _maxRadius = r;
 
-            long key = ComputeCellKey(fieldData.positions[i]);
+            Vector3 worldPos = chunkWorldOrigin + fieldData.positions[i];
+            long key = ComputeCellKey(worldPos);
 
             if (!_cellToIndices.TryGetValue(key, out var list))
             {
@@ -180,7 +183,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
                         if (_destroyed != null && _destroyed[i])
                             continue;
 
-                        Vector3 sphereCenter = fieldData.positions[i];
+                        Vector3 sphereCenter = chunkWorldOrigin + fieldData.positions[i];
                         float sphereRadius = _radii[i];
 
                         if (SphereIntersectsAABB(sphereCenter, sphereRadius, b, out Vector3 pushNormal, out float pushDist))
@@ -318,7 +321,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 
                     foreach (int i in list)
                     {
-                        Vector3 center = fieldData.positions[i];
+                        Vector3 center = chunkWorldOrigin + fieldData.positions[i];
                         float r = _radii[i];
                         Gizmos.DrawWireSphere(center, r);
                     }
@@ -450,7 +453,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             float randomSpeed = Mathf.Lerp(1f, 20f, t);                  // chaos
             int count = Mathf.RoundToInt(Mathf.Lerp(20f, 60f, t));      // particles
 
-            Vector3 asteroidPos = fieldData.positions[index];
+            Vector3 asteroidPos = chunkWorldOrigin + fieldData.positions[index];
             Vector3 hitPos = playerBox.bounds.ClosestPoint(asteroidPos);
 
             smashVfxPool.SpawnImpact(hitPos, smashDir, dirSpeed, radialSpeed, randomSpeed, count, asteroidColor);

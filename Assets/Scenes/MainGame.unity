@@ -304,7 +304,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 20, y: 10}
+  m_AnchoredPosition: {x: 10, y: 5}
   m_SizeDelta: {x: 500, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &22637974
@@ -1218,7 +1218,7 @@ MonoBehaviour:
     count: 450
     separationPadding: 0.25
     maxAttemptsPerAsteroid: 50
-    uniformScaleRange: {x: 3, y: 5}
+    uniformScaleRange: {x: 3, y: 6}
     randomRotation: 1
     angularSpeedRangeDeg: {x: 5, y: 5}
     bakeSpatialIndex: 1
@@ -1228,9 +1228,6 @@ MonoBehaviour:
     candidatesPerCell: 6
     maxPerCell: 2
     maxCellPicks: 1500
-  planetCellSize: 1000
-  planetAvoidRadius: 220
-  planetSpawnChance: 0.3
   generateOnStart: 1
   logChunkCreates: 1
 --- !u!4 &103438303
@@ -3676,7 +3673,7 @@ MonoBehaviour:
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
   minSpeedForVelocityAxis: 0.5
-  axisSmoothing: 16
+  axisSmoothing: 30
   uniformScaleRange: {x: 1, y: 2}
   randomRotation: 1
   angularSpeedRangeDeg: {x: 0, y: 35}
@@ -13953,6 +13950,7 @@ MonoBehaviour:
   playerRb: {fileID: 1616803247}
   playerBox: {fileID: 1616803248}
   cellSize: 20
+  chunkWorldOrigin: {x: 0, y: 0, z: 0}
   neighborRadius: 1
   separationSlop: 0.02
   normalDamp: 0.65
@@ -26024,12 +26022,14 @@ RectTransform:
   - {fileID: 1384281346}
   - {fileID: 1598084868}
   - {fileID: 22637973}
+  - {fileID: 1392847911}
+  - {fileID: 1399342990}
   m_Father: {fileID: 1876932849}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 400, y: 200}
-  m_SizeDelta: {x: 700, y: 250}
+  m_AnchoredPosition: {x: 400, y: 160}
+  m_SizeDelta: {x: 720, y: 240}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1073292225
 CanvasRenderer:
@@ -33103,6 +33103,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1310095058}
   m_CullTransparentMesh: 1
+--- !u!1 &1317036057
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1317036058}
+  - component: {fileID: 1317036059}
+  m_Layer: 0
+  m_Name: StationPos-Renderer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1317036058
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317036057}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1317036059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1317036057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f21380cd59bb35a419eb5922702e0cad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stationPrefab: {fileID: 5881774255416267546, guid: bdda7522b0fa7c74fa65683b767fc075, type: 3}
+  posManager: {fileID: 2048073271}
+  renderCamera: {fileID: 330585545}
+  shadowCasting: 1
+  receiveShadows: 1
+  renderLayer: 0
+  onlyRenderInPlayMode: 1
 --- !u!1 &1318480883
 GameObject:
   m_ObjectHideFlags: 0
@@ -34165,18 +34216,18 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1392847910}
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 320190795}
   - {fileID: 937614817}
-  m_Father: {fileID: 1876932849}
+  m_Father: {fileID: 1073292223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 740, y: 310}
+  m_AnchoredPosition: {x: 700, y: 220}
   m_SizeDelta: {x: 200, y: 60}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1392847912
@@ -34283,8 +34334,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 35
+  m_fontSizeBase: 35
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -34356,16 +34407,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1399342986}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1876932849}
+  m_Father: {fileID: 1073292223}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -500, y: 150}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 10, y: 10}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
 --- !u!1 &1403356620
@@ -37361,7 +37412,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -230, y: -41}
+  m_AnchoredPosition: {x: -245, y: -41}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1598084869
@@ -37960,7 +38011,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1632884797
 Transform:
   m_ObjectHideFlags: 0
@@ -46322,10 +46373,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1399342990}
   - {fileID: 204939324}
   - {fileID: 1073292223}
-  - {fileID: 1392847911}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -47771,6 +47820,62 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2024998588}
   m_CullTransparentMesh: 1
+--- !u!1 &2048073270
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2048073272}
+  - component: {fileID: 2048073271}
+  m_Layer: 0
+  m_Name: StationPos-Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2048073271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048073270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32e019504143e1047897a7eefd30f308, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1616803246}
+  chunkSize: 1000
+  gridWidth: 3
+  globalSeed: 12345
+  settings:
+    chunkSize: 1000
+    candidateModulo: 12
+    excludeNeighborRadius: 1
+    stationRadius: 250
+    borderPadding: 150
+  generateOnStart: 1
+  logChunkCreates: 1
+--- !u!4 &2048073272
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2048073270}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2050495966
 GameObject:
   m_ObjectHideFlags: 0
@@ -54182,6 +54287,8 @@ SceneRoots:
   - {fileID: 4944189793185897459}
   - {fileID: 821560724}
   - {fileID: 103438303}
+  - {fileID: 1317036058}
+  - {fileID: 2048073272}
   - {fileID: 1632884797}
   - {fileID: 1090598852}
   - {fileID: 134385067}

@@ -24,25 +24,24 @@ public class AsteroidPosManager : MonoBehaviour
     public int globalSeed = 12345;
     public AsteroidFieldRuntimeGenerator.Settings settings = new AsteroidFieldRuntimeGenerator.Settings();
 
-    [Header("Planets (super basic)")]
-    public float planetCellSize = 3000f;
-    public float planetAvoidRadius = 200f;
-    [Range(0f, 1f)] public float planetSpawnChance = 0.35f;
-
     [Header("Debug")]
     public bool generateOnStart = true;
     public bool logChunkCreates = true;
 
-    /// <summary>Raised whenever a chunk is created (or recreated).</summary>
+    /// <summary>
+    /// Raised whenever a chunk coord is assigned a data object.
+    /// IMPORTANT: data contents don't change; only its coord changes.
+    /// </summary>
     public event Action<Vector3Int, AsteroidFieldData> OnChunkCreated;
 
-    // chunkCoord -> generated data (in-memory ScriptableObject)
+    // coord -> data currently occupying that coord (changes on shift)
     private readonly Dictionary<Vector3Int, AsteroidFieldData> _chunks = new Dictionary<Vector3Int, AsteroidFieldData>(64);
 
-    private Vector3Int _centerChunk;
-    private Vector3Int _lastCenterChunk;
+    // reusable list buffers to avoid GC in ShiftGrid
+    private readonly List<Vector3Int> _toRemove = new List<Vector3Int>(64);
+    private readonly List<Vector3Int> _toAdd = new List<Vector3Int>(64);
 
-    private readonly List<PlanetSectorGenerator.PlanetNode> _tmpPlanets = new List<PlanetSectorGenerator.PlanetNode>(32);
+    private Vector3Int _lastCenterChunk;
 
     private void Awake()
     {
@@ -61,19 +60,18 @@ public class AsteroidPosManager : MonoBehaviour
             EnsureGrid();
 
         _lastCenterChunk = WorldToChunkCoord(player.position);
+        UpdateCollisionChunk(_lastCenterChunk);
     }
 
     private void Update()
     {
         Vector3Int newCenter = WorldToChunkCoord(player.position);
+        if (newCenter == _lastCenterChunk) return;
 
-        if (newCenter != _lastCenterChunk)
-        {
-            ShiftGrid(newCenter);
-            _lastCenterChunk = newCenter;
+        ShiftGrid_NoRegen(newCenter);
+        _lastCenterChunk = newCenter;
 
-            UpdateCollisionChunk(newCenter);
-        }
+        UpdateCollisionChunk(newCenter);
     }
 
     public IReadOnlyDictionary<Vector3Int, AsteroidFieldData> Chunks => _chunks;
@@ -83,60 +81,114 @@ public class AsteroidPosManager : MonoBehaviour
         if (!AsteroidFieldRuntimeGenerator.CanGenerate(settings))
             return;
 
-        Vector3 pos = player ? player.position : Vector3.zero;
-        Vector3Int currentCenter = WorldToChunkCoord(pos);
+        _chunks.Clear();
 
-        // If you want to avoid regen spam later, we’ll compare and recycle.
-        _centerChunk = currentCenter;
-
+        Vector3Int center = WorldToChunkCoord(player ? player.position : Vector3.zero);
         int half = gridWidth / 2;
 
         for (int dz = -half; dz <= half; dz++)
             for (int dy = -half; dy <= half; dy++)
                 for (int dx = -half; dx <= half; dx++)
                 {
-                    Vector3Int coord = new Vector3Int(_centerChunk.x + dx, _centerChunk.y + dy, _centerChunk.z + dz);
-
-                    if (_chunks.ContainsKey(coord))
-                        continue;
-
-                    CreateChunk(coord);
+                    Vector3Int coord = new Vector3Int(center.x + dx, center.y + dy, center.z + dz);
+                    CreateChunk_OneTime(coord);
                 }
     }
 
-    private void CreateChunk(Vector3Int coord)
+    private void CreateChunk_OneTime(Vector3Int coord)
     {
-        Vector3 chunkOrigin = ChunkCoordToWorldOrigin(coord);
-
+        Vector3 origin = ChunkCoordToWorldOrigin(coord);
         int seed = HashSeed(globalSeed, coord);
 
-        PlanetSectorGenerator.GetPlanetsForChunk(
-            globalSeed,
-            chunkOrigin,
-            chunkSize,
-            planetCellSize,
-            planetAvoidRadius,
-            planetSpawnChance,
-            _tmpPlanets);
-
+        // IMPORTANT: generate asteroids WITHOUT planets so nothing ever forces regen.
+        // (You’ll cull near planets in rendering/collision later.)
         AsteroidFieldData data = AsteroidFieldRuntimeGenerator.GenerateChunk(
             settings,
-            chunkOrigin,
+            origin,
             chunkSize,
             seed,
-            _tmpPlanets);
+            localSpace: true
+        );
 
         _chunks[coord] = data;
 
         if (logChunkCreates)
-            Debug.Log($"[AsteroidPosManager] Created chunk {coord} origin={chunkOrigin} count={data.count}");
+            Debug.Log($"[AsteroidPosManager] Created chunk {coord} origin={origin} count={data.count}");
 
         OnChunkCreated?.Invoke(coord, data);
     }
 
+    // --- shifting WITHOUT regeneration ---
+    private void ShiftGrid_NoRegen(Vector3Int newCenter)
+    {
+        // Compute desired coords around newCenter
+        int half = gridWidth / 2;
+
+        _toRemove.Clear();
+        _toAdd.Clear();
+
+        // mark which existing coords are now out of range
+        foreach (var kv in _chunks)
+        {
+            Vector3Int c = kv.Key;
+            if (Mathf.Abs(c.x - newCenter.x) > half ||
+                Mathf.Abs(c.y - newCenter.y) > half ||
+                Mathf.Abs(c.z - newCenter.z) > half)
+            {
+                _toRemove.Add(c);
+            }
+        }
+
+        // find coords we need that we don't have
+        for (int dz = -half; dz <= half; dz++)
+            for (int dy = -half; dy <= half; dy++)
+                for (int dx = -half; dx <= half; dx++)
+                {
+                    Vector3Int want = new Vector3Int(newCenter.x + dx, newCenter.y + dy, newCenter.z + dz);
+                    if (!_chunks.ContainsKey(want))
+                        _toAdd.Add(want);
+                }
+
+        // Reassign data objects from old coords to new coords
+        int moves = Mathf.Min(_toRemove.Count, _toAdd.Count);
+
+        for (int i = 0; i < moves; i++)
+        {
+            Vector3Int oldCoord = _toRemove[i];
+            Vector3Int newCoord = _toAdd[i];
+
+            AsteroidFieldData data = _chunks[oldCoord];
+            _chunks.Remove(oldCoord);
+
+            _chunks[newCoord] = data;
+
+            if (logChunkCreates)
+                Debug.Log($"[AsteroidPosManager] Moved chunk data {oldCoord} -> {newCoord}");
+
+            // Tell listeners the coord assignment changed (data contents did NOT change)
+            OnChunkCreated?.Invoke(newCoord, data);
+        }
+
+        // Safety: if something got out of sync, fill missing with new allocations (rare)
+        for (int i = moves; i < _toAdd.Count; i++)
+        {
+            CreateChunk_OneTime(_toAdd[i]);
+        }
+    }
+    private void UpdateCollisionChunk(Vector3Int centerChunk)
+    {
+        if (!collisionDetector) return;
+
+        if (_chunks.TryGetValue(centerChunk, out var data))
+        {
+            collisionDetector.fieldData = data;
+            collisionDetector.chunkWorldOrigin = ChunkCoordToWorldOrigin(centerChunk);
+            collisionDetector.Rebuild();
+        }
+    }
+
     public Vector3Int WorldToChunkCoord(Vector3 worldPos)
     {
-        // Floor division into chunk coords.
         int cx = Mathf.FloorToInt(worldPos.x / chunkSize);
         int cy = Mathf.FloorToInt(worldPos.y / chunkSize);
         int cz = Mathf.FloorToInt(worldPos.z / chunkSize);
@@ -152,97 +204,11 @@ public class AsteroidPosManager : MonoBehaviour
     {
         unchecked
         {
-            // Simple stable hash. Good enough for chunk seeding.
             int h = baseSeed;
             h = (h * 397) ^ c.x;
             h = (h * 397) ^ c.y;
             h = (h * 397) ^ c.z;
             return h;
-        }
-    }
-    private HashSet<Vector3Int> ComputeDesiredCoords(Vector3Int center)
-    {
-        int half = gridWidth / 2;
-        var set = new HashSet<Vector3Int>();
-
-        for (int z = -half; z <= half; z++)
-            for (int y = -half; y <= half; y++)
-                for (int x = -half; x <= half; x++)
-                    set.Add(new Vector3Int(center.x + x, center.y + y, center.z + z));
-
-        return set;
-    }
-    private void ShiftGrid(Vector3Int newCenter)
-    {
-        var desired = ComputeDesiredCoords(newCenter);
-
-        // Find chunks that are no longer needed
-        List<Vector3Int> toRemove = new List<Vector3Int>();
-        foreach (var kv in _chunks)
-        {
-            if (!desired.Contains(kv.Key))
-                toRemove.Add(kv.Key);
-        }
-
-        // Find coords we need but don't have
-        Queue<Vector3Int> toAdd = new Queue<Vector3Int>();
-        foreach (var coord in desired)
-        {
-            if (!_chunks.ContainsKey(coord))
-                toAdd.Enqueue(coord);
-        }
-
-        // Recycle
-        for (int i = 0; i < toRemove.Count; i++)
-        {
-            if (toAdd.Count == 0)
-                break;
-
-            Vector3Int oldCoord = toRemove[i];
-            Vector3Int newCoord = toAdd.Dequeue();
-
-            AsteroidFieldData data = _chunks[oldCoord];
-            _chunks.Remove(oldCoord);
-
-            RegenerateChunk(data, newCoord);
-            _chunks[newCoord] = data;
-        }
-    }
-    private void RegenerateChunk(AsteroidFieldData data, Vector3Int coord)
-    {
-        Vector3 origin = ChunkCoordToWorldOrigin(coord);
-        int seed = HashSeed(globalSeed, coord);
-
-        data.Clear(); // reuse memory object
-
-        PlanetSectorGenerator.GetPlanetsForChunk(
-            globalSeed,
-            origin,
-            chunkSize,
-            planetCellSize,
-            planetAvoidRadius,
-            planetSpawnChance,
-            _tmpPlanets);
-
-        AsteroidFieldRuntimeGenerator.FillExistingChunk(
-            data,
-            settings,
-            origin,
-            chunkSize,
-            seed,
-            _tmpPlanets);
-
-        OnChunkCreated?.Invoke(coord, data);
-    }
-    private void UpdateCollisionChunk(Vector3Int centerChunk)
-    {
-        if (!collisionDetector)
-            return;
-
-        if (_chunks.TryGetValue(centerChunk, out var data))
-        {
-            collisionDetector.fieldData = data;
-            collisionDetector.Rebuild();
         }
     }
 

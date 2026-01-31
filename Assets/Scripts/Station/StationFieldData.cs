@@ -18,7 +18,8 @@ public class StationFieldData : ScriptableObject
     public Quaternion localRotation = Quaternion.identity;
 
     // Optional for later (orbit radius / culling radius / keepout)
-    public float stationRadius = 250f;
+    public float preGravityRadius = 400f; // outer trigger
+    public float orbitRadius = 280f;      // inner trigger (capture)
 
     public void Clear()
     {
@@ -30,8 +31,9 @@ public class StationFieldData : ScriptableObject
         hasStation = false;
         localPosition = Vector3.zero;
         localRotation = Quaternion.identity;
-        stationRadius = 250f;
-    }
+        preGravityRadius = 400f;
+        orbitRadius = 280f;
+    }   
 
     public Vector3 WorldPosition(Vector3 chunkWorldOrigin) => chunkWorldOrigin + localPosition;
     public Quaternion WorldRotation() => localRotation;

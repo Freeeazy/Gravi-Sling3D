@@ -19,10 +19,10 @@ public static class StationRuntimeGenerator
 
         [Header("Neighbor Exclusion")]
         [Tooltip("Chunk radius to exclude other stations. 1 => blocks all 26 neighbors (3x3x3 minus center).")]
-        [Range(1, 4)] public int excludeNeighborRadius = 1;
+        [Range(0, 4)] public int excludeNeighborRadius = 1;
 
         [Header("Station size")]
-        public float stationRadius = 250f;
+        public float orbitRadius = 280f;
 
         [Header("Placement inside chunk")]
         [Tooltip("How far from chunk borders we keep the station local position.")]
@@ -43,7 +43,7 @@ public static class StationRuntimeGenerator
         // Score-based winner among candidate neighbors within radius
         float myScore = Score01(globalSeed, coord);
 
-        int r = Mathf.Max(1, s.excludeNeighborRadius);
+        int r = Mathf.Max(0, s.excludeNeighborRadius);
 
         for (int dz = -r; dz <= r; dz++)
             for (int dy = -r; dy <= r; dy++)
@@ -101,7 +101,7 @@ public static class StationRuntimeGenerator
 
         bool has = IsStationAnchor(s, globalSeed, coord);
         data.hasStation = has;
-        data.stationRadius = Mathf.Max(0.01f, s.stationRadius);
+        data.orbitRadius = Mathf.Max(0.01f, s.orbitRadius);
 
         if (!has)
             return;

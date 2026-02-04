@@ -120,6 +120,7 @@ GameObject:
   - component: {fileID: 1831170524505580018}
   - component: {fileID: 4816576802051389977}
   - component: {fileID: 3586703863658501036}
+  - component: {fileID: 1667247480199420997}
   m_Layer: 0
   m_Name: StationProxy
   m_TagString: Untagged
@@ -244,6 +245,20 @@ MonoBehaviour:
   slingshot: {fileID: 4816576802051389977}
   preGravityTrigger: {fileID: 3389974876249596906}
   preGravity: {fileID: 4967203091336313616}
+--- !u!114 &1667247480199420997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4653939491283774447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69544e52ff752c446a417b7dc30e33d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  radius: 250
+  active: 1
 --- !u!1 &5975128302669208982
 GameObject:
   m_ObjectHideFlags: 0

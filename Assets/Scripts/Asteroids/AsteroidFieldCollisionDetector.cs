@@ -336,7 +336,21 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         if (smashSpeedThreshold <= 0f) return false;
 
         Vector3 v = playerRb.linearVelocity;
-        float speed = v.magnitude;
+        float rbSpeed = v.magnitude;
+
+        // If physics speed is basically stopped (damping / sleep),
+        // fall back to HUD speed (already scaled & human-readable)
+        float speed;
+
+        if (rbSpeed < 1f && SpeedHUD.Instance != null)
+        {
+            speed = SpeedHUD.Instance.GetCurrentSpeed();
+        }
+        else
+        {
+            speed = rbSpeed;
+        }
+
         if (speed < smashSpeedThreshold) return false;
 
         // pushNormal points ~ from asteroid -> player.
@@ -353,31 +367,40 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         if (speed < requiredSpeed)
             return false;
 
-        Vector3 vel = playerRb.linearVelocity;
+        // Use RB velocity if we have it; otherwise infer direction from impact normal.
+        // Magnitude should match our chosen 'speed' (HUD fallback).
+        Vector3 effectiveVel;
 
-        // Fallback-safe velocity direction
-        Vector3 velDir = (vel.sqrMagnitude > 1e-6f)
-            ? vel.normalized
-            : (-pushNormal);
+        if (rbSpeed > 1e-3f)
+        {
+            effectiveVel = v;
+        }
+        else
+        {
+            // pushNormal is asteroid -> player, so -pushNormal roughly points "into" the asteroid.
+            // For VFX we want a forward-ish direction; using -pushNormal is usually fine.
+            effectiveVel = (-pushNormal) * speed;
+        }
+
+        Vector3 vel = effectiveVel;
+
+        Vector3 velDir = (vel.sqrMagnitude > 1e-6f) ? vel.normalized : (-pushNormal);
 
         // PushNormal points asteroid -> player, so invert for "away from impact"
         Vector3 awayFromImpact = -pushNormal;
 
         // Blend: mostly velocity, slightly surface response
-        Vector3 smashDir = Vector3.Normalize(
-            velDir * 0.85f +
-            awayFromImpact * 0.15f
-        );
+        Vector3 smashDir = Vector3.Normalize(velDir * 0.85f + awayFromImpact * 0.15f);
 
         // Scalar strength (tune this)            // How Much Speed Gets Applied - Min - Max
-        float vfxSpeed = Mathf.Clamp(vel.magnitude * 0.8f, 8f, 400f);
+        float vfxSpeed = Mathf.Clamp(speed * 0.8f, 8f, 400f);
 
         DestroyAsteroid(index, smashDir, vfxSpeed);
 
         // small nudge forward so we don't remain overlapping for a frame
         if (smashForwardNudge > 0f)
         {
-            Vector3 dir = (speed > 0.0001f) ? (v / speed) : (-pushNormal);
+            Vector3 dir = velDir;
             playerRb.MovePosition(playerRb.position + dir * smashForwardNudge);
         }
 
@@ -423,6 +446,18 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         if (_destroyed != null && index >= 0 && index < _destroyed.Length)
             _destroyed[index] = true;
 
+        float rbSpeed = playerRb ? playerRb.linearVelocity.magnitude : 0f;
+
+        float speed;
+        if (rbSpeed < 1f && SpeedHUD.Instance != null)
+        {
+            speed = SpeedHUD.Instance.GetCurrentSpeed();
+        }
+        else
+        {
+            speed = rbSpeed;
+        }
+
         if (smashVfxPool != null)
         {
             Color asteroidColor = Color.white;
@@ -447,7 +482,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             asteroidColor = BrightenMultiply(asteroidColor, 2.5f);
 
             // Example tuning knobs
-            float t = Mathf.InverseLerp(smashSpeedThreshold, smashSpeedThreshold * 2f, playerRb.linearVelocity.magnitude);
+            float t = Mathf.InverseLerp(smashSpeedThreshold, smashSpeedThreshold * 2f, speed); 
             float dirSpeed = vfxSpeed;                                  // from your velocity-based scalar
             float radialSpeed = Mathf.Lerp(6f, 50f, t);                // explosion strength
             float randomSpeed = Mathf.Lerp(1f, 20f, t);                  // chaos

@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 public class SpeedHUD : MonoBehaviour
 {
@@ -23,6 +25,21 @@ public class SpeedHUD : MonoBehaviour
         if (!speedText) return;
         float v = speedUnitsPerSec * multiplier;
         speedText.text = $"{label}: {v.ToString($"F{decimals}")}";
+    }
+    public float GetCurrentSpeed()
+    {
+        if (!speedText || string.IsNullOrEmpty(speedText.text))
+            return 0f;
+
+        // Extract first number in the string (handles "Speed: 123.4", "0m/s", etc)
+        var match = Regex.Match(speedText.text, @"-?\d+(\.\d+)?");
+        if (!match.Success)
+            return 0f;
+
+        if (float.TryParse(match.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out float value))
+            return value;
+
+        return 0f;
     }
 
     public void Clear()

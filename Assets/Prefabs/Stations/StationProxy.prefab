@@ -216,7 +216,7 @@ MonoBehaviour:
   chargeRate: 60
   shrinkRate: 10
   maxChargeTime: 60
-  minCaptureTangentialSpeed: 35
+  minCaptureTangentialSpeed: 75
   maxCaptureTangentialSpeed: 1000
   captureMomentumPreserve: 1
   localShipBottomAxis: {x: 0, y: -1, z: 0}

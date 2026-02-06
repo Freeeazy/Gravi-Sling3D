@@ -142,11 +142,17 @@ public class SimpleMove : MonoBehaviour
         if (Input.GetKey(KeyCode.E)) roll -= 1f;
 
         bool boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        bool hasInput = input.sqrMagnitude > 0.0001f;
+
+        // "movement input" (WASD/space/ctrl)
+        bool hasMoveInput = input.sqrMagnitude > 0.0001f;
+
+        // Allow boost-only to count as intent
+        bool boostOnlyIntent = boostHeld && !hasMoveInput;
+        bool hasInput = hasMoveInput || boostOnlyIntent;
 
         if (BoostManager.Instance)
         {
-            BoostManager.Instance.SetBoostInput(boostHeld, hasInput);
+            BoostManager.Instance.SetBoostInput(boostHeld, hasMoveInput || boostOnlyIntent);
             boostCharge = BoostManager.Instance.Boost01; // reuse your existing float
         }
         else
@@ -205,6 +211,13 @@ public class SimpleMove : MonoBehaviour
         // Damping while slipping (when no input)
         float slipDampScale = Mathf.Lerp(1f, slipDampingMultiplier, slip01); // < 1 = less damping
 
+        // If boosting with no movement input, boost along ship forward
+        if (boostOnlyIntent)
+        {
+            // Use the ship's current forward direction
+            moveDir = rb.rotation * Vector3.forward;
+        }
+
         // --- DESIRED VELOCITY (camera-relative preserved) ---
         Vector3 desiredVel = moveDir * boostedMaxSpeed;
 
@@ -250,7 +263,6 @@ public class SimpleMove : MonoBehaviour
         if (enableRotation)
         {
             // Consider us "wanting rotation" if we are moving OR rolling OR have some velocity
-            bool hasMoveInput = input.sqrMagnitude > 0.0001f;
             bool hasVel = rb.linearVelocity.sqrMagnitude > (minSpeedToRotate * minSpeedToRotate);
             bool hasManualRollIntent = Mathf.Abs(_manualRoll) > 0.001f; // stored roll (or you can use roll key input)
 

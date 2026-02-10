@@ -14135,6 +14135,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 668654162}
   m_CullTransparentMesh: 1
+--- !u!1 &677246344
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 677246345}
+  m_Layer: 0
+  m_Name: MAKE PLAYER BOOST ON LEFT CLICK -> BETTER CONTROL 6DOF
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &677246345
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677246344}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -1.35}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &685616545
 GameObject:
   m_ObjectHideFlags: 0
@@ -37204,7 +37235,7 @@ MonoBehaviour:
   startFull: 1
   startEnergy: 100
   drainPerSecond: 18
-  dontDrain: 1
+  dontDrain: 0
   regenPerSecond: 10
   boostRampUp: 1.2
   boostRampDown: 1
@@ -59871,6 +59902,7 @@ SceneRoots:
   - {fileID: 409990333}
   - {fileID: 1135039496}
   - {fileID: 480414392}
+  - {fileID: 677246345}
   - {fileID: 1616803246}
   - {fileID: 383793093}
   - {fileID: 980576575}

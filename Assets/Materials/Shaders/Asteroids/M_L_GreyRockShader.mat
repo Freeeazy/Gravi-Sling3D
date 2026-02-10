@@ -64,10 +64,10 @@ Material:
     - _FarBrightness: 0.95
     - _FarCurvePower: 1.5
     - _FarFadeEnd: 1150
-    - _FarFadeStart: 550
-    - _Metallic: 0.7
+    - _FarFadeStart: 150
+    - _Metallic: 0.6
     - _NearBlendDist: 50
-    - _NearBrightness: 1.2
+    - _NearBrightness: 1.25
     - _NearFreezeDist: 50
     - _QueueControl: 0
     - _QueueOffset: 0

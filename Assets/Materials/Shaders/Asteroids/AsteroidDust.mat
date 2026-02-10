@@ -61,13 +61,13 @@ Material:
     - _DitherStart: 950
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _FarBrightness: 0.8
+    - _FarBrightness: 0.75
     - _FarCurvePower: 1.5
-    - _FarFadeEnd: 1000
-    - _FarFadeStart: 200
+    - _FarFadeEnd: 1100
+    - _FarFadeStart: 0
     - _Metallic: 0.9
     - _NearBlendDist: 1
-    - _NearBrightness: 1.15
+    - _NearBrightness: 1.2
     - _NearFreezeDist: 1
     - _QueueControl: 0
     - _QueueOffset: 0
@@ -82,7 +82,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     m_Colors:
-    - _BaseColor: {r: 0.15686275, g: 0.15686275, b: 0.15686275, a: 1}
+    - _BaseColor: {r: 0.3137255, g: 0.3137255, b: 0.3137255, a: 1}
     - _FadeColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

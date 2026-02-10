@@ -71,8 +71,8 @@ Material:
     - _QueueOffset: 0
     m_Colors:
     - _Color168_CockpitAccent: {r: 0.4465309, g: 2.9960785, b: 2.8808446, a: 0}
-    - _Color169_AccentLights: {r: 0, g: 85.445015, b: 19.683666, a: 0}
-    - _Color170_Thrusters: {r: 3.4716985, g: 24.990192, b: 31.999998, a: 0}
+    - _Color169_AccentLights: {r: 0, g: 383.49805, b: 140.54903, a: 0}
+    - _Color170_Thrusters: {r: 10.401482, g: 74.87258, b: 95.87451, a: 0}
     - _Color176_MainBody_WingTips: {r: 0.18635, g: 1.0140661, b: 1.4631926, a: 0}
     - _Color177_SecondaryBody: {r: 0.32549024, g: 1, b: 0.9441312, a: 0}
     - _Color178_AccentWiring: {r: 0.47120413, g: 2, b: 1.4415684, a: 0}

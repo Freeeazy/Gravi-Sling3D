@@ -141,7 +141,7 @@ public class SimpleMove : MonoBehaviour
         if (Input.GetKey(KeyCode.Q)) roll += 1f;
         if (Input.GetKey(KeyCode.E)) roll -= 1f;
 
-        bool boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        bool boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
 
         // "movement input" (WASD/space/ctrl)
         bool hasMoveInput = input.sqrMagnitude > 0.0001f;

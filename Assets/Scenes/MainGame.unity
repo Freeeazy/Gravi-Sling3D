@@ -371,8 +371,8 @@ MonoBehaviour:
   redOff: {fileID: 2100000, guid: dcc1d336ab193f74796a8d70b0e0eca0, type: 2}
   freeFlightMaxSpeed: 200
   freeFlightFillPortion: 0.25
-  redlineSpeed: 1100
-  maxSpeed: 1100
+  redlineSpeed: 800
+  maxSpeed: 800
   redlineStart01: 0.78
   flickerHzMin: 3
   flickerHzMax: 18

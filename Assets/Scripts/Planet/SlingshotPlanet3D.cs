@@ -65,7 +65,7 @@ public class SlingshotPlanet3D : MonoBehaviour
     public float rollOffsetDeg = 0f;
 
     [Header("Input")]
-    public KeyCode boostKey = KeyCode.Space;
+    //public KeyCode boostKey = KeyCode.Space;
     public int mouseButton = 0; // 0 = left click
 
     [Header("Orbit Plane Steering (Q/E)")]
@@ -370,7 +370,8 @@ public class SlingshotPlanet3D : MonoBehaviour
 
     private bool IsBoostHeld()
     {
-        return Input.GetKey(boostKey) || Input.GetMouseButton(mouseButton);
+        // Input.GetKey(boostKey) ||
+        return Input.GetMouseButton(mouseButton);
     }
 
     private void AlignShipToPlanet(

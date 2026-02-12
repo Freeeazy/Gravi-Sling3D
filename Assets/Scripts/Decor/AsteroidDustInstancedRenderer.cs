@@ -52,37 +52,75 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
     [Header("Random Assignment")]
     public int meshSeed = 1337;
 
+    [Header("View Alignment (ParticleSystem-style)")]
+    [Tooltip("If true, instances use the view/camera rotation (like ParticleSystem Render Alignment = View).")]
+    public bool alignToView = false;
+
+    [Tooltip("Camera/transform to align to. If null, uses Camera.main.")]
+    public Transform viewTransform;
+
+    [Tooltip("If true, each instance gets a stable random spin around the view forward axis.")]
+    public bool randomSpinAroundViewForward = true;
+
+    [Tooltip("Seed for stable view-spin randomization.")]
+    public int spinSeed = 9001;
+
+    [Header("Per-Instance Tint Palette")]
+    public bool useTintPalette = false;
+
+    [Tooltip("Per-instance ShaderGraph color property reference name.")]
+    public string tintProperty = "_Tint";
+
+    [Tooltip("Palette entries (2-3 is fine). If empty, tint is disabled.")]
+    public List<Color> tintPalette = new List<Color>()
+    {
+        new Color(0.60f, 0.75f, 1.00f, 1f), // cool blue
+        new Color(0.50f, 0.80f, 0.95f, 1f), // teal-ish
+        new Color(0.70f, 0.70f, 0.90f, 1f), // lavender-grey
+    };
+
+    [Tooltip("Seed for stable per-instance tint assignment.")]
+    public int tintSeed = 4242;
+
+    [Range(0f, 1f)]
+    [Tooltip("Chance of using palette[0]. Remaining probability is spread across other entries.")]
+    public float tintBiasToFirst = 0.0f; // keep 0 unless you want “mostly blue”
+
     // Per-instance mesh id (sticky)
     private int[] _meshId;
+    private float[] _viewSpinDeg;
+    private int[] _tintId;
 
     // Reusable per-mesh matrix lists (to avoid allocations)
-    private List<Matrix4x4>[] _perMeshMatrices;
+    private List<int>[] _perMeshIndices;
 
     // Temp batch buffer
-    private static readonly Matrix4x4[] _batch = new Matrix4x4[1023];
-
+    private static readonly Matrix4x4[] _batchMatrices = new Matrix4x4[1023];
+    private static readonly Vector4[] _batchTints = new Vector4[1023];
+    private MaterialPropertyBlock _mpb;
     private void Awake()
     {
         if (!posManager) posManager = GetComponent<AsteroidDustPosManager>();
-        RebuildMeshAssignments();
+        if (_mpb == null) _mpb = new MaterialPropertyBlock();
+        RebuildAssignments();
     }
 
     private void OnEnable()
     {
         if (posManager != null)
-            posManager.OnRegenerated += RebuildMeshAssignments;
+            posManager.OnRegenerated += RebuildAssignments;
+        ;
     }
 
     private void OnDisable()
     {
         if (posManager != null)
-            posManager.OnRegenerated -= RebuildMeshAssignments;
+            posManager.OnRegenerated -= RebuildAssignments;
     }
 
     private void LateUpdate()
     {
         if (!posManager || posManager.Positions == null) return;
-
         if (!IsValid())
         {
             if (disableIfInvalid) return;
@@ -90,47 +128,51 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
 
         EnsureBuffers();
 
-        // Clear per-mesh lists (keep capacity)
-        for (int m = 0; m < _perMeshMatrices.Length; m++)
-            _perMeshMatrices[m].Clear();
+        // clear buckets
+        for (int m = 0; m < _perMeshIndices.Length; m++)
+            _perMeshIndices[m].Clear();
 
         int n = posManager.Positions.Length;
 
-        // Build matrices
+        // resolve view rotation once
+        Quaternion viewRot = Quaternion.identity;
+        if (alignToView)
+        {
+            Transform vt = viewTransform;
+            if (!vt)
+            {
+                Camera cam = Camera.main;
+                if (cam) vt = cam.transform;
+            }
+            if (vt) viewRot = vt.rotation;
+        }
+
+        // bucket instances by mesh
         for (int i = 0; i < n; i++)
         {
-            if (posManager.IsHidden(i))
-                continue;
+            if (posManager.IsHidden(i)) continue;
 
             int mid = _meshId[i];
             if ((uint)mid >= (uint)meshes.Count) mid = 0;
 
-            Vector3 pos = posManager.Positions[i];
-            float s = posManager.Scales[i];
-            Quaternion rot = posManager.Rotations[i];
-            rot = NormalizeSafe(rot);
-
-            // Distance band scale
-            float d01 = ComputeDistance01(pos);
+            // compute final scale early so we can skip tiny ones
+            float d01 = ComputeDistance01(posManager.Positions[i]);
             float band = Mathf.Clamp01(scaleBand.Evaluate(d01));
             float bandScale = Mathf.Lerp(1f, band, Mathf.Clamp01(bandStrength));
+            float finalS = posManager.Scales[i] * bandScale;
 
-            float finalS = s * bandScale;
+            if (finalS <= cullScaleThreshold) continue;
 
-            // If it's basically invisible, skip drawing entirely (saves fill + avoids tiny specks)
-            if (finalS <= cullScaleThreshold)
-                continue;
-
-            _perMeshMatrices[mid].Add(Matrix4x4.TRS(pos, rot, Vector3.one * finalS));
+            _perMeshIndices[mid].Add(i);
         }
 
-        // Draw each mesh bucket
+        // draw each mesh bucket in 1023 batches
         for (int m = 0; m < meshes.Count; m++)
         {
             Mesh mesh = meshes[m];
             if (!mesh) continue;
 
-            var list = _perMeshMatrices[m];
+            var list = _perMeshIndices[m];
             int total = list.Count;
             int offset = 0;
 
@@ -138,23 +180,55 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
             {
                 int take = Mathf.Min(1023, total - offset);
 
-                // Copy into fixed array for DrawMeshInstanced
+                // build matrices + per-instance tints
                 for (int k = 0; k < take; k++)
-                    _batch[k] = list[offset + k];
+                {
+                    int i = list[offset + k];
+
+                    Vector3 pos = posManager.Positions[i];
+                    float s = posManager.Scales[i];
+
+                    // apply band scale again (cheap, keeps your previous behavior)
+                    float d01 = ComputeDistance01(pos);
+                    float band = Mathf.Clamp01(scaleBand.Evaluate(d01));
+                    float bandScale = Mathf.Lerp(1f, band, Mathf.Clamp01(bandStrength));
+                    float finalS = s * bandScale;
+
+                    Quaternion rot = alignToView ? viewRot : posManager.Rotations[i];
+                    rot = NormalizeSafe(rot);
+
+                    if (alignToView && randomSpinAroundViewForward && _viewSpinDeg != null)
+                        rot = rot * Quaternion.AngleAxis(_viewSpinDeg[i], Vector3.forward);
+
+                    _batchMatrices[k] = Matrix4x4.TRS(pos, rot, Vector3.one * finalS);
+
+                    if (useTintPalette && tintPalette != null && tintPalette.Count > 0)
+                    {
+                        int tid = (_tintId != null && _tintId.Length > i) ? _tintId[i] : 0;
+                        tid = Mathf.Clamp(tid, 0, tintPalette.Count - 1);
+                        Color c = tintPalette[tid];
+                        _batchTints[k] = new Vector4(c.r, c.g, c.b, c.a);
+                    }
+                }
+
+                // MPB: only set vector array when tinting is enabled
+                _mpb.Clear();
+                if (useTintPalette && tintPalette != null && tintPalette.Count > 0)
+                    _mpb.SetVectorArray(tintProperty, _batchTints);
 
                 Graphics.DrawMeshInstanced(
                     mesh,
-                    submeshIndex: 0,
-                    material: material,
-                    matrices: _batch,
-                    count: take,
-                    properties: null,
-                    castShadows: shadows,
-                    receiveShadows: receiveShadows,
-                    layer: layer,
-                    camera: null,
-                    lightProbeUsage: UnityEngine.Rendering.LightProbeUsage.Off,
-                    lightProbeProxyVolume: null
+                    0,
+                    material,
+                    _batchMatrices,
+                    take,
+                    _mpb,
+                    shadows,
+                    receiveShadows,
+                    layer,
+                    null,
+                    LightProbeUsage.Off,
+                    null
                 );
 
                 offset += take;
@@ -180,71 +254,81 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
 
         // mesh ids
         if (_meshId == null || _meshId.Length != n)
-            RebuildMeshAssignments();
+            RebuildAssignments();
 
         // per-mesh lists
-        if (_perMeshMatrices == null || _perMeshMatrices.Length != meshes.Count)
+        if (_perMeshIndices == null || _perMeshIndices.Length != meshes.Count)
         {
-            _perMeshMatrices = new List<Matrix4x4>[meshes.Count];
+            _perMeshIndices = new List<int>[meshes.Count];
             for (int i = 0; i < meshes.Count; i++)
-                _perMeshMatrices[i] = new List<Matrix4x4>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
+                _perMeshIndices[i] = new List<int>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
         }
     }
 
-    private void RebuildMeshAssignments()
+    private void RebuildAssignments()
     {
         if (!posManager || posManager.Positions == null) return;
 
         int n = posManager.Positions.Length;
-        _meshId = new int[n];
 
+        // mesh id
+        _meshId = new int[n];
         int meshCount = Mathf.Max(1, meshes.Count);
         var rng = new System.Random(meshSeed);
-
         for (int i = 0; i < n; i++)
             _meshId[i] = rng.Next(meshCount);
 
-        // Rebuild per-mesh lists if needed
-        if (_perMeshMatrices == null || _perMeshMatrices.Length != meshes.Count)
+        // view spin
+        _viewSpinDeg = new float[n];
+        var srng = new System.Random(spinSeed);
+        for (int i = 0; i < n; i++)
+            _viewSpinDeg[i] = (float)(srng.NextDouble() * 360.0);
+
+        // tint id (only meaningful if tintPalette has entries)
+        _tintId = new int[n];
+        var trng = new System.Random(tintSeed);
+
+        int palCount = (tintPalette != null) ? tintPalette.Count : 0;
+        if (palCount <= 0)
         {
-            _perMeshMatrices = new List<Matrix4x4>[meshes.Count];
-            for (int i = 0; i < meshes.Count; i++)
-                _perMeshMatrices[i] = new List<Matrix4x4>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
+            for (int i = 0; i < n; i++) _tintId[i] = 0;
         }
-    }
+        else
+        {
+            for (int i = 0; i < n; i++)
+            {
+                // optional bias towards palette[0]
+                if (tintBiasToFirst > 0f && trng.NextDouble() < tintBiasToFirst)
+                {
+                    _tintId[i] = 0;
+                }
+                else
+                {
+                    _tintId[i] = trng.Next(palCount);
+                }
+            }
+        }
 
-    private Bounds ComputeWorldBounds()
-    {
-        Transform centerT = boundsCenterOverride ? boundsCenterOverride : posManager.player;
-        Vector3 c = centerT ? centerT.position : Vector3.zero;
+        // buckets
+        if (_perMeshIndices == null || _perMeshIndices.Length != meshes.Count)
+        {
+            _perMeshIndices = new List<int>[meshes.Count];
+            for (int i = 0; i < meshes.Count; i++)
+                _perMeshIndices[i] = new List<int>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
+        }
 
-        // Should cover your oriented outer cube extents regardless of axis orientation.
-        // We use a big AABB in world space sized from outerHalfExtents.
-        Vector3 half = posManager.outerHalfExtents;
-        float pad = Mathf.Max(0f, boundsPadding);
-
-        Vector3 size = new Vector3(
-            (half.x + pad) * 2f,
-            (half.y + pad) * 2f,
-            (half.z + pad) * 2f
-        );
-
-        return new Bounds(c, size);
+        if (_mpb == null) _mpb = new MaterialPropertyBlock();
     }
 
     private static Quaternion NormalizeSafe(Quaternion q)
     {
-        // Fast path: if it's already basically unit length, return as-is
         float ls = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
-
-        // Handle NaN/Inf or degenerate
         if (!float.IsFinite(ls) || ls < 1e-12f)
             return Quaternion.identity;
-
-        // Normalize if slightly off
         float inv = 1.0f / Mathf.Sqrt(ls);
         return new Quaternion(q.x * inv, q.y * inv, q.z * inv, q.w * inv);
     }
+
     private float ComputeDistance01(Vector3 instancePos)
     {
         Vector3 fromPos = (distanceFrom ? distanceFrom.position :
@@ -252,16 +336,9 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
 
         float d = Vector3.Distance(fromPos, instancePos);
 
-        float denom;
-        if (normalizeByOuterBox && posManager != null)
-        {
-            // Use an approximate "radius" for your box. Magnitude works well as a single knob.
-            denom = posManager.outerHalfExtents.magnitude;
-        }
-        else
-        {
-            denom = Mathf.Max(0.0001f, maxDistance);
-        }
+        float denom = (normalizeByOuterBox && posManager != null)
+            ? posManager.outerHalfExtents.magnitude
+            : Mathf.Max(0.0001f, maxDistance);
 
         return Mathf.Clamp01(d / Mathf.Max(0.0001f, denom));
     }

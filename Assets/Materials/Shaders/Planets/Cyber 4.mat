@@ -104,11 +104,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Animation_X: 0.1
-    - _Animation_Y: 0.02
+    - _Animation_X: 0.2
+    - _Animation_Y: -0.05
     - _BG1_Pattern_Scale: 0.8
     - _BG1_Scale: 0.3
-    - _BG_Transparency: 0.9
+    - _BG_Transparency: 0
     - _BG_scale: 0.8
     - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
@@ -121,19 +121,19 @@ Material:
     - _Hue_Enable_Disable: 0
     - _Hue_Shift: 0.869
     - _Hue_Value: 0.37
-    - _Metallic: 1
+    - _Metallic: 0
     - _Noise_Scale: 0
     - _Noise_Speed: 0
     - _Noise_Strength: 0
-    - _P1_Animation_X: 0.02
-    - _P1_Animation_Y: -0.01
-    - _P1_Opacity: 0.3
-    - _P1_Scale: 5
+    - _P1_Animation_X: 0.1
+    - _P1_Animation_Y: -0.1
+    - _P1_Opacity: 0.09
+    - _P1_Scale: -5
     - _P1_Transparency: 0.6
     - _P2_Animation_X: 0.01
     - _P2_Animation_Y: 0.03
     - _P2_Opacity: -0.4
-    - _P2_Opacity_1: 0.081
+    - _P2_Opacity_1: 0.25
     - _P2_Scale: 8
     - _P2_Transparency: 0.6
     - _Patterns_1_Opacity: 1
@@ -150,14 +150,14 @@ Material:
     - _Twirl_on_Pattern2_P2: 0
     - _Use_Default_Noise_Texture: 0
     m_Colors:
-    - _BG1_Color1: {r: 0.015686277, g: 0.05277556, b: 0.14901961, a: 0}
-    - _BG1_Color2: {r: 0.015686264, g: 0.40337208, b: 0.6509804, a: 1}
+    - _BG1_Color1: {r: 0.015686277, g: 0.12985584, b: 0.14901961, a: 0}
+    - _BG1_Color2: {r: 0, g: 0.8983755, b: 1, a: 1}
     - _BG1_Offset: {r: 1, g: 1, b: 0, a: 0}
     - _BG1_Tiling: {r: 3, g: 3, b: 0, a: 0}
     - _Color_Filter: {r: 0, g: 0, b: 0, a: 0}
     - _Color_Filter_CF: {r: 1, g: 0.66279554, b: 0, a: 0}
     - _Noise_Tile_X_Y: {r: 0, g: 0, b: 0, a: 0}
-    - _P1_Color: {r: 0, g: 0.55931664, b: 1, a: 0}
-    - _P2_Color: {r: 0, g: 0.14599973, b: 0.3372549, a: 0}
+    - _P1_Color: {r: 0, g: 428.9937, b: 766.99615, a: 0}
+    - _P2_Color: {r: 0, g: 1.2970209, b: 2.9960787, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

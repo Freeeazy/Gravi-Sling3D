@@ -235,7 +235,45 @@ public class StationPosManager : MonoBehaviour
             outMatrices.Add(Matrix4x4.TRS(worldPos, worldRot, Vector3.one * s));
         }
     }
+    /// <summary>
+    /// Lightweight snapshot for quest picking + beacon targeting.
+    /// </summary>
+    public struct StationWorldInfo
+    {
+        public Vector3Int coord;
+        public Vector3 worldPos;
+        public Quaternion worldRot;
+        public StationFieldData data;
+    }
 
+    /// <summary>
+    /// Appends all currently-active stations with their world pose + coord.
+    /// </summary>
+    public void FillActiveStations(List<StationWorldInfo> outStations)
+    {
+        if (outStations == null) return;
+
+        foreach (var kv in _chunks)
+        {
+            var coord = kv.Key;
+            var data = kv.Value;
+            if (!data || !data.hasStation) continue;
+
+            Vector3 origin = ChunkCoordToWorldOrigin(coord);
+            Vector3 worldPos = data.WorldPosition(origin);
+
+            // Your data currently uses localRotation already.
+            Quaternion worldRot = data.localRotation;
+
+            outStations.Add(new StationWorldInfo
+            {
+                coord = coord,
+                worldPos = worldPos,
+                worldRot = worldRot,
+                data = data
+            });
+        }
+    }
 
 #if UNITY_EDITOR
     [ContextMenu("Regenerate All Stations (Editor Only)")]

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +22,13 @@ public class StationProxyManager : MonoBehaviour
     {
         if (!posManager) return;
         posManager.OnChunkCreated += HandleChunkCreated;
+
+        // Bootstrap existing chunks so we don't miss the initial grid
+        if (posManager.Chunks != null && player)
+        {
+            foreach (var kv in posManager.Chunks)
+                HandleChunkCreated(kv.Key, kv.Value);
+        }
     }
 
     private void OnDisable()
@@ -70,7 +78,17 @@ public class StationProxyManager : MonoBehaviour
         _active[coord] = p;
         return p;
     }
-
+    public bool TryGetProxy(Vector3Int coord, out StationProxy proxy)
+    {
+        return _active.TryGetValue(coord, out proxy) && proxy;
+    }
+    public void ForEachActiveProxy(Action<StationProxy> fn)
+    {
+        foreach (var kv in _active)
+        {
+            if (kv.Value) fn?.Invoke(kv.Value);
+        }
+    }
     private void ReleaseProxy(Vector3Int coord)
     {
         if (!_active.TryGetValue(coord, out var p) || !p) return;

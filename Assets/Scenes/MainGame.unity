@@ -4571,13 +4571,14 @@ GameObject:
   m_Component:
   - component: {fileID: 305733145}
   - component: {fileID: 305733144}
+  - component: {fileID: 305733146}
   m_Layer: 0
   m_Name: QuestNavigator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &305733144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4585,7 +4586,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 305733143}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 112cab8b19e81b143b821ca555990c1e, type: 3}
   m_Name: 
@@ -4622,6 +4623,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &305733146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 305733143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacefd5a10fca4346bc53c4886c71cb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1616803246}
+  cam: {fileID: 330585545}
+  posManager: {fileID: 2048073271}
+  proxyManager: {fileID: 53806277}
+  questBeaconPrefab: {fileID: 522058233459429503, guid: a8f6f75c5bbe426468d06af262fa860a, type: 3}
+  globalSeed: 12345
+  pickRadius: 6000
+  minTargetDistance: 1500
+  pickAttempts: 6
+  beaconDepthFrac: 0.8
+  beaconMaxDistance: 800
+  armTriggerDistance: 900
+  requiredPlayerTag: 
+  logPicks: 1
 --- !u!1 &310636910
 GameObject:
   m_ObjectHideFlags: 0

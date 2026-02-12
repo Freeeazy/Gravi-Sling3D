@@ -10,6 +10,10 @@ public class StationProxy : MonoBehaviour
     public SphereCollider preGravityTrigger;     // child GO
     public PreGravityPullZone preGravity;
 
+    [Header("Quest Highlight (optional)")]
+    [Tooltip("White sphere overlay (or any highlight GO). Will be toggled for the active quest target.")]
+    public GameObject questHighlight;
+
     public Vector3Int Coord { get; private set; }
 
     private void Reset()
@@ -56,5 +60,9 @@ public class StationProxy : MonoBehaviour
         {
             preGravity.planet = slingshot; // your PreGravityPullZone expects this
         }
+    }
+    public void SetQuestHighlight(bool on)
+    {
+        if (questHighlight) questHighlight.SetActive(on);
     }
 }

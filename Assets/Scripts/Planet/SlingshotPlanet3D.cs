@@ -219,7 +219,7 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         while (true)
         {
-            bool held = IsBoostHeld();
+            bool held = UIBlock.IsUIOpen ? false : IsBoostHeld();
 
             if (enableBoosting)
             {

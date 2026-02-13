@@ -126,6 +126,16 @@ public class BoostManager : MonoBehaviour
             if (_energy > capacity) _energy = capacity;
         }
 
+        // --- Cheat: Ctrl + B = refill energy ---
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            _energy = capacity;
+            _boost01 = 0f; // optional: prevents weird instant boost spike
+            ApplyBarWidth();
+
+            Debug.Log("[BoostManager] Cheat refill activated.");
+        }
+
         ApplyBarWidth();
     }
 

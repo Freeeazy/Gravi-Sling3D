@@ -55,6 +55,9 @@ public class SimpleFollowCamera : MonoBehaviour
     private Vector3 _lookAheadCurrent; // smoothed world-space look-ahead
     private Vector3 _shakeOffset; // world-space or camera-space; we'll use camera-space
 
+    private bool _cursorWasLocked;
+    private bool _lastUIOpen;
+
     private void Awake()
     {
         if (Instance && Instance != this)
@@ -76,52 +79,57 @@ public class SimpleFollowCamera : MonoBehaviour
 
         _offset = keepInitialOffset ? (transform.position - target.position) : manualOffset;
 
-        // If user didn't assign RB, try find one on target or its children.
         if (!targetRb)
         {
             targetRb = target.GetComponentInChildren<Rigidbody>();
             if (!targetRb) targetRb = target.GetComponent<Rigidbody>();
         }
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        _lastUIOpen = UIBlock.IsUIOpen;
+        ApplyCursorState(_lastUIOpen);
     }
 
     private void LateUpdate()
     {
         if (!target) return;
 
+        bool uiOpen = UIBlock.IsUIOpen;
+        if (uiOpen != _lastUIOpen)
+        {
+            _lastUIOpen = uiOpen;
+            ApplyCursorState(uiOpen);
+        }
+
         float dt = Time.deltaTime;
 
-        // --- Mouse look (keep your current behavior) ---
-        float mx = Input.GetAxis("Mouse X") * mouseSensitivity;
-        float my = Input.GetAxis("Mouse Y") * mouseSensitivity;
-
-        Vector3 yawAxis = transform.up;
-        Vector3 pitchAxis = transform.right;
-
-        transform.Rotate(yawAxis, mx, Space.World);
-        transform.Rotate(pitchAxis, -my, Space.World);
-
-        // Manual roll
-        float rollInput = 0f;
-        if (Input.GetKey(KeyCode.Q)) rollInput += 1f;
-        if (Input.GetKey(KeyCode.E)) rollInput -= 1f;
-
-        if (rollInput != 0f)
-            transform.Rotate(transform.forward, rollInput * rollSpeed * dt, Space.World);
-
-        // Optional auto-level (very gentle; keep off unless you want it)
-        if (autoLevel > 0f)
+        // Only allow look controls when UI is closed
+        if (!uiOpen)
         {
-            // Nudge camera "up" toward referenceUp by removing twist slowly.
-            // (simple approach: slerp rotation toward a version that uses referenceUp)
-            Vector3 f = transform.forward;
-            if (f.sqrMagnitude > 1e-6f)
+            float mx = Input.GetAxis("Mouse X") * mouseSensitivity;
+            float my = Input.GetAxis("Mouse Y") * mouseSensitivity;
+
+            Vector3 yawAxis = transform.up;
+            Vector3 pitchAxis = transform.right;
+
+            transform.Rotate(yawAxis, mx, Space.World);
+            transform.Rotate(pitchAxis, -my, Space.World);
+
+            float rollInput = 0f;
+            if (Input.GetKey(KeyCode.Q)) rollInput += 1f;
+            if (Input.GetKey(KeyCode.E)) rollInput -= 1f;
+
+            if (rollInput != 0f)
+                transform.Rotate(transform.forward, rollInput * rollSpeed * dt, Space.World);
+
+            if (autoLevel > 0f)
             {
-                Quaternion leveled = Quaternion.LookRotation(f, referenceUp);
-                float t = 1f - Mathf.Exp(-autoLevel * dt);
-                transform.rotation = Quaternion.Slerp(transform.rotation, leveled, t);
+                Vector3 f = transform.forward;
+                if (f.sqrMagnitude > 1e-6f)
+                {
+                    Quaternion leveled = Quaternion.LookRotation(f, referenceUp);
+                    float t = 1f - Mathf.Exp(-autoLevel * dt);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, leveled, t);
+                }
             }
         }
 
@@ -212,5 +220,18 @@ public class SimpleFollowCamera : MonoBehaviour
         Vector3 impulseWorld = (dir + rand).normalized * (s * shakeMaxOffset);
 
         _shakeOffset += impulseWorld;
+    }
+    private void ApplyCursorState(bool uiOpen)
+    {
+        if (uiOpen)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 }

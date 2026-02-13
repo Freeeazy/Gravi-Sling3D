@@ -4641,12 +4641,12 @@ MonoBehaviour:
   proxyManager: {fileID: 53806277}
   questBeaconPrefab: {fileID: 522058233459429503, guid: a8f6f75c5bbe426468d06af262fa860a, type: 3}
   globalSeed: 12345
-  pickRadius: 6000
+  pickRadius: 8000
   minTargetDistance: 1500
-  pickAttempts: 6
+  pickAttempts: 8
   beaconDepthFrac: 0.8
-  beaconMaxDistance: 800
-  armTriggerDistance: 900
+  beaconMaxDistance: 1000
+  armTriggerDistance: 1100
   requiredPlayerTag: 
   logPicks: 1
 --- !u!1 &310636910
@@ -5577,6 +5577,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 105324099}
     m_Modifications:
+    - target: {fileID: 2630406865529328231, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 307.89
+      objectReference: {fileID: 0}
     - target: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_Name
       value: QuestBoardTask (3)
@@ -19181,37 +19185,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 668654162}
   m_CullTransparentMesh: 1
---- !u!1 &677246344
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 677246345}
-  m_Layer: 0
-  m_Name: MAKE PLAYER BOOST ON LEFT CLICK -> BETTER CONTROL 6DOF
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &677246345
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 677246344}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1.35}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &685616545
 GameObject:
   m_ObjectHideFlags: 0
@@ -19800,6 +19773,42 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 719373424}
   m_CullTransparentMesh: 1
+--- !u!1 &720178645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 720178646}
+  m_Layer: 5
+  m_Name: QuestPointer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &720178646
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 720178645}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1158176809}
+  m_Father: {fileID: 1876932849}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &723035783
 GameObject:
   m_ObjectHideFlags: 0
@@ -34639,6 +34648,106 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147930709}
   m_CullTransparentMesh: 1
+--- !u!1 &1158176808
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1158176809}
+  - component: {fileID: 1158176812}
+  - component: {fileID: 1158176811}
+  - component: {fileID: 1158176810}
+  m_Layer: 5
+  m_Name: Pointer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1158176809
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158176808}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 720178646}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1158176810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158176808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2882953c0d334da4ea1ec24623a96c83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 330585545}
+  worldBeacon: {fileID: 0}
+  arrowImage: {fileID: 1158176811}
+  beaconName: StationQuestBeacon
+  findInterval: 0.25
+  ellipseFrac: {x: 0.42, y: 0.3}
+  ellipsePaddingPx: {x: 40, y: 40}
+  edgeOffsetPx: 18
+  rotateArrow: 1
+  rotationOffsetDegrees: 90
+  hideWhenInsideEllipse: 1
+  hideWhenBehindCamera: 0
+--- !u!114 &1158176811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158176808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 02a30534455217f41bdd1b3b4c157f2c, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1158176812
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158176808}
+  m_CullTransparentMesh: 1
 --- !u!1 &1166352515
 GameObject:
   m_ObjectHideFlags: 0
@@ -35068,6 +35177,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 105324099}
     m_Modifications:
+    - target: {fileID: 2630406865529328231, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 307.89
+      objectReference: {fileID: 0}
     - target: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_Name
       value: QuestBoardTask (2)
@@ -46699,6 +46812,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 105324099}
     m_Modifications:
+    - target: {fileID: 2630406865529328231, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 307.89
+      objectReference: {fileID: 0}
     - target: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_Name
       value: QuestBoardTask (1)
@@ -46915,6 +47032,7 @@ GameObject:
   - component: {fileID: 1616803246}
   - component: {fileID: 1616803245}
   - component: {fileID: 1616803249}
+  - component: {fileID: 1616803251}
   - component: {fileID: 1616803250}
   - component: {fileID: 1616803247}
   - component: {fileID: 1616803248}
@@ -47120,6 +47238,22 @@ MonoBehaviour:
   charge_lr_speed: 5
   charge_lr_size: 0.2
   lerpSpeed: 14
+--- !u!114 &1616803251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616803244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fa5d13db0c630f4081776eaa13b9edf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  move: {fileID: 1616803245}
+  questBoardRoot: {fileID: 80308804}
+  toggleKey: 102
+  onlyAllowWhenOrbiting: 1
 --- !u!1 &1616872903
 GameObject:
   m_ObjectHideFlags: 0
@@ -56392,6 +56526,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 720178646}
   - {fileID: 204939324}
   - {fileID: 1073292223}
   - {fileID: 20791186}
@@ -64867,6 +65002,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 105324099}
     m_Modifications:
+    - target: {fileID: 2630406865529328231, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 307.89
+      objectReference: {fileID: 0}
     - target: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_Name
       value: QuestBoardTask
@@ -65195,7 +65334,6 @@ SceneRoots:
   - {fileID: 409990333}
   - {fileID: 1135039496}
   - {fileID: 480414392}
-  - {fileID: 677246345}
   - {fileID: 1616803246}
   - {fileID: 383793093}
   - {fileID: 435553617}

@@ -241,15 +241,9 @@ public class SlingshotPlanet3D : MonoBehaviour
                     chargeTimer += dt;
                     if (chargeTimer >= maxChargeTime || currentRadius <= planetRadius)
                     {
-                        rb.linearVelocity = Vector3.zero;
-                        if (cachedMoveScript) cachedMoveScript.enabled = false;
-
-                        isOrbiting = false;
-                        if (Active == this) Active = null;
-
-                        if (SpeedHUD.Instance)
-                            SpeedHUD.Instance.SetSpeed(0f);
-
+                        // Safety release: station/planet refuses to let you get closer,
+                        // so it forces a launch instead of "crashing" and leaving you stuck.
+                        ForceLaunch(rb, center);
                         yield break;
                     }
 
@@ -426,7 +420,45 @@ public class SlingshotPlanet3D : MonoBehaviour
         // lock01=1 => fully rotAfterBottom (snapped/locked)
         ship.rotation = Quaternion.Slerp(smoothRot, rotAfterBottom, lock01);
     }
+    private void ForceLaunch(Rigidbody rb, Vector3 center)
+    {
+        // Tangent direction = orbitAxis x radialDir (right-hand rule)
+        Vector3 tangent = Vector3.Cross(orbitAxis, radialDir).normalized;
 
+        // Optional extra angle offset at launch
+        if (Mathf.Abs(launchAngleOffsetDeg) > 0.001f)
+            tangent = Quaternion.AngleAxis(launchAngleOffsetDeg, orbitAxis) * tangent;
+
+        if (PlayerThrustManager.Instance)
+            PlayerThrustManager.Instance.OnLaunch();
+
+        rb.linearVelocity = tangent * launchSpeed;
+
+        // Prevent pre-gravity from tugging immediately after launch.
+        if (preGravityZone) preGravityZone.DisablePostLaunch();
+
+        if (SpeedHUD.Instance)
+            SpeedHUD.Instance.SetSpeed(rb.linearVelocity.magnitude);
+
+        if (SpeedometerHUD.Instance)
+            SpeedometerHUD.Instance.ClearExternalSpeed();
+
+        if (BoostManager.Instance)
+            BoostManager.Instance.SetMode(BoostManager.Mode.FreeFlight);
+
+        // Re-enable movement.
+        if (cachedMoveScript) cachedMoveScript.enabled = true;
+
+        if (Bubble) Bubble.gameObject.SetActive(true);
+
+        if (PlayerThrustManager.Instance)
+            PlayerThrustManager.Instance.ResetToIdle();
+
+        isOrbiting = false;
+        if (Active == this) Active = null;
+        cachedRb = null;
+        cachedMoveScript = null;
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

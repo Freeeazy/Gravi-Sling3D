@@ -57,23 +57,23 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _Color168_Accent_CockpitWindshield: {r: 1, g: 1, b: 1, a: 0}
+    - _Color168_Accent_CockpitWindshield: {r: 0, g: 0.7490197, b: 0.7490197, a: 0}
     - _Color168_Accent_Cockpit_Lights: {r: 1, g: 1, b: 1, a: 0}
     - _Color168_CockpitAccent: {r: 1, g: 0, b: 0, a: 0}
     - _Color168_Windows: {r: 0, g: 0.6293888, b: 1, a: 0}
-    - _Color169_AccentLights: {r: 1, g: 1, b: 1, a: 0}
-    - _Color170_AccentLights_2: {r: 1, g: 1, b: 1, a: 0}
+    - _Color169_AccentLights: {r: 0, g: 64, b: 1.1206151, a: 0}
+    - _Color170_AccentLights_2: {r: 0, g: 47.937256, b: 1.0039216, a: 0}
     - _Color170_Thrusters: {r: 1, g: 1, b: 1, a: 0}
     - _Color176_MainBody_WingTips: {r: 1, g: 0, b: 0, a: 0}
-    - _Color176_Thrusters: {r: 1, g: 1, b: 1, a: 0}
-    - _Color177_CockpitRoof_SideWindows: {r: 1, g: 1, b: 1, a: 0}
+    - _Color176_Thrusters: {r: 1.35849, g: 32, b: 32, a: 0}
+    - _Color177_CockpitRoof_SideWindows: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 0}
     - _Color177_CockpitRoof_Windows: {r: 1, g: 1, b: 1, a: 0}
     - _Color177_SecondaryBody: {r: 1, g: 0, b: 0, a: 0}
     - _Color178_AccentWiring: {r: 1, g: 0.3619898, b: 0, a: 0}
     - _Color178_Nothing: {r: 1, g: 1, b: 1, a: 0}
-    - _Color179_Hull_Secondary: {r: 1, g: 1, b: 1, a: 0}
+    - _Color179_Hull_Secondary: {r: 0.13207549, g: 0.13207549, b: 0.13207549, a: 0}
     - _Color179_ThrusterEdge_Accents: {r: 1, g: 0, b: 0, a: 0}
-    - _Color80_Hull_Primary: {r: 1, g: 1, b: 1, a: 0}
+    - _Color80_Hull_Primary: {r: 0, g: 0.36940053, b: 0.4339623, a: 0}
     - _Color80_Wings: {r: 1, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

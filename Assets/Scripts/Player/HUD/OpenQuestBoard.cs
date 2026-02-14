@@ -4,7 +4,7 @@ public class OpenQuestBoard : MonoBehaviour
 {
     [Header("Refs (scene objects)")]
     public SimpleMove move;                 // assign in inspector
-    public GameObject questBoardRoot;       // assign in inspector (the thing you want to toggle)
+    public Transform questBoardRoot;       // assign in inspector (the thing you want to toggle)
 
     [Header("Input")]
     public KeyCode toggleKey = KeyCode.F;
@@ -12,14 +12,29 @@ public class OpenQuestBoard : MonoBehaviour
     [Header("Rules")]
     public bool onlyAllowWhenOrbiting = true;
 
+    [Header("Rotation Settings")]
+    public float closedXAngle = 90f;   // folded up
+    public float openXAngle = 0f;      // flat / readable
+    public float rotateSpeed = 6f;
+
+    private bool isOpen = false;
+    private float targetX;
+
     private void Awake()
     {
-        if (questBoardRoot) questBoardRoot.SetActive(false);
+        if (questBoardRoot)
+        {
+            targetX = closedXAngle;
+            questBoardRoot.localRotation = Quaternion.Euler(closedXAngle, 0f, 0f);
+        }
+
         UIBlock.IsUIOpen = false;
     }
 
     private void Update()
     {
+        if (!questBoardRoot) return;
+
         // If you only want this at stations/orbit:
         if (onlyAllowWhenOrbiting)
         {
@@ -28,17 +43,19 @@ public class OpenQuestBoard : MonoBehaviour
                 return;
         }
 
-        if (!questBoardRoot) return;
-
         if (Input.GetKeyDown(toggleKey))
         {
-            bool newState = !questBoardRoot.activeSelf;
-            questBoardRoot.SetActive(newState);
-            UIBlock.IsUIOpen = newState;
+            isOpen = !isOpen;
+            targetX = isOpen ? openXAngle : closedXAngle;
+            UIBlock.IsUIOpen = isOpen;
         }
 
-        // Safety: if board was closed externally, keep flag in sync
-        if (UIBlock.IsUIOpen != questBoardRoot.activeSelf)
-            UIBlock.IsUIOpen = questBoardRoot.activeSelf;
+        // Smooth rotate toward target
+        Quaternion targetRot = Quaternion.Euler(targetX, 0f, 0f);
+        questBoardRoot.localRotation = Quaternion.Slerp(
+            questBoardRoot.localRotation,
+            targetRot,
+            rotateSpeed * Time.deltaTime
+        );
     }
 }

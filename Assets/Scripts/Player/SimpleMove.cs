@@ -72,6 +72,14 @@ public class SimpleMove : MonoBehaviour
 
     [NonSerialized] public float slipFactor = 0f; // 1 = fully slipping, 0 = normal
 
+    [Header("Cruise Control (Toggle X)")]
+    public KeyCode cruiseKey = KeyCode.X;
+
+    [Tooltip("If true, pressing any movement/boost/roll input will disable cruise.")]
+    public bool cruiseAutoDisengageOnInput = true;
+
+    [NonSerialized] public bool cruiseControl = false;
+
     [Header("Debug")]
     public bool debugVelocity = false;
 
@@ -89,6 +97,9 @@ public class SimpleMove : MonoBehaviour
     private float boostCharge = 0f;
 
     private float _lastSpeed = float.NaN;
+    private Vector3 _cruiseMoveDir = Vector3.zero;   // stored world direction
+    private Vector3 _cruiseBankInput = Vector3.zero; // stored input for styling/bank (optional)
+    private bool _cruiseTogglePressed;
 
     private void Awake()
     {
@@ -109,6 +120,16 @@ public class SimpleMove : MonoBehaviour
     {
         if (enableSlip)
             slipFactor = slipStart;
+    }
+
+    private void OnDisable()
+    {
+        cruiseControl = false;
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(cruiseKey))
+            _cruiseTogglePressed = true;
     }
 
     private void FixedUpdate()
@@ -193,6 +214,54 @@ public class SimpleMove : MonoBehaviour
             Vector3 dir = new Vector3(input.x, input.y, input.z);
             if (dir.sqrMagnitude > 0.0001f)
                 moveDir = dir.normalized;
+        }
+
+        // --- CRUISE TOGGLE (captured in Update, consumed here) ---
+        if (_cruiseTogglePressed)
+        {
+            _cruiseTogglePressed = false;
+
+            cruiseControl = !cruiseControl;
+
+            if (cruiseControl)
+            {
+                Vector3 dirToStore = (rb.rotation * Vector3.forward);
+
+                if (dirToStore.sqrMagnitude > 0.0001f)
+                {
+                    _cruiseMoveDir = dirToStore.normalized;
+                    _cruiseBankInput = input;
+                }
+                else cruiseControl = false;
+            }
+        }
+
+        // Auto-disengage if player provides other input
+        if (cruiseControl && cruiseAutoDisengageOnInput)
+        {
+            bool pressedMoveKeys =
+                Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.D) ||
+                Input.GetKey(KeyCode.Space) ||
+                Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
+            bool pressedBoost = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
+
+            // If they are trying to manually control anything (other than just toggling X), drop cruise.
+            // (Mouse look does NOT count as input here.)
+            if ((pressedMoveKeys || pressedBoost) && !_cruiseTogglePressed)
+                cruiseControl = false;
+        }
+
+        // --- CRUISE OVERRIDE ---
+        // If cruise is active, force intent even if player isn't holding movement keys.
+        if (cruiseControl)
+        {
+            moveDir = _cruiseMoveDir;   // stored world direction
+            input = _cruiseBankInput;   // stored input (optional flair)
+
+            // Note: we don't change boostOnlyIntent here — cruise is "movement intent".
+            hasMoveInput = true;
+            hasInput = true;
         }
 
         // --- BOOSTED SPEED/ACCEL (ADDITIVE) ---

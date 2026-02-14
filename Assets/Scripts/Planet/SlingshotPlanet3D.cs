@@ -84,6 +84,7 @@ public class SlingshotPlanet3D : MonoBehaviour
 
     private bool isOrbiting;
     public static SlingshotPlanet3D Active;
+    private bool isCharging;
 
     private Rigidbody cachedRb;
     private MonoBehaviour cachedMoveScript; // e.g., SimpleMove
@@ -96,6 +97,8 @@ public class SlingshotPlanet3D : MonoBehaviour
     private float orbitTangentialSpeed; // units/sec along the arc
     private float orbitStartTime;
     public bool IsOrbiting => isOrbiting;
+    public bool IsCharging => isCharging;
+
 
     private void Reset()
     {
@@ -231,6 +234,8 @@ public class SlingshotPlanet3D : MonoBehaviour
                 {
                     float dt = Time.fixedDeltaTime;
 
+                    isCharging = true;
+
                     // Shrink radius
                     currentRadius = Mathf.MoveTowards(currentRadius, planetRadius, shrinkRate * dt);
 
@@ -333,6 +338,8 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         if (PlayerThrustManager.Instance)
             PlayerThrustManager.Instance.OnLaunch();
+
+        isCharging = false;
 
         rb.linearVelocity = tangent * launchSpeed;                                          // LAUNCH
 

@@ -39,7 +39,7 @@ public class OpenQuestBoard : MonoBehaviour
         if (onlyAllowWhenOrbiting)
         {
             // SlingshotPlanet3D.Active is set when orbit starts, cleared on exit
-            if (SlingshotPlanet3D.Active == null || !SlingshotPlanet3D.Active.IsOrbiting)
+            if (SlingshotPlanet3D.Active == null || !SlingshotPlanet3D.Active.IsOrbiting || SlingshotPlanet3D.Active.IsCharging)
                 return;
         }
 

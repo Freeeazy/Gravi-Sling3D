@@ -66,10 +66,16 @@ public class StationInstancedRenderer : MonoBehaviour
         if (!stationPrefab) return;
 
 #if UNITY_EDITOR
-        // Editor-safe way: loads prefab contents into a hidden staging scene
+        // If this is a scene instance, we can cache directly
+        if (stationPrefab.scene.IsValid())
+        {
+            CacheFromRoot(stationPrefab.transform);
+            return;
+        }
+
+        // Editor prefab-asset path: loads prefab contents into a staging scene
         var path = UnityEditor.AssetDatabase.GetAssetPath(stationPrefab);
         var root = UnityEditor.PrefabUtility.LoadPrefabContents(path);
-
         try
         {
             CacheFromRoot(root.transform);
@@ -79,9 +85,27 @@ public class StationInstancedRenderer : MonoBehaviour
             UnityEditor.PrefabUtility.UnloadPrefabContents(root);
         }
 #else
-    // Build-safe fallback: instantiate once (not per validate) OR require explicit baking.
-    CacheFromRoot(stationPrefab.transform); // this may not work for prefab assets in builds
+    CacheFromPrefabByInstantiating();
 #endif
+    }
+    private void CacheFromPrefabByInstantiating()
+    {
+        // Instantiate once, cache, then destroy. Works in builds.
+        var temp = Instantiate(stationPrefab);
+        temp.name = $"{stationPrefab.name}_CACHE_TEMP";
+        temp.hideFlags = HideFlags.HideAndDontSave;
+
+        // Keep it from doing anything weird if it has scripts/animators etc.
+        temp.SetActive(false);
+
+        try
+        {
+            CacheFromRoot(temp.transform);
+        }
+        finally
+        {
+            Destroy(temp);
+        }
     }
 
     private void CacheFromRoot(Transform root)

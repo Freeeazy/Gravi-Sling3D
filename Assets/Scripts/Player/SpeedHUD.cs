@@ -13,7 +13,6 @@ public class SpeedHUD : MonoBehaviour
     [Header("Format")]
     [SerializeField] private string label = "Speed";
     [SerializeField] private float multiplier = 1f;     // set 0.5f if you want “km/s vibes”
-    [SerializeField] private int decimals = 1;
 
     private void Awake()
     {
@@ -24,7 +23,8 @@ public class SpeedHUD : MonoBehaviour
     {
         if (!speedText) return;
         float v = speedUnitsPerSec * multiplier;
-        speedText.text = $"{label}: {v.ToString($"F{decimals}")}";
+        int iv = Mathf.RoundToInt(v * 2);
+        speedText.text = iv.ToString("D4");
     }
     public float GetCurrentSpeed()
     {

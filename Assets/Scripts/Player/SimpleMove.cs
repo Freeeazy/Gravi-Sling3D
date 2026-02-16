@@ -1,6 +1,8 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+
 public class SimpleMove : MonoBehaviour
 {
     [Header("References")]
@@ -80,6 +82,14 @@ public class SimpleMove : MonoBehaviour
 
     [NonSerialized] public bool cruiseControl = false;
 
+    public Image CruiseControlBkRnd;
+
+    [Tooltip("Material when Cruise Control is ON.")]
+    public Material cruiseOnMat;
+
+    [Tooltip("Material when Cruise Control is OFF.")]
+    public Material cruiseOffMat;
+
     [Header("Debug")]
     public bool debugVelocity = false;
 
@@ -100,6 +110,7 @@ public class SimpleMove : MonoBehaviour
     private Vector3 _cruiseMoveDir = Vector3.zero;   // stored world direction
     private Vector3 _cruiseBankInput = Vector3.zero; // stored input for styling/bank (optional)
     private bool _cruiseTogglePressed;
+    private bool _lastCruiseState = false;
 
     private void Awake()
     {
@@ -115,6 +126,8 @@ public class SimpleMove : MonoBehaviour
 
         if (!cameraTransform && Camera.main)
             cameraTransform = Camera.main.transform;
+
+        UpdateCruiseUI(force: true);
     }
     private void OnEnable()
     {
@@ -125,6 +138,7 @@ public class SimpleMove : MonoBehaviour
     private void OnDisable()
     {
         cruiseControl = false;
+        UpdateCruiseUI(force: true);
     }
     private void Update()
     {
@@ -234,6 +248,7 @@ public class SimpleMove : MonoBehaviour
                 }
                 else cruiseControl = false;
             }
+            UpdateCruiseUI(force: true);
         }
 
         // Auto-disengage if player provides other input
@@ -251,6 +266,7 @@ public class SimpleMove : MonoBehaviour
             if ((pressedMoveKeys || pressedBoost) && !_cruiseTogglePressed)
                 cruiseControl = false;
         }
+        UpdateCruiseUI();
 
         // --- CRUISE OVERRIDE ---
         // If cruise is active, force intent even if player isn't holding movement keys.
@@ -375,14 +391,8 @@ public class SimpleMove : MonoBehaviour
 
         _lastSpeed = speed;
 
-        switch (velocityDecimals)
-        {
-            case 0: velocityText.SetText("Speed: {0:0} m/s", speed); break;
-            case 1: velocityText.SetText("Speed: {0:0.0} m/s", speed); break;
-            case 2: velocityText.SetText("Speed: {0:0.00} m/s", speed); break;
-            case 3: velocityText.SetText("Speed: {0:0.000} m/s", speed); break;
-            default: velocityText.SetText("Speed: {0:0.0000} m/s", speed); break;
-        }
+        if (SpeedHUD.Instance)
+            SpeedHUD.Instance.SetSpeed(rb.linearVelocity.magnitude);
     }
 
     private Quaternion ComputeFacing3D(Vector3 dir)
@@ -432,6 +442,18 @@ public class SimpleMove : MonoBehaviour
         Quaternion roll = Quaternion.AngleAxis(_bank + wobble, forwardAxis);
 
         return roll * facing;
+    }
+    private void UpdateCruiseUI(bool force = false)
+    {
+        if (CruiseControlBkRnd == null) return;
+
+        if (!force && cruiseControl == _lastCruiseState) return;
+        _lastCruiseState = cruiseControl;
+
+        if (cruiseControl && cruiseOnMat != null)
+            CruiseControlBkRnd.material = cruiseOnMat;
+        else if (!cruiseControl && cruiseOffMat != null)
+            CruiseControlBkRnd.material = cruiseOffMat;
     }
     void OnCollisionStay(Collision c)
     {

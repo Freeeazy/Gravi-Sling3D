@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 /// <summary>
@@ -15,6 +16,7 @@ public class AsteroidVFXPoolManager : MonoBehaviour
     public int prewarmCount = 10;
     public int maxPoolSize = 20;
     public bool allowExpand = true;
+    public float tintPercent = 0.05f;
 
     [Header("Playback")]
     public bool playOnSpawn = true;
@@ -57,23 +59,6 @@ public class AsteroidVFXPoolManager : MonoBehaviour
         Transform t = vfx.transform;
         t.SetPositionAndRotation(position, rotation);
         t.gameObject.SetActive(true);
-    }
-
-    public void SpawnImpact(
-        Vector3 position,
-        Vector3 smashDirWorld,
-        float dirSpeed,
-        float radialSpeed,
-        float randomSpeed,
-        int count)
-    {
-        var vfx = GetFromPool();
-        if (!vfx) return;
-
-        vfx.transform.SetPositionAndRotation(position, Quaternion.identity);
-        vfx.gameObject.SetActive(true);
-
-        vfx.PlayImpactBurst(smashDirWorld, dirSpeed, radialSpeed, randomSpeed, count);
     }
 
     /// <summary>
@@ -157,8 +142,7 @@ public class AsteroidVFXPoolManager : MonoBehaviour
         vfx.transform.SetPositionAndRotation(position, Quaternion.identity);
         vfx.gameObject.SetActive(true);
 
-        vfx.SetTint(tint); // NEW
-        vfx.PlayImpactBurst(smashDirWorld, dirSpeed, radialSpeed, randomSpeed, count);
+        vfx.PlayImpactBurst(smashDirWorld, dirSpeed, radialSpeed, randomSpeed, count, tint, tintPercent);
     }
 
     /// <summary>
@@ -189,7 +173,9 @@ public class AsteroidVFXPoolManager : MonoBehaviour
             float dirSpeed,
             float radialSpeed,
             float randomSpeed,
-            int count)
+            int count,
+            Color baseTint,
+            float tintJitterPct = 0.05f)
         {
             if (_systems == null || _systems.Length == 0) return;
 
@@ -215,6 +201,10 @@ public class AsteroidVFXPoolManager : MonoBehaviour
                 Vector3 chaos = Random.onUnitSphere * randomSpeed;
 
                 emitParams.velocity = radial + directional + chaos;
+
+                // subtle per-particle tint variation
+                emitParams.startColor = VaryColor(baseTint, tintJitterPct);
+
                 ps.Emit(emitParams, 1);
             }
 
@@ -260,6 +250,22 @@ public class AsteroidVFXPoolManager : MonoBehaviour
                 c.a = baseCol.a;
                 main.startColor = new ParticleSystem.MinMaxGradient(c);
             }
+        }
+        private static Color VaryColor(Color baseCol, float pct)
+        {
+            // pct = 0.05f means +/-5%
+            float r = 1f + Random.Range(-pct, pct);
+            float g = 1f + Random.Range(-pct, pct);
+            float b = 1f + Random.Range(-pct, pct);
+
+            Color c = new Color(baseCol.r * r, baseCol.g * g, baseCol.b * b, baseCol.a);
+
+            // Clamp because multiplying can push >1 or <0
+            c.r = Mathf.Clamp01(c.r);
+            c.g = Mathf.Clamp01(c.g);
+            c.b = Mathf.Clamp01(c.b);
+
+            return c;
         }
     }
 }

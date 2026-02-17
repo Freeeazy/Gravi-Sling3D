@@ -531,8 +531,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 532993881a0aad4479c8df41a4e682c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offY: 25
-  onY: 204
+  offY: 204
+  onY: 25
   duration: 0.35
   easeCurve:
     serializedVersion: 2
@@ -3926,8 +3926,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 532993881a0aad4479c8df41a4e682c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offY: 0
-  onY: -179
+  offY: -179
+  onY: 0
   duration: 0.35
   easeCurve:
     serializedVersion: 2
@@ -7072,7 +7072,7 @@ MonoBehaviour:
   enableLookAhead: 1
   lookAheadMaxDistance: 6
   lookAheadSharpness: 10
-  lookAheadMinSpeed: 0.5
+  lookAheadMinSpeed: 5
   lookAheadFullAtSpeed: 100
   enableShake: 1
   shakeDamping: 18
@@ -18428,6 +18428,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 8cb913940df82d849870e2630e1e4f6c, type: 2}
+    - target: {fileID: -6400281290468069383, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -725012648089265939, guid: 5bf796888503f3147879b71215e8f811, type: 3}
     - target: {fileID: 919132149155446097, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_Name
       value: DualStriker
@@ -24347,6 +24351,7 @@ MonoBehaviour:
   prewarmCount: 5
   maxPoolSize: 10
   allowExpand: 1
+  tintPercent: 0.2
   playOnSpawn: 1
 --- !u!4 &1090598852
 Transform:
@@ -36776,15 +36781,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 3.45
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_LocalRotation.w
@@ -36822,6 +36827,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 8cb913940df82d849870e2630e1e4f6c, type: 2}
+    - target: {fileID: -6400281290468069383, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -725012648089265939, guid: 5bf796888503f3147879b71215e8f811, type: 3}
     - target: {fileID: 919132149155446097, guid: 8ae948f8aef4bf44c9860796cd734488, type: 3}
       propertyPath: m_Name
       value: DualStriker
@@ -39185,8 +39194,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 1.0000014
-  m_Size: 0.6534485
+  m_Value: 1.0000012
+  m_Size: 0.65298986
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

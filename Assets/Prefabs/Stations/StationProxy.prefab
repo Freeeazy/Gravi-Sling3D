@@ -423,7 +423,7 @@ MonoBehaviour:
   requireRigidbody: 1
   accelAtEdge: 100
   accelAtInner: 200
-  innerRadius01: 0.35
+  innerRadius01: 0.5
   radialDamping: 0.2
   postLaunchDisableTime: 1
   planet: {fileID: 4816576802051389977}

@@ -136,6 +136,9 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         Active = this;
 
+        if (StationNameManager.Instance)
+            StationNameManager.Instance.SetCurrentStationByWorldPos(transform.position);
+
         if (PlayerThrustManager.Instance)
             PlayerThrustManager.Instance.SetOrbiting(0.5f);
 

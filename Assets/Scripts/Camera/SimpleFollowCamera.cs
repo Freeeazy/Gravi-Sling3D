@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 public class SimpleFollowCamera : MonoBehaviour
@@ -45,6 +47,36 @@ public class SimpleFollowCamera : MonoBehaviour
     [Tooltip("Max shake offset (meters).")]
     public float shakeMaxOffset = 0.6f;
 
+    [Header("FOV (Optional)")]
+    public bool enableFov = true;
+
+    [Tooltip("If null, will auto-fetch Camera on this GameObject or children.")]
+    public Camera cam;
+
+    [Tooltip("If 0, uses current camera FOV at Start.")]
+    public float baseFov = 0f;
+
+    [Tooltip("Hard clamp for readability.")]
+    public float minFov = 55f;
+    public float maxFov = 95f;
+
+    [Tooltip("Ignore tiny changes to prevent micro-wobble.")]
+    public float fovDeadzone = 0.15f;
+
+    public enum FovMode { None, FreeFlight, Boost, DriftHold, Orbiting }
+    public FovMode fovMode = FovMode.FreeFlight;
+
+    // Free-flight config
+    [NonSerialized] public float freeMaxSpeed = 8f;         // will be set by caller
+    [NonSerialized] public float freeMaxAdd = 4f;           // +0..+4 typically
+    [NonSerialized] public float freeSharpness = 6f;        // smoothing rate
+
+    // Boost config
+    [NonSerialized] public float boostMaxSpeed = 16f;       // maxSpeed + boostMaxSpeedAdd
+    [NonSerialized] public float boostExtraAdd = 5f;        // extra on top of free
+    [NonSerialized] public float boostSharpnessUp = 12f;    // fast in
+    [NonSerialized] public float boostSharpnessDown = 5f;   // slow out
+
     [Header("Stabilization (Optional)")]
     [Tooltip("0 = no auto-level. Higher = camera slowly untwists toward referenceUp.")]
     public float autoLevel = 0f;
@@ -57,6 +89,13 @@ public class SimpleFollowCamera : MonoBehaviour
 
     private bool _cursorWasLocked;
     private bool _lastUIOpen;
+
+    // Runtime FOV
+    private float _currentFov;
+    private float _targetFov;
+    private float _driftHoldUntil = -1f;
+    private float _driftHoldFovAdd = 0f;
+    private Coroutine _fovKickRoutine;
 
     private void Awake()
     {
@@ -76,6 +115,13 @@ public class SimpleFollowCamera : MonoBehaviour
     private void Start()
     {
         if (!target) return;
+
+        if (cam)
+        {
+            if (baseFov <= 0.01f) baseFov = cam.fieldOfView;
+            _currentFov = cam.fieldOfView;
+            _targetFov = cam.fieldOfView;
+        }
 
         _offset = keepInitialOffset ? (transform.position - target.position) : manualOffset;
 
@@ -101,6 +147,8 @@ public class SimpleFollowCamera : MonoBehaviour
         }
 
         float dt = Time.deltaTime;
+
+        UpdateFov(dt);
 
         // Only allow look controls when UI is closed
         if (!uiOpen)
@@ -211,10 +259,10 @@ public class SimpleFollowCamera : MonoBehaviour
         float s = Mathf.Clamp01(strength);
 
         // Directional kick: convert world dir into camera space so it shakes relative to view
-        Vector3 dir = (worldDir.sqrMagnitude > 1e-6f) ? worldDir.normalized : Random.onUnitSphere;
+        Vector3 dir = (worldDir.sqrMagnitude > 1e-6f) ? worldDir.normalized : UnityEngine.Random.onUnitSphere;
 
         // Slight randomness so it doesn't feel robotic
-        Vector3 rand = Random.insideUnitSphere * 0.35f;
+        Vector3 rand = UnityEngine.Random.insideUnitSphere * 0.35f;
 
         // Shake in camera space (mostly opposite impact direction)
         Vector3 impulseWorld = (dir + rand).normalized * (s * shakeMaxOffset);
@@ -233,5 +281,151 @@ public class SimpleFollowCamera : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+    }
+
+    // ---------------------------
+    // FOV API (event / mode based)
+    // ---------------------------
+    public void SetFreeFlightFOV(float maxSpeed, float maxAdd = 4f, float sharpness = 6f)
+    {
+        freeMaxSpeed = Mathf.Max(0.01f, maxSpeed);
+        freeMaxAdd = maxAdd;
+        freeSharpness = Mathf.Max(0f, sharpness);
+        fovMode = FovMode.FreeFlight;
+    }
+
+    public void SetBoostFOV(float maxBoostSpeed, float extraAdd = 5f, float sharpnessUp = 12f, float sharpnessDown = 5f)
+    {
+        boostMaxSpeed = Mathf.Max(0.01f, maxBoostSpeed);
+        boostExtraAdd = extraAdd;
+        boostSharpnessUp = Mathf.Max(0f, sharpnessUp);
+        boostSharpnessDown = Mathf.Max(0f, sharpnessDown);
+        fovMode = FovMode.Boost;
+    }
+
+    public void SetFovMode(FovMode mode)
+    {
+        fovMode = mode;
+    }
+
+    public void SetDriftHold(float fovAdd, float duration)
+    {
+        _driftHoldFovAdd = fovAdd;
+        _driftHoldUntil = Time.time + Mathf.Max(0f, duration);
+        fovMode = FovMode.DriftHold;
+    }
+
+    public void SetOrbiting()
+    {
+        fovMode = FovMode.Orbiting;
+    }
+
+    // “Launch punch” — quick kick that eases out, then returns to whatever mode you choose.
+    public void PlaySlingshotKick(float kickAdd = 6f, float inTime = 0.08f, float holdTime = 0.05f, float outTime = 0.35f, FovMode returnMode = FovMode.FreeFlight)
+    {
+        if (_fovKickRoutine != null) StopCoroutine(_fovKickRoutine);
+        _fovKickRoutine = StartCoroutine(FovKickRoutine(kickAdd, inTime, holdTime, outTime, returnMode));
+    }
+    private IEnumerator FovKickRoutine(float kickAdd, float inTime, float holdTime, float outTime, FovMode returnMode)
+    {
+        if (!enableFov || !cam) yield break;
+
+        // Temporarily go None so the state machine doesn't fight the kick.
+        var prevMode = fovMode;
+        fovMode = FovMode.None;
+
+        float start = _currentFov;
+        float peak = Mathf.Clamp(baseFov + kickAdd, minFov, maxFov);
+
+        // Ease in
+        if (inTime > 0.0001f)
+        {
+            float t = 0f;
+            while (t < 1f)
+            {
+                t += Time.deltaTime / inTime;
+                _targetFov = Mathf.Lerp(start, peak, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t)));
+                yield return null;
+            }
+        }
+        _targetFov = peak;
+
+        // Hold
+        if (holdTime > 0.0001f)
+            yield return new WaitForSeconds(holdTime);
+
+        // Ease out
+        float end = Mathf.Clamp(baseFov, minFov, maxFov);
+        if (outTime > 0.0001f)
+        {
+            float t = 0f;
+            while (t < 1f)
+            {
+                t += Time.deltaTime / outTime;
+                _targetFov = Mathf.Lerp(peak, end, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t)));
+                yield return null;
+            }
+        }
+        _targetFov = end;
+
+        fovMode = returnMode; // or prevMode if you prefer
+        _fovKickRoutine = null;
+    }
+
+    private void UpdateFov(float dt)
+    {
+        if (!enableFov || !cam) return;
+
+        // If in drift-hold mode, hold additive FOV for duration
+        if (fovMode == FovMode.DriftHold)
+        {
+            if (Time.time <= _driftHoldUntil)
+            {
+                _targetFov = Mathf.Clamp(baseFov + _driftHoldFovAdd, minFov, maxFov);
+            }
+            else
+            {
+                // fall back to FreeFlight after hold ends (you can change this)
+                fovMode = FovMode.FreeFlight;
+            }
+        }
+
+        // Normal modes
+        if (fovMode == FovMode.FreeFlight || fovMode == FovMode.Boost)
+        {
+            float speed = 0f;
+            if (targetRb) speed = targetRb.linearVelocity.magnitude;
+
+            float targetAdd = 0f;
+
+            // Free-flight portion (0..freeMaxAdd)
+            float free01 = Mathf.Clamp01(speed / Mathf.Max(0.01f, freeMaxSpeed));
+            targetAdd += free01 * freeMaxAdd;
+
+            if (fovMode == FovMode.Boost)
+            {
+                // Extra boost portion only above free max range
+                float boostRange = Mathf.Max(0.01f, boostMaxSpeed - freeMaxSpeed);
+                float boost01 = Mathf.Clamp01((speed - freeMaxSpeed) / boostRange);
+                targetAdd += boost01 * boostExtraAdd;
+            }
+
+            _targetFov = Mathf.Clamp(baseFov + targetAdd, minFov, maxFov);
+        }
+
+        // Deadzone to prevent micro-wobble
+        if (Mathf.Abs(_targetFov - _currentFov) < fovDeadzone)
+            _targetFov = _currentFov;
+
+        // Mode-specific smoothing (Boost = fast up, slower down)
+        float sharpness = freeSharpness;
+
+        if (fovMode == FovMode.Boost)
+            sharpness = (_targetFov > _currentFov) ? boostSharpnessUp : boostSharpnessDown;
+
+        float t = (sharpness <= 0f) ? 1f : (1f - Mathf.Exp(-sharpness * dt));
+        _currentFov = Mathf.Lerp(_currentFov, _targetFov, t);
+
+        cam.fieldOfView = _currentFov;
     }
 }

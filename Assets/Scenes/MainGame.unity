@@ -6972,7 +6972,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 80
+  field of view: 75
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -7077,6 +7077,13 @@ MonoBehaviour:
   enableShake: 1
   shakeDamping: 18
   shakeMaxOffset: 20
+  enableFov: 1
+  cam: {fileID: 330585545}
+  baseFov: 0
+  minFov: 55
+  maxFov: 95
+  fovDeadzone: 0.15
+  fovMode: 1
   autoLevel: 0
   referenceUp: {x: 0, y: 1, z: 0}
 --- !u!1 &332453889

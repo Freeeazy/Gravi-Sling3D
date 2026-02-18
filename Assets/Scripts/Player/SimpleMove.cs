@@ -111,6 +111,7 @@ public class SimpleMove : MonoBehaviour
     private Vector3 _cruiseBankInput = Vector3.zero; // stored input for styling/bank (optional)
     private bool _cruiseTogglePressed;
     private bool _lastCruiseState = false;
+    private bool _wasBoosting;
 
     private void Awake()
     {
@@ -177,6 +178,36 @@ public class SimpleMove : MonoBehaviour
         if (Input.GetKey(KeyCode.E)) roll -= 1f;
 
         bool boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
+
+        var cam = SimpleFollowCamera.Instance;
+        if (cam)
+        {
+            bool isBoosting = boostHeld && boostCharge > 0.01f;
+
+            if (isBoosting != _wasBoosting)
+            {
+                _wasBoosting = isBoosting;
+
+                if (isBoosting)
+                {
+                    cam.SetBoostFOV(
+                        maxBoostSpeed: maxSpeed + boostMaxSpeedAdd,
+                        extraAdd: 10f,            // tweak
+                        sharpnessUp: 12f,
+                        sharpnessDown: 5f
+                    );
+
+                    // Also ensure free-flight base is correct for the boost mode math
+                    cam.SetFreeFlightFOV(maxSpeed, maxAdd: 6f, sharpness: 6f);
+                    cam.SetFovMode(SimpleFollowCamera.FovMode.Boost);
+                }
+                else
+                {
+                    cam.SetFreeFlightFOV(maxSpeed, maxAdd: 6f, sharpness: 6f);
+                    cam.SetFovMode(SimpleFollowCamera.FovMode.FreeFlight);
+                }
+            }
+        }
 
         // "movement input" (WASD/space/ctrl)
         bool hasMoveInput = input.sqrMagnitude > 0.0001f;

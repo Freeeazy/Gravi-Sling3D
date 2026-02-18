@@ -346,6 +346,35 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         rb.linearVelocity = tangent * launchSpeed;                                          // LAUNCH
 
+        var cam = SimpleFollowCamera.Instance;
+        if (cam)
+        {
+            float enterSpeed = SpeedHUD.Instance.GetCurrentSpeed(); // <-- this is currently being updated during orbit, see note below
+            float exitSpeed = launchSpeed; // reliable (you set rb.linearVelocity = tangent * launchSpeed)
+
+            float delta = Mathf.Max(0f, exitSpeed - enterSpeed);
+
+            // Tune this: “what delta should feel like a full-power kick?”
+            float maxDeltaForFullKick = 120f; // start here, adjust later
+            float t = Mathf.Clamp01(delta / maxDeltaForFullKick);
+
+            // Optional curve so small deltas still show a bit
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            float minKick = 4f;
+            float maxKick = 20f;
+            float kickAdd = Mathf.Lerp(minKick, maxKick, t);
+
+            // Hold drift FOV longer for bigger deltas (optional)
+            float holdFov = Mathf.Lerp(5f, 8f, t);
+            float holdTime = Mathf.Lerp(0.6f, 1.4f, t);
+
+            cam.PlaySlingshotKick(kickAdd: kickAdd, inTime: 0.07f, holdTime: 0.05f, outTime: 0.35f,
+                                  returnMode: SimpleFollowCamera.FovMode.DriftHold);
+
+            cam.SetDriftHold(fovAdd: holdFov, duration: holdTime);
+        }
+
         // Prevent pre-gravity from tugging us immediately after launch.
         if (preGravityZone) preGravityZone.DisablePostLaunch();
 

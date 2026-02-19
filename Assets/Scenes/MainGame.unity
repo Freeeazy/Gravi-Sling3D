@@ -2401,7 +2401,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.0003047543}
+  m_AnchoredPosition: {x: 0, y: 0.0003378794}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &105324100
@@ -6304,7 +6304,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 305733145}
-  - component: {fileID: 305733144}
   - component: {fileID: 305733146}
   m_Layer: 0
   m_Name: QuestNavigator
@@ -6313,35 +6312,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &305733144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 305733143}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 112cab8b19e81b143b821ca555990c1e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 1616803246}
-  cam: {fileID: 330585545}
-  planetRenderer: {fileID: 0}
-  questBeaconPrefab: {fileID: 522058233459429503, guid: a8f6f75c5bbe426468d06af262fa860a, type: 3}
-  globalSeed: 123456
-  pickRadius: 6000
-  minTargetDistance: 1500
-  pickAttempts: 6
-  planetCellSize: 1000
-  planetAvoidRadius: 220
-  planetSpawnChance: 0.3
-  beaconDepthFrac: 0.8
-  beaconMaxDistance: 800
-  armTriggerDistance: 900
-  questArrivedChildName: QuestArrived
-  requiredPlayerTag: 
-  logPicks: 1
 --- !u!4 &305733145
 Transform:
   m_ObjectHideFlags: 0
@@ -6373,13 +6343,10 @@ MonoBehaviour:
   cam: {fileID: 330585545}
   posManager: {fileID: 2048073271}
   proxyManager: {fileID: 53806277}
-  questBeaconPrefab: {fileID: 522058233459429503, guid: a8f6f75c5bbe426468d06af262fa860a, type: 3}
   globalSeed: 12345
   pickRadius: 8000
   minTargetDistance: 1500
   pickAttempts: 8
-  beaconDepthFrac: 0.8
-  beaconMaxDistance: 1000
   armTriggerDistance: 1100
   requiredPlayerTag: 
   logPicks: 1
@@ -6972,7 +6939,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 75
+  field of view: 80
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -20224,91 +20191,91 @@ MonoBehaviour:
   renderCamera: {fileID: 330585545}
   typeRenders:
   - name: L_BlueRock
-    material: {fileID: 2100000, guid: 542dd1bd06fa61a4bb2e87c8ba38b849, type: 2}
+    material: {fileID: 2100000, guid: d2b02721be384d243a1e3a0def1521df, type: 2}
     lod0Mesh: {fileID: -774025853847820937, guid: aee30169a7b5a5d49a754566887dfd3b, type: 3}
     lod1Mesh: {fileID: -4026668556318066001, guid: a5120b590771c8d499448905685dfe62, type: 3}
     lod2Mesh: {fileID: -9178212560276608217, guid: 176c0e292c30c5e4b932a8b612934615, type: 3}
     baseRadius: 1
   - name: M_BlueRock
-    material: {fileID: 2100000, guid: 542dd1bd06fa61a4bb2e87c8ba38b849, type: 2}
+    material: {fileID: 2100000, guid: d2b02721be384d243a1e3a0def1521df, type: 2}
     lod0Mesh: {fileID: 4179277973940732825, guid: 8a50d4a78671dec43bec2eddc63b4c2f, type: 3}
     lod1Mesh: {fileID: -6316366969256337693, guid: 846f47ba4fe791e44ac902aec0fcc4c5, type: 3}
     lod2Mesh: {fileID: 3261589817270813421, guid: 44e2902c8fd6fbf40b1d0ae106c8dc80, type: 3}
     baseRadius: 1
   - name: S_BlueRock
-    material: {fileID: 2100000, guid: 542dd1bd06fa61a4bb2e87c8ba38b849, type: 2}
+    material: {fileID: 2100000, guid: d2b02721be384d243a1e3a0def1521df, type: 2}
     lod0Mesh: {fileID: 8490984756935201455, guid: ef9983ae2c7903f48ac01227cdb01579, type: 3}
     lod1Mesh: {fileID: 5059251482782649461, guid: 322c4b72ddceaea4dadde0697adc02f9, type: 3}
     lod2Mesh: {fileID: 6776924334099852119, guid: 36bc9c508c16388408e89d9a74bb4f45, type: 3}
     baseRadius: 1
   - name: L_BrownRock
-    material: {fileID: 2100000, guid: 95c8128eb3bce464f98c6b610617e2cb, type: 2}
+    material: {fileID: 2100000, guid: 49fc33715a27b2a47ac86148e4e16808, type: 2}
     lod0Mesh: {fileID: 4543645846014623981, guid: eab5c6f7be0af574ab71d43b468b0ee7, type: 3}
     lod1Mesh: {fileID: 7976396269016314491, guid: f351a26535dfab047b7b28d84328c040, type: 3}
     lod2Mesh: {fileID: 9175478711362591777, guid: cab1077195f20cd4c8670b16c3b14215, type: 3}
     baseRadius: 1
   - name: M_BrownRock
-    material: {fileID: 2100000, guid: 95c8128eb3bce464f98c6b610617e2cb, type: 2}
+    material: {fileID: 2100000, guid: 49fc33715a27b2a47ac86148e4e16808, type: 2}
     lod0Mesh: {fileID: 2377391392699851877, guid: ecf4fc6b91b7f464a93d4edffa06cc73, type: 3}
     lod1Mesh: {fileID: -3144152289611362143, guid: d457a1ccdc55c71488ce6fee9625f96f, type: 3}
     lod2Mesh: {fileID: 6681085618261714678, guid: 9594d832efe6f324c85f0b104c0eda5d, type: 3}
     baseRadius: 1
   - name: S_BrownRock
-    material: {fileID: 2100000, guid: 95c8128eb3bce464f98c6b610617e2cb, type: 2}
+    material: {fileID: 2100000, guid: 49fc33715a27b2a47ac86148e4e16808, type: 2}
     lod0Mesh: {fileID: 2699877453419187061, guid: dfd3d3820cea4df4a9a12c291ffff29a, type: 3}
     lod1Mesh: {fileID: -6909477560494952862, guid: 5c34a03b454920242a0c4fcca0242ba7, type: 3}
     lod2Mesh: {fileID: -4361605751911745676, guid: ce59813f54a47fc45a07d380156e7fef, type: 3}
     baseRadius: 1
   - name: L_GrayRock
-    material: {fileID: 2100000, guid: e826a49226ad38943a26dffa946b0a9d, type: 2}
+    material: {fileID: 2100000, guid: dc642c38f2494504a9a6b957c559c7a7, type: 2}
     lod0Mesh: {fileID: -8082275258613420655, guid: 0abb815c0c3898749953e6649985f2a3, type: 3}
     lod1Mesh: {fileID: -3977950802843120712, guid: 7d90d467cb2214e45aa94dbb0a12d8fd, type: 3}
     lod2Mesh: {fileID: -2197129205727511004, guid: 8b973eec968e4274fb6ffbdffaedfb0c, type: 3}
     baseRadius: 1
   - name: M_GrayRock
-    material: {fileID: 2100000, guid: e826a49226ad38943a26dffa946b0a9d, type: 2}
+    material: {fileID: 2100000, guid: dc642c38f2494504a9a6b957c559c7a7, type: 2}
     lod0Mesh: {fileID: 6975415252068691527, guid: 6bc6a3e392c2054429ff5cb4e51277f2, type: 3}
     lod1Mesh: {fileID: -6311535828571334888, guid: 52b67d0e2d55799419014f83f1667c1f, type: 3}
     lod2Mesh: {fileID: 289908712202008992, guid: 51fcc394ad9672b4fa40df2501cb343a, type: 3}
     baseRadius: 1
   - name: S_GrayRock
-    material: {fileID: 2100000, guid: e826a49226ad38943a26dffa946b0a9d, type: 2}
+    material: {fileID: 2100000, guid: dc642c38f2494504a9a6b957c559c7a7, type: 2}
     lod0Mesh: {fileID: 2875774152753549942, guid: aa0b685f0cf38d84b9ff1632ee9fa6f3, type: 3}
     lod1Mesh: {fileID: 2064653708943956137, guid: ce2c311d71858ac48982aeb3687cbae6, type: 3}
     lod2Mesh: {fileID: -4523105479852274335, guid: 06ad2b802a9c144419f07558ee2f398d, type: 3}
     baseRadius: 1
   - name: L_GreenRock
-    material: {fileID: 2100000, guid: 767cfff65eed7fc428fe61f1dfd4afbf, type: 2}
+    material: {fileID: 2100000, guid: 930fe4852093b434d88415f92ec27b2f, type: 2}
     lod0Mesh: {fileID: -8165688660058112801, guid: 65bd3c94fa2654c468364c4c16613b51, type: 3}
     lod1Mesh: {fileID: 5420030783254424970, guid: e2b2be868e6202a42a6ec51a83b02359, type: 3}
     lod2Mesh: {fileID: -4294320402425114688, guid: 5a71791a992c81844b2d2bf22e71dc72, type: 3}
     baseRadius: 1
   - name: M_GreenRock
-    material: {fileID: 2100000, guid: 767cfff65eed7fc428fe61f1dfd4afbf, type: 2}
+    material: {fileID: 2100000, guid: 930fe4852093b434d88415f92ec27b2f, type: 2}
     lod0Mesh: {fileID: -9012910776138754643, guid: d4e8db1852ee95340b90e7f53c2db768, type: 3}
     lod1Mesh: {fileID: -1753119937371807440, guid: b704adae438a18948b996cf14f5ab7e3, type: 3}
     lod2Mesh: {fileID: -7439793090660208588, guid: 14e11a9b84e9a664ebae188ff51b36df, type: 3}
     baseRadius: 1
   - name: S_GreenRock
-    material: {fileID: 2100000, guid: 767cfff65eed7fc428fe61f1dfd4afbf, type: 2}
+    material: {fileID: 2100000, guid: 930fe4852093b434d88415f92ec27b2f, type: 2}
     lod0Mesh: {fileID: -3437816315349805161, guid: d146c9179acf9044a909455b900dc477, type: 3}
     lod1Mesh: {fileID: -1639238764339013194, guid: 9c34fc9205bc4a648903e55ed208692b, type: 3}
     lod2Mesh: {fileID: -6487828443210188127, guid: a9e3a90e85d1c79418b9744eed6e525e, type: 3}
     baseRadius: 1
   - name: L_OrangeRock
-    material: {fileID: 2100000, guid: 2ea044d32d163614e87499a05e97fb07, type: 2}
+    material: {fileID: 2100000, guid: f650152ad945d7b4980e7c88a75a8b46, type: 2}
     lod0Mesh: {fileID: 6283558402235945622, guid: 1f0bc2c6983158845838bfc3bef8032a, type: 3}
     lod1Mesh: {fileID: 1665281112332744325, guid: c7808beba8a073343b4aa6dc43fcaf76, type: 3}
     lod2Mesh: {fileID: -7992995145585369420, guid: 2591359ae84197c4fb0403bed109285d, type: 3}
     baseRadius: 1
   - name: M_OrangeRock
-    material: {fileID: 2100000, guid: 2ea044d32d163614e87499a05e97fb07, type: 2}
+    material: {fileID: 2100000, guid: f650152ad945d7b4980e7c88a75a8b46, type: 2}
     lod0Mesh: {fileID: -4469724380924797177, guid: ce2cc08ade80f9249aef14bfd1069a96, type: 3}
     lod1Mesh: {fileID: -6805248471260047665, guid: 2d7658ffa9f45f04c8c513e318639ff4, type: 3}
     lod2Mesh: {fileID: 6366408436468995819, guid: 227d275318842e74bbb2cb9cdff9b385, type: 3}
     baseRadius: 1
   - name: S_OrangeRock
-    material: {fileID: 2100000, guid: 2ea044d32d163614e87499a05e97fb07, type: 2}
+    material: {fileID: 2100000, guid: f650152ad945d7b4980e7c88a75a8b46, type: 2}
     lod0Mesh: {fileID: -57849929999402630, guid: 48663e31090ece447abc3906aa97700b, type: 3}
     lod1Mesh: {fileID: -4105537433108580021, guid: 6ca4df58eabf6324194fb271851bd832, type: 3}
     lod2Mesh: {fileID: 6797020291627772500, guid: d43bc23bf1ec7334faabb49e09c172e7, type: 3}
@@ -21287,6 +21254,179 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 912244514}
+  m_CullTransparentMesh: 1
+--- !u!1 &917633660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 917633661}
+  m_Layer: 5
+  m_Name: QuestBeacon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &917633661
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 917633660}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1581322205}
+  m_Father: {fileID: 1876932849}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &929206763
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 929206764}
+  - component: {fileID: 929206766}
+  - component: {fileID: 929206765}
+  m_Layer: 5
+  m_Name: DistanceText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &929206764
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929206763}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1581322205}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0}
+  m_AnchorMax: {x: 0.5, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 200, y: 50}
+  m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &929206765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929206763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: 0 Units
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: b15510d12b50f3d458c252092f929b4c, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 0826da7759963454ea85b2276f3adfd0, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 36
+  m_fontSizeBase: 36
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_characterHorizontalScale: 1
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 0
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &929206766
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 929206763}
   m_CullTransparentMesh: 1
 --- !u!1 &931236493
 GameObject:
@@ -25294,10 +25434,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 330585545}
-  worldBeacon: {fileID: 0}
+  navigator: {fileID: 305733146}
   arrowImage: {fileID: 1158176811}
-  beaconName: StationQuestBeacon
-  findInterval: 0.25
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -33346,6 +33484,101 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!1 &1581322204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1581322205}
+  - component: {fileID: 1581322207}
+  - component: {fileID: 1581322206}
+  - component: {fileID: 1581322208}
+  m_Layer: 5
+  m_Name: Beacon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1581322205
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581322204}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 929206764}
+  m_Father: {fileID: 917633661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1581322206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581322204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: a15c3fe6ff7cb9e41afd490efc06c928, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1581322207
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581322204}
+  m_CullTransparentMesh: 1
+--- !u!114 &1581322208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581322204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23c0be2a3caf4ea4e8a4eb1e37271943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 330585545}
+  navigator: {fileID: 305733146}
+  beaconImage: {fileID: 1581322206}
+  distanceText: {fileID: 929206765}
+  ellipseFrac: {x: 0.42, y: 0.3}
+  ellipsePaddingPx: {x: 40, y: 40}
 --- !u!1 &1584471102
 GameObject:
   m_ObjectHideFlags: 0
@@ -39201,8 +39434,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 1.0000012
-  m_Size: 0.65298986
+  m_Value: 1.0000007
+  m_Size: 0.65366447
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -39788,7 +40021,7 @@ GameObject:
   - component: {fileID: 1876932851}
   - component: {fileID: 1876932850}
   m_Layer: 5
-  m_Name: ScreenSpaceCanvas
+  m_Name: ScreenSpaceCanvas-UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -39807,6 +40040,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 720178646}
+  - {fileID: 917633661}
   - {fileID: 204939324}
   - {fileID: 1073292223}
   - {fileID: 20791186}

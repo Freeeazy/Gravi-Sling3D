@@ -14,9 +14,6 @@ public class StationQuestNavigator : MonoBehaviour
     [Tooltip("Used to find the target station proxy to highlight + arm trigger.")]
     public StationProxyManager proxyManager;
 
-    [Tooltip("World-space beacon prefab (quad/sphere) - ideally billboards to camera.")]
-    public GameObject questBeaconPrefab;
-
     [Header("Quest Selection")]
     public int globalSeed = 12345;
 
@@ -29,10 +26,6 @@ public class StationQuestNavigator : MonoBehaviour
     [Tooltip("Max attempts to pick a new target (avoid same coord).")]
     public int pickAttempts = 8;
 
-    [Header("Beacon Placement (inside far clip)")]
-    [Range(0.1f, 0.95f)] public float beaconDepthFrac = 0.8f;
-    public float beaconMaxDistance = 800f;
-
     [Header("Arrival / Trigger")]
     [Tooltip("When within this distance, hide beacon and arm target orbit trigger (if proxy exists).")]
     public float armTriggerDistance = 900f;
@@ -43,8 +36,6 @@ public class StationQuestNavigator : MonoBehaviour
     [Header("Debug")]
     public bool logPicks = true;
 
-    private GameObject _beacon;
-
     private bool _hasTarget;
     private StationPosManager.StationWorldInfo _target;
 
@@ -52,6 +43,9 @@ public class StationQuestNavigator : MonoBehaviour
     private int _questIndex = 0;
 
     private readonly List<StationPosManager.StationWorldInfo> _tmpStations = new(256);
+    public bool HasTarget => _hasTarget;
+    public Vector3 TargetWorldPos => _target.worldPos;
+    public Vector3Int TargetCoord => _target.coord;
 
     private void Awake()
     {
@@ -67,8 +61,6 @@ public class StationQuestNavigator : MonoBehaviour
     {
         // Wait at least one frame so other Start() methods run
         yield return null;
-
-        EnsureBeacon();
 
         // Wait until StationPosManager has generated something usable
         // (this also handles cases where generation happens a frame later)
@@ -98,53 +90,13 @@ public class StationQuestNavigator : MonoBehaviour
     {
         if (!_hasTarget || !player || !cam || !posManager) return;
 
-        UpdateBeacon();
-
         float dist = Vector3.Distance(player.position, _target.worldPos);
 
+        // Only arm triggers when close enough.
         if (dist <= armTriggerDistance)
         {
-            if (_beacon && _beacon.activeSelf) _beacon.SetActive(false);
             TryArmArrivalTriggerOnTargetProxy();
         }
-        else
-        {
-            if (_beacon && !_beacon.activeSelf) _beacon.SetActive(true);
-        }
-    }
-
-    private void EnsureBeacon()
-    {
-        if (_beacon) return;
-
-        if (!questBeaconPrefab)
-        {
-            Debug.LogError("[StationQuestNavigator] questBeaconPrefab not assigned.");
-            return;
-        }
-
-        _beacon = Instantiate(questBeaconPrefab);
-        _beacon.name = "StationQuestBeacon";
-        _beacon.SetActive(true);
-    }
-
-    private void UpdateBeacon()
-    {
-        if (!_beacon) return;
-
-        Vector3 from = player.position;
-        Vector3 to = _target.worldPos;
-
-        Vector3 dir = (to - from);
-        if (dir.sqrMagnitude < 0.0001f)
-            dir = player.forward;
-
-        dir.Normalize();
-
-        float far = cam.farClipPlane;
-        float d = Mathf.Min(far * beaconDepthFrac, beaconMaxDistance);
-
-        _beacon.transform.position = from + dir * d;
     }
 
     public void PickNewTarget()
@@ -154,7 +106,6 @@ public class StationQuestNavigator : MonoBehaviour
         if (!posManager)
         {
             _hasTarget = false;
-            if (_beacon) _beacon.SetActive(false);
             return;
         }
 
@@ -166,7 +117,6 @@ public class StationQuestNavigator : MonoBehaviour
         {
             _hasTarget = false;
             if (logPicks) Debug.Log("[StationQuestNavigator] No active stations found (yet).");
-            if (_beacon) _beacon.SetActive(false);
             ClearAllProxyHighlights();
             return;
         }
@@ -199,7 +149,7 @@ public class StationQuestNavigator : MonoBehaviour
             break;
         }
 
-        // Fallback: pick first valid by scan (still respects constraints)
+        // Fallback: pick first valid by scan
         if (!found)
         {
             for (int i = 0; i < _tmpStations.Count; i++)
@@ -219,7 +169,6 @@ public class StationQuestNavigator : MonoBehaviour
         {
             _hasTarget = false;
             if (logPicks) Debug.Log("[StationQuestNavigator] No stations met distance constraints. Try larger pickRadius or smaller minTargetDistance.");
-            if (_beacon) _beacon.SetActive(false);
             ClearAllProxyHighlights();
             return;
         }
@@ -228,13 +177,11 @@ public class StationQuestNavigator : MonoBehaviour
         _hasTarget = true;
         _lastTargetCoord = chosen.coord;
 
-        if (_beacon) _beacon.SetActive(true);
-
         if (logPicks)
             Debug.Log($"[StationQuestNavigator] New target station coord={_target.coord} pos={_target.worldPos}");
 
         ApplyTargetHighlightOnly(_target.coord);
-        DisarmOldTargetTriggers(); // optional cleanup hook
+        DisarmOldTargetTriggers();
     }
 
     private void ApplyTargetHighlightOnly(Vector3Int targetCoord)
@@ -290,8 +237,6 @@ public class StationQuestNavigator : MonoBehaviour
 
         if (logPicks)
             Debug.Log($"[StationQuestNavigator] Arrived at station coord={coord}. Picking new target...");
-
-        if (_beacon) _beacon.SetActive(false);
 
         PickNewTarget();
     }

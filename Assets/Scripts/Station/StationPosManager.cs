@@ -108,7 +108,7 @@ public class StationPosManager : MonoBehaviour
         if (logChunkCreates)
         {
             string s = data.hasStation ? $"STATION local={data.localPosition}" : "no station";
-            Debug.Log($"[StationPosManager] Created chunk {coord} origin={origin} -> {s}");
+            //Debug.Log($"[StationPosManager] Created chunk {coord} origin={origin} -> {s}");
         }
 
         OnChunkCreated?.Invoke(coord, data);
@@ -130,7 +130,7 @@ public class StationPosManager : MonoBehaviour
         if (logChunkCreates)
         {
             string s = data.hasStation ? $"STATION local={data.localPosition}" : "no station";
-            Debug.Log($"[StationPosManager] Refilled data for coord {coord} origin={origin} -> {s}");
+            //Debug.Log($"[StationPosManager] Refilled data for coord {coord} origin={origin} -> {s}");
         }
 
         OnChunkCreated?.Invoke(coord, data);

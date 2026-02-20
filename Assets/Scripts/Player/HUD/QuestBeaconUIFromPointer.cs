@@ -19,6 +19,9 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
     public Vector2 ellipseFrac = new Vector2(0.42f, 0.30f);
     public Vector2 ellipsePaddingPx = new Vector2(40f, 40f);
 
+    public float maxDistance = 1000f;
+    public bool tooClose = false;
+
     private RectTransform _rt;
     private RectTransform _canvasRt;
 
@@ -71,7 +74,7 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
         bool insideEllipse = (nx * nx + ny * ny) <= 1f;
 
         // INVERSE OF POINTER
-        if (insideEllipse)
+        if (insideEllipse && !tooClose)
         {
             SetVisible(true);
 
@@ -82,7 +85,13 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
             if (distanceText)
             {
                 float dist = Vector3.Distance(cam.transform.position, targetPos);
-                distanceText.text = dist >= 1000f ? $"{dist * 0.001f:0.0} Units" : $"{dist:0} m";
+                distanceText.text = $"{dist:0000} Units";
+
+                if (dist < maxDistance)
+                {
+                    SetVisible(false);
+                    tooClose = true;
+                }
             }
         }
         else
@@ -95,5 +104,10 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
     {
         if (beaconImage) beaconImage.enabled = on;
         if (distanceText) distanceText.enabled = on;
+
+        if (!on)
+        {
+            tooClose = false;
+        }
     }
 }

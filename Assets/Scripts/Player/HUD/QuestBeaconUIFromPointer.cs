@@ -22,6 +22,10 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
     public float maxDistance = 1000f;
     public bool tooClose = false;
 
+    [Header("Scaling")]
+    public float growMult = 2.0f;
+    public float growDistance = 2000f;
+
     private RectTransform _rt;
     private RectTransform _canvasRt;
 
@@ -87,6 +91,29 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
                 float dist = Vector3.Distance(cam.transform.position, targetPos);
                 distanceText.text = $"{dist:0000} Units";
 
+                // ---- SCALE LOGIC ----
+                if (dist <= growDistance && dist > maxDistance)
+                {
+                    // Normalize between growDistance (0) -> maxDistance (1)
+                    float normalized = Mathf.InverseLerp(growDistance, maxDistance, dist);
+
+                    // Invert so closer = biggerwwww
+                    //normalized = 1f - normalized;
+
+                    // Smooth curve
+                    float t = Mathf.SmoothStep(0f, 1f, normalized);
+
+                    // Lerp scale
+                    float scale = Mathf.Lerp(1f, growMult, t);
+
+                    _rt.localScale = Vector3.one * scale;
+                }
+                else
+                {
+                    _rt.localScale = Vector3.one;
+                }
+
+                // Turn off if too close
                 if (dist < maxDistance)
                 {
                     SetVisible(false);

@@ -41,6 +41,19 @@ public class SimpleMove : MonoBehaviour
     public float manualRollSpeed = 120f; // degrees per second
     public float _manualRoll;           // accumulated roll angle
 
+    [Header("Auto Stabilization (Roll)")]
+    public bool autoStabilizeRoll = true;          // master toggle
+    public bool isAutoStabilizingRoll = false;     // <-- public for other scripts to reference
+
+    [Tooltip("Seconds after letting go of Q/E before auto-stabilization starts.")]
+    public float autoStabilizeDelay = 0.75f;
+
+    [Tooltip("How fast we correct back toward 0 roll (degrees per second).")]
+    public float autoStabilizeDegPerSec = 180f;
+
+    [Tooltip("When abs(roll) is below this, snap to 0 and stop updating.")]
+    public float autoStabilizeEpsilon = 0.15f;
+
     [Header("Style / Flair")]
     [Tooltip("Roll/bank amount while steering (degrees). This does NOT change direction; it's just style.")]
     public float bankDegrees = 20f;
@@ -90,6 +103,15 @@ public class SimpleMove : MonoBehaviour
     [Tooltip("Material when Cruise Control is OFF.")]
     public Material cruiseOffMat;
 
+    [Header("Auto Stabilize UI")]
+    public Image AutoStabilizeBkRnd;
+
+    [Tooltip("Material when Auto Stabilize is ENABLED.")]
+    public Material autoStabilizeOnMat;
+
+    [Tooltip("Material when Auto Stabilize is DISABLED.")]
+    public Material autoStabilizeOffMat;
+
     [Header("Debug")]
     public bool debugVelocity = false;
 
@@ -113,6 +135,7 @@ public class SimpleMove : MonoBehaviour
     private bool _lastCruiseState = false;
     private bool _wasBoosting;
 
+    private float _rollIdleTimer = 0f;
     private void Awake()
     {
         if (!rb)
@@ -129,6 +152,7 @@ public class SimpleMove : MonoBehaviour
             cameraTransform = Camera.main.transform;
 
         UpdateCruiseUI(force: true);
+        UpdateAutoStabilizeUI(force: true);
     }
     private void OnEnable()
     {
@@ -140,6 +164,8 @@ public class SimpleMove : MonoBehaviour
     {
         cruiseControl = false;
         UpdateCruiseUI(force: true);
+        UpdateAutoStabilizeUI(force: true);
+        _rollIdleTimer = 0f;
     }
     private void Update()
     {
@@ -232,8 +258,51 @@ public class SimpleMove : MonoBehaviour
             else boostCharge = 0f;
         }
 
-        // accumulate roll over time (so it "sticks" like space roll)
-        _manualRoll += roll * manualRollSpeed * Time.fixedDeltaTime;
+        float dt = Time.fixedDeltaTime;
+
+        // roll input is -1, 0, or +1 based on Q/E
+        bool hasRollInput = Mathf.Abs(roll) > 0.0001f;
+
+        if (hasRollInput)
+        {
+            // Manual roll overrides everything
+            isAutoStabilizingRoll = false;
+            _rollIdleTimer = 0f;
+
+            _manualRoll += roll * manualRollSpeed * dt;
+            _manualRoll = Mathf.Repeat(_manualRoll, 360f);
+        }
+        else
+        {
+            // No roll input
+            if (autoStabilizeRoll && Mathf.Abs(_manualRoll) > autoStabilizeEpsilon)
+            {
+                _rollIdleTimer += dt;
+
+                if (_rollIdleTimer >= autoStabilizeDelay)
+                {
+                    isAutoStabilizingRoll = true;
+
+                    // Drive roll back to zero
+                    _manualRoll = Mathf.MoveTowards(_manualRoll, 0f, autoStabilizeDegPerSec * dt);
+                    _manualRoll = Mathf.Repeat(_manualRoll, 360f);
+
+                    // Done? snap and stop updating
+                    if (Mathf.Abs(_manualRoll) <= autoStabilizeEpsilon)
+                    {
+                        _manualRoll = 0f;
+                        isAutoStabilizingRoll = false;
+                    }
+                }
+            }
+            else
+            {
+                // Already basically stable (or disabled)
+                _manualRoll = (Mathf.Abs(_manualRoll) <= autoStabilizeEpsilon) ? 0f : _manualRoll;
+                isAutoStabilizingRoll = false;
+                _rollIdleTimer = 0f;
+            }
+        }
 
         // --- BUILD CAMERA-RELATIVE MOVE DIR ---
         Vector3 moveDir = Vector3.zero;
@@ -298,6 +367,7 @@ public class SimpleMove : MonoBehaviour
                 cruiseControl = false;
         }
         UpdateCruiseUI();
+        UpdateAutoStabilizeUI();
 
         // --- CRUISE OVERRIDE ---
         // If cruise is active, force intent even if player isn't holding movement keys.
@@ -340,8 +410,6 @@ public class SimpleMove : MonoBehaviour
         // --- MOVE (INERTIA) ---
         Vector3 currentVel = rb.linearVelocity;
         Vector3 newVel = currentVel;
-
-        float dt = Time.fixedDeltaTime;
 
         if (hasInput && moveDir.sqrMagnitude > 0.0001f)
         {
@@ -485,6 +553,22 @@ public class SimpleMove : MonoBehaviour
             CruiseControlBkRnd.material = cruiseOnMat;
         else if (!cruiseControl && cruiseOffMat != null)
             CruiseControlBkRnd.material = cruiseOffMat;
+    }
+    private bool _lastAutoStabilizeState = false;
+
+    private void UpdateAutoStabilizeUI(bool force = false)
+    {
+        if (AutoStabilizeBkRnd == null) return;
+
+        bool state = isAutoStabilizingRoll;
+
+        if (!force && state == _lastAutoStabilizeState) return;
+        _lastAutoStabilizeState = state;
+
+        if (state && autoStabilizeOnMat != null)
+            AutoStabilizeBkRnd.material = autoStabilizeOnMat;
+        else if (!state && autoStabilizeOffMat != null)
+            AutoStabilizeBkRnd.material = autoStabilizeOffMat;
     }
     void OnCollisionStay(Collision c)
     {

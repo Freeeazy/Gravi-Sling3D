@@ -164,6 +164,7 @@ public class SimpleMove : MonoBehaviour
     {
         cruiseControl = false;
         UpdateCruiseUI(force: true);
+        isAutoStabilizingRoll = false;
         UpdateAutoStabilizeUI(force: true);
         _rollIdleTimer = 0f;
     }

@@ -34,7 +34,7 @@ public class StationProxy : MonoBehaviour
 
         // --- radii ---
         float orbitR = Mathf.Max(0.1f, data.orbitRadius); // or data.orbitRadius if you add it
-        float preR = orbitR * 1.5f;                       // or data.preGravityRadius
+        float preR = orbitR * 1.8f;                       // or data.preGravityRadius
 
         if (orbitTrigger)
         {

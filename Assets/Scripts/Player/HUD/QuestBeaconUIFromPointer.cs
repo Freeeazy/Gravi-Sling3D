@@ -89,7 +89,7 @@ public class QuestBeaconUIFromPointer : MonoBehaviour
             if (distanceText)
             {
                 float dist = Vector3.Distance(cam.transform.position, targetPos);
-                distanceText.text = $"{dist:0000} Units";
+                distanceText.text = $"{dist*2:0000} Units";
 
                 // ---- SCALE LOGIC ----
                 if (dist <= growDistance && dist > maxDistance)

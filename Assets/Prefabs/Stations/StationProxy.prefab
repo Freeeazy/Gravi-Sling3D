@@ -353,6 +353,14 @@ MonoBehaviour:
   preGravityTrigger: {fileID: 3389974876249596906}
   preGravity: {fileID: 4967203091336313616}
   questHighlight: {fileID: 3329196204730148865}
+  bubble: {fileID: 1858667739632006358}
+  bubbleRenderer: {fileID: 3555375457191696723}
+  bubbleMaterials:
+  - {fileID: 2100000, guid: 418142b328b7e5341879b011a8a9b924, type: 2}
+  - {fileID: 2100000, guid: 304cf8b2101c2c24cb9fd9c30a444c8e, type: 2}
+  - {fileID: 2100000, guid: 050e0ac6f939fb642b4eb08c92dc9ac3, type: 2}
+  - {fileID: 2100000, guid: 82ebd3826ff19fa41b7b6e3615895d6f, type: 2}
+  - {fileID: 2100000, guid: bfd2a80adb2407b49b6fa2f76ea1be59, type: 2}
 --- !u!1 &5975128302669208982
 GameObject:
   m_ObjectHideFlags: 0

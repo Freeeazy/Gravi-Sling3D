@@ -14,6 +14,11 @@ public class StationProxy : MonoBehaviour
     [Tooltip("White sphere overlay (or any highlight GO). Will be toggled for the active quest target.")]
     public GameObject questHighlight;
 
+    [Header("Visuals")]
+    public GameObject bubble;
+    public Renderer bubbleRenderer;
+    public Material[] bubbleMaterials;
+
     public Vector3Int Coord { get; private set; }
 
     private void Reset()
@@ -54,6 +59,13 @@ public class StationProxy : MonoBehaviour
             slingshot.orbitRadius = orbitR; // IMPORTANT: your script uses this internally
             slingshot.preGravityZone = preGravity;
             // slingshot.Bubble can be optional / or assigned in prefab
+        }
+
+        // --- Random Bubble Material (shared for batching) ---
+        if (bubbleRenderer && bubbleMaterials != null && bubbleMaterials.Length > 0)
+        {
+            int idx = Random.Range(0, bubbleMaterials.Length);
+            bubbleRenderer.sharedMaterial = bubbleMaterials[idx];
         }
 
         if (preGravity)

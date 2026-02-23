@@ -13,8 +13,8 @@ public class NPCManager : MonoBehaviour
     public TMP_Text populationCountText;
 
     [Header("UI Pool (size 10)")]
-    [Tooltip("Assign 10 TMP_Text references (list items). We'll enable/disable or clear them.")]
-    public TMP_Text[] npcNameTexts = new TMP_Text[10];
+    [Tooltip("Assign 10 NPCUILink references (rows). We'll enable/disable them.")]
+    public NPCUILink[] npcRows = new NPCUILink[10];
 
     [Header("Population Settings")]
     public int minPopulation = 2;
@@ -30,49 +30,42 @@ public class NPCManager : MonoBehaviour
 
     public void SetCurrentStationByWorldPos(Vector3 stationWorldPos)
     {
-        if (!posManager || npcNameTexts == null || npcNameTexts.Length == 0) return;
+        if (!posManager || npcRows == null || npcRows.Length == 0) return;
 
         Vector3Int coord = posManager.WorldToChunkCoord(stationWorldPos);
-
         List<NPCData> npcs = GetOrCreatePopulation(coord);
 
-        // Update population count text
         if (populationCountText)
-        {
             populationCountText.text = $"{npcs.Count}";
-        }
 
-        // Fill pool
-        int poolCount = npcNameTexts.Length;
+        int poolCount = npcRows.Length;
         int showCount = Mathf.Min(poolCount, npcs.Count);
 
         for (int i = 0; i < poolCount; i++)
         {
-            TMP_Text t = npcNameTexts[i];
-            if (!t) continue;
+            var row = npcRows[i];
+            if (!row) continue;
 
             bool on = i < showCount;
 
-            // Either disable the whole item or just blank text — your call.
-            // If your list item is just the TMP_Text GO, this is fine.
-            t.gameObject.SetActive(on);
+            row.SetRowActive(on);
 
             if (on)
-                t.text = npcs[i].displayName;
-            else
-                t.text = "";
+                row.Bind(npcs[i]);
         }
     }
 
     public void ClearStation()
     {
-        if (npcNameTexts == null) return;
+        if (npcRows == null) return;
 
-        for (int i = 0; i < npcNameTexts.Length; i++)
+        if (populationCountText)
+            populationCountText.text = "0";
+
+        for (int i = 0; i < npcRows.Length; i++)
         {
-            if (!npcNameTexts[i]) continue;
-            npcNameTexts[i].text = "";
-            npcNameTexts[i].gameObject.SetActive(false);
+            if (!npcRows[i]) continue;
+            npcRows[i].SetRowActive(false);
         }
     }
 
@@ -82,8 +75,8 @@ public class NPCManager : MonoBehaviour
             return list;
 
         int seed = posManager ? posManager.globalSeed : 0;
-
         list = NPCUtil.GeneratePopulation(coord, seed, minPopulation, maxPopulation);
+
         cache[coord] = list;
         return list;
     }

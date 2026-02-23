@@ -79,4 +79,68 @@ public static class NPCUtil
 
         return list;
     }
+
+    public struct NPCTag
+    {
+        public string label;
+        public Color color;
+
+        public NPCTag(string label, Color color)
+        {
+            this.label = label;
+            this.color = color;
+        }
+    }
+
+    // Expand this list whenever.
+    static readonly NPCTag[] tagPool =
+    {
+        new NPCTag("Trader",    new Color32( 80, 180, 255, 255)),
+        new NPCTag("Veteran",   new Color32(255, 175,  80, 255)),
+        new NPCTag("Shady",     new Color32(190,  80, 255, 255)),
+        new NPCTag("Friendly",  new Color32( 90, 220, 140, 255)),
+        new NPCTag("Mechanic",  new Color32(170, 170, 170, 255)),
+        new NPCTag("Courier",   new Color32(255, 110, 150, 255)),
+        new NPCTag("Scholar",   new Color32(255, 230, 100, 255)),
+        new NPCTag("Rookie",    new Color32(120, 255, 200, 255)),
+        new NPCTag("Bounty",    new Color32(255,  90,  90, 255)),
+        new NPCTag("Pilot",     new Color32(120, 160, 255, 255)),
+        new NPCTag("Scientist", new Color32(100, 220, 255, 255)),
+    };
+
+    /// <summary>
+    /// Always returns 2–4 distinct tags, deterministic per npcId.
+    /// </summary>
+    public static NPCTag[] GenerateTags(int npcId, int min = 2, int max = 4)
+    {
+        if (min < 0) min = 0;
+        if (max < min) max = min;
+        max = Mathf.Min(max, 4);
+
+        var rng = new System.Random(npcId ^ 0x5F3759DF);
+
+        int count = rng.Next(min, max + 1);
+        count = Mathf.Clamp(count, 0, 4);
+
+        // Pick distinct tags
+        var chosen = new NPCTag[count];
+        var used = new HashSet<int>();
+
+        for (int i = 0; i < count; i++)
+        {
+            int tries = 0;
+            int idx;
+            do
+            {
+                idx = rng.Next(0, tagPool.Length);
+                tries++;
+            }
+            while (used.Contains(idx) && tries < 20);
+
+            used.Add(idx);
+            chosen[i] = tagPool[idx];
+        }
+
+        return chosen;
+    }
 }

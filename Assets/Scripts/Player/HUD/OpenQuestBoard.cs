@@ -6,6 +6,9 @@ public class OpenQuestBoard : MonoBehaviour
     public SimpleMove move;                 // assign in inspector
     public Transform questBoardRoot;       // assign in inspector (the thing you want to toggle)
 
+    [Header("UI hooks")]
+    public NPCDropdownMover dropdownMover;
+
     [Header("Input")]
     public KeyCode toggleKey = KeyCode.F;
 
@@ -45,9 +48,19 @@ public class OpenQuestBoard : MonoBehaviour
 
         if (Input.GetKeyDown(toggleKey))
         {
+            bool wasOpen = isOpen;
+
             isOpen = !isOpen;
             targetX = isOpen ? openXAngle : closedXAngle;
             UIBlock.IsUIOpen = isOpen;
+
+            // If we just CLOSED, reset the dropdown panel
+            if (wasOpen && !isOpen)
+            {
+                dropdownMover?.ResetDropdown();
+                // or if you later add Instance:
+                // NPCDropdownMover.Instance?.ResetDropdown();
+            }
         }
 
         // Smooth rotate toward target

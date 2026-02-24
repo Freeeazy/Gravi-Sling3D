@@ -8,6 +8,7 @@ public class NPCManager : MonoBehaviour
 
     [Header("References")]
     public StationPosManager posManager;     // provides WorldToChunkCoord + globalSeed
+    public NPCQuestManager questManager;
 
     [Header("UI")]
     public TMP_Text populationCountText;
@@ -53,6 +54,8 @@ public class NPCManager : MonoBehaviour
             if (on)
                 row.Bind(npcs[i]);
         }
+
+        questManager?.RefreshOffersForStation(stationWorldPos);
     }
 
     public void ClearStation()

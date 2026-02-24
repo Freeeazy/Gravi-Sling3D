@@ -192,4 +192,38 @@ public static class StationRuntimeGenerator
 
         return new Quaternion(x, y, z, w);
     }
+    public static bool TryGetStationPose_NoAlloc(
+    Settings s,
+    Vector3 chunkWorldOrigin,
+    Vector3Int coord,
+    int globalSeed,
+    out Vector3 worldPos,
+    out Quaternion worldRot)
+    {
+        worldPos = default;
+        worldRot = default;
+
+        if (s == null) return false;
+
+        // EXACT same rule as FillExistingChunk
+        bool has = IsStationAnchor(s, globalSeed, coord);
+        if (!has) return false;
+
+        float cs = Mathf.Max(1f, s.chunkSize);
+
+        int seed = HashSeed(globalSeed, coord);
+        var rng = new System.Random(seed);
+
+        float pad = Mathf.Clamp(s.borderPadding, 0f, cs * 0.49f);
+
+        float x = Lerp((float)rng.NextDouble(), pad, cs - pad);
+        float y = Lerp((float)rng.NextDouble(), pad, cs - pad);
+        float z = Lerp((float)rng.NextDouble(), pad, cs - pad);
+
+        Vector3 localPos = new Vector3(x, y, z);
+        worldPos = chunkWorldOrigin + localPos;
+        worldRot = RandomRotation(rng);
+
+        return true;
+    }
 }

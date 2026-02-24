@@ -595,6 +595,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  questManager: {fileID: 0}
+  distanceText: {fileID: 0}
   tagPaddingX: 20
   tagMinWidth: 40
   tagMaxWidth: 220

@@ -5,6 +5,9 @@ public class NPCDropdownMover : MonoBehaviour
 {
     public static NPCDropdownMover Instance { get; private set; }
 
+    [Header("Dropdown UI")]
+    public NPCQuestDropdownUI dropdownUI;
+
     [Header("Wiring")]
     [Tooltip("Assign the same 10 rows the NPCManager uses (or fewer if you want).")]
     public NPCUILink[] rows;
@@ -24,7 +27,6 @@ public class NPCDropdownMover : MonoBehaviour
     private int _currentRowIndex = -1;
     private Transform _originalParent;
     private int _originalSiblingIndex;
-
     private void Awake()
     {
         if (dropdownPanel)
@@ -103,7 +105,11 @@ public class NPCDropdownMover : MonoBehaviour
 
         dropdownPanel.gameObject.SetActive(true);
 
-        Debug.Log($"[NPC CLICK] rowIndex={rowIndex} | rowName={rows[rowIndex]?.name} | dropSibling={dropdownPanel.GetSiblingIndex()}");
+        // IMPORTANT: tell dropdown which NPC is selected
+        int npcId = rows[rowIndex].BoundNpcId;   // requires BoundNpcId in NPCUILink
+        dropdownUI?.ShowForNpc(npcId);
+
+        //Debug.Log($"[NPC CLICK] rowIndex={rowIndex} | rowName={rows[rowIndex]?.name} | dropSibling={dropdownPanel.GetSiblingIndex()}");
 
         ForceLayoutRefresh();
     }
@@ -127,6 +133,8 @@ public class NPCDropdownMover : MonoBehaviour
             dropdownPanel.SetParent(_originalParent, worldPositionStays: false);
             dropdownPanel.SetSiblingIndex(_originalSiblingIndex);
         }
+
+        dropdownUI?.ResetUI();
 
         ForceLayoutRefresh();
     }

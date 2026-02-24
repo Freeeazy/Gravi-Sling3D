@@ -274,6 +274,31 @@ public class StationPosManager : MonoBehaviour
             });
         }
     }
+    public bool TryGetStationWorldPose(Vector3Int coord, out Vector3 worldPos, out Quaternion worldRot)
+    {
+        worldPos = default;
+        worldRot = default;
+
+        // If it's loaded, use real data.
+        if (_chunks.TryGetValue(coord, out var data) && data && data.hasStation)
+        {
+            Vector3 origin = ChunkCoordToWorldOrigin(coord);
+            worldPos = data.WorldPosition(origin);
+            worldRot = data.localRotation;
+            return true;
+        }
+
+        // Otherwise do virtual lookup.
+        Vector3 origin2 = ChunkCoordToWorldOrigin(coord);
+        return StationRuntimeGenerator.TryGetStationPose_NoAlloc(
+            settings,
+            origin2,
+            coord,
+            globalSeed,
+            out worldPos,
+            out worldRot
+        );
+    }
 
 #if UNITY_EDITOR
     [ContextMenu("Regenerate All Stations (Editor Only)")]

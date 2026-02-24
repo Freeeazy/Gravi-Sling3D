@@ -112,9 +112,19 @@ public class NPCQuestManager : MonoBehaviour
             return false;
 
         // prevent duplicates to same station for now (optional)
+        //for (int i = 0; i < _active.Count; i++)
+        //    if (_active[i].toCoord == offer.toCoord)
+        //        return false;
+
+        // 1 quest per NPC gate
         for (int i = 0; i < _active.Count; i++)
-            if (_active[i].toCoord == offer.toCoord)
+        {
+            if (_active[i].npcId == npcId)
+            {
+                Debug.LogWarning($"[NPCQuestManager] Duplicate quest from same NPC blocked. npcId={npcId}");
                 return false;
+            }
+        }
 
         var q = new ActiveQuest
         {
@@ -129,23 +139,27 @@ public class NPCQuestManager : MonoBehaviour
         return true;
     }
 
-    public bool RemoveQuestByCoord(Vector3Int coord)
+    public int RemoveAllQuestsByCoord(Vector3Int coord)
     {
+        int removed = 0;
         for (int i = _active.Count - 1; i >= 0; i--)
         {
             if (_active[i].toCoord == coord)
             {
                 _active.RemoveAt(i);
-                return true;
+                removed++;
             }
         }
-        return false;
+        return removed;
     }
 
     public void NotifyArrivedAt(Vector3Int coord)
     {
-        // Prototype: arriving completes any quest whose target is this coord.
-        RemoveQuestByCoord(coord);
+        // Complete ALL quests that target this coord.
+        int removed = RemoveAllQuestsByCoord(coord);
+
+        // Optional debug
+        if (removed > 0) Debug.Log($"Completed {removed} quest(s) at {coord}");
     }
 
     private QuestOffer GenerateOfferForNpc(int npcId)

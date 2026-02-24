@@ -14,6 +14,10 @@ public class QuestMarkerManager : MonoBehaviour
     [Header("Behavior")]
     public bool hideAllWhenNoQuests = true;
 
+    // Reuse buffers to avoid allocations
+    private readonly List<Vector3> _uniqueWorldTargets = new List<Vector3>(16);
+    private readonly HashSet<Vector3Int> _seenCoords = new HashSet<Vector3Int>();
+
     private void Awake()
     {
         if (!cam) cam = Camera.main;
@@ -28,6 +32,7 @@ public class QuestMarkerManager : MonoBehaviour
         }
 
         var active = questManager.ActiveQuests;
+
         int maxSlots = Mathf.Min(
             pointers != null ? pointers.Length : 0,
             beacons != null ? beacons.Length : 0
@@ -36,12 +41,15 @@ public class QuestMarkerManager : MonoBehaviour
         if (maxSlots <= 0)
             return;
 
-        int count = Mathf.Min(active.Count, maxSlots);
+        BuildUniqueTargets(active);
+
+        int uniqueCount = _uniqueWorldTargets.Count;
+        int count = Mathf.Min(uniqueCount, maxSlots);
 
         // Update active slots
         for (int i = 0; i < count; i++)
         {
-            Vector3 target = active[i].toWorldPos;
+            Vector3 target = _uniqueWorldTargets[i];
 
             if (pointers[i])
             {
@@ -63,8 +71,25 @@ public class QuestMarkerManager : MonoBehaviour
             if (beacons[i]) beacons[i].SetSlotActive(false);
         }
 
-        if (hideAllWhenNoQuests && active.Count == 0)
+        if (hideAllWhenNoQuests && uniqueCount == 0)
             SetAllActive(false);
+    }
+
+    private void BuildUniqueTargets(IReadOnlyList<NPCQuestManager.ActiveQuest> active)
+    {
+        _uniqueWorldTargets.Clear();
+        _seenCoords.Clear();
+
+        if (active == null || active.Count == 0)
+            return;
+
+        // Stable ordering: first quest that targets a coord "wins"
+        for (int i = 0; i < active.Count; i++)
+        {
+            var q = active[i];
+            if (_seenCoords.Add(q.toCoord))
+                _uniqueWorldTargets.Add(q.toWorldPos);
+        }
     }
 
     private void SetAllActive(bool on)

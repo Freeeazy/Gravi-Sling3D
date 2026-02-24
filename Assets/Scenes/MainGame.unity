@@ -50850,6 +50850,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1430325606905941059, guid: 1bb1991a146204441b7aff28d5322caa, type: 3}
+      propertyPath: m_text
+      value: ' 999999 Units Away'
+      objectReference: {fileID: 0}
     - target: {fileID: 1660226235576604929, guid: 1bb1991a146204441b7aff28d5322caa, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

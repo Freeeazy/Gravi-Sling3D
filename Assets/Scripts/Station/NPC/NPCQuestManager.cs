@@ -308,4 +308,14 @@ public class NPCQuestManager : MonoBehaviour
         offer.valid = true;
         return offer;
     }
+    public bool HasActiveQuestFromNpc(int npcId)
+    {
+        for (int i = 0; i < _active.Count; i++)
+        {
+            if (_active[i].npcId == npcId)
+                return true;
+        }
+
+        return false;
+    }
 }

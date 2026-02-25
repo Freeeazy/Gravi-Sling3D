@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NPCQuestDropdownUI : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
     [Tooltip("Distance text in the dropdown panel")]
     public TMP_Text distanceText;
+
+    public TMP_Text acceptText;
+    public Button acceptButton;
 
     private int _currentNpcId = -1;
 
@@ -24,6 +28,17 @@ public class NPCQuestDropdownUI : MonoBehaviour
         {
             if (distanceText)
                 distanceText.text = "----";
+        }
+
+        if (questManager && !questManager.HasActiveQuestFromNpc(npcId))
+        {
+            acceptButton.enabled = true;
+            acceptText.text = "Accept";
+        }
+        else
+        {
+            acceptButton.enabled = false;
+            acceptText.text = "Accepted";
         }
     }
 
@@ -46,6 +61,12 @@ public class NPCQuestDropdownUI : MonoBehaviour
         Debug.Log(ok
             ? $"[NPCQuestDropdownUI] Accepted quest from npcId={_currentNpcId}"
             : $"[NPCQuestDropdownUI] Accept failed for npcId={_currentNpcId} (max quests? duplicate? no offer?)");
+
+        if (ok)
+        {
+            acceptButton.enabled = false;
+            acceptText.text = "Accepted";
+        }
     }
 
     public void ResetUI()

@@ -42,6 +42,8 @@ public class NPCManager : MonoBehaviour
         int poolCount = npcRows.Length;
         int showCount = Mathf.Min(poolCount, npcs.Count);
 
+        questManager?.RefreshOffersForStation(stationWorldPos);
+
         for (int i = 0; i < poolCount; i++)
         {
             var row = npcRows[i];
@@ -52,10 +54,15 @@ public class NPCManager : MonoBehaviour
             row.SetRowActive(on);
 
             if (on)
+            {
                 row.Bind(npcs[i]);
-        }
 
-        questManager?.RefreshOffersForStation(stationWorldPos);
+                if (questManager && questManager.TryGetOffer(row.BoundNpcId, out var offer))
+                    row.SetDistance(offer.distance);
+                else
+                    row.SetDistance(0f);
+            }
+        }
     }
 
     public void ClearStation()

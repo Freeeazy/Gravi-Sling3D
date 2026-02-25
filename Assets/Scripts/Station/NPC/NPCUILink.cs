@@ -21,6 +21,7 @@ public class NPCUILink : MonoBehaviour
     [Header("Row UI")]
     public TMP_Text nameText;
     public Image portraitImage;
+    public TMP_Text distanceText;
 
     [Header("Interaction")]
     public Button rowButton;
@@ -66,6 +67,8 @@ public class NPCUILink : MonoBehaviour
             portraitImage.sprite = defaultPortrait;
             portraitImage.enabled = portraitImage.sprite != null;
         }
+
+        ClearDistance();
 
         // Hide all tags
         if (tagSlots == null) return;
@@ -121,6 +124,24 @@ public class NPCUILink : MonoBehaviour
         var size = rt.sizeDelta;
         size.x = w;
         rt.sizeDelta = size;
+    }
+    public void SetDistance(float distanceMeters)
+    {
+        if (!distanceText) return;
+
+        if (distanceMeters <= 0f)
+        {
+            distanceText.text = "--";
+            return;
+        }
+
+        distanceText.text = $"{distanceMeters:0000} Units";
+    }
+
+    public void ClearDistance()
+    {
+        if (!distanceText) return;
+        distanceText.text = "";
     }
 
 #if UNITY_EDITOR

@@ -33,6 +33,7 @@ public class NPCQuestManager : MonoBehaviour
         public Vector3 toWorldPos;
 
         public float distance; // from station -> target (world distance)
+        public int difficulty; // 1..5
         public bool valid;
     }
 
@@ -169,19 +170,35 @@ public class NPCQuestManager : MonoBehaviour
             npcId = npcId,
             fromCoord = _currentStationCoord,
             fromWorldPos = _currentStationWorldPos,
-            valid = false
+            valid = false,
+            difficulty = 1
         };
 
         if (!_hasStationContext || !posManager) return offer;
-
-        float min2 = minTargetDistance * minTargetDistance;
-        float max2 = pickRadius * pickRadius;
 
         // Deterministic per NPC + station
         int seed = unchecked(globalSeed * 73856093 ^ npcId * 19349663 ^ _currentStationCoord.GetHashCode());
         var rng = new System.Random(seed);
 
-        // Helper local function: test a coord
+        // Pick difficulty (random for now, deterministic due to seed)
+        int difficulty = PickDifficulty1to5(rng);
+        offer.difficulty = difficulty;
+
+        // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
+        float tMin01, tMax01;
+        GetDifficultyBand01(difficulty, out tMin01, out tMax01);
+
+        float minD = minTargetDistance;
+        float maxD = pickRadius;
+
+        // Band distances in world units
+        float bandMin = Mathf.Lerp(minD, maxD, tMin01);
+        float bandMax = Mathf.Lerp(minD, maxD, tMax01);
+
+        float bandMin2 = bandMin * bandMin;
+        float bandMax2 = bandMax * bandMax;
+
+        // Helper local function: test a coord against the BAND (not global min/max)
         bool TryCoord(Vector3Int c, out Vector3 wpos)
         {
             wpos = default;
@@ -192,39 +209,43 @@ public class NPCQuestManager : MonoBehaviour
                 return false;
 
             float d2 = (pos - _currentStationWorldPos).sqrMagnitude;
-            if (d2 < min2) return false;
-            if (d2 > max2) return false;
+
+            if (d2 < bandMin2) return false;
+            if (d2 > bandMax2) return false;
 
             wpos = pos;
             return true;
         }
 
-        // Start from ring=1 outward
+        // Convert band to ring range so we don't always start at ring 1 (near bias)
+        float chunk = Mathf.Max(1f, posManager.chunkSize);
+        int ringMin = Mathf.Max(1, Mathf.FloorToInt(bandMin / chunk));
+        int ringMax = Mathf.Max(ringMin, Mathf.CeilToInt(bandMax / chunk));
+
+        // Respect your global cap too
         int rMax = Mathf.Max(1, maxRingRadiusChunks);
+        int maxRadiusByPick = Mathf.CeilToInt(pickRadius / chunk);
+        rMax = Mathf.Min(rMax, Mathf.Max(1, maxRadiusByPick));
+
+        ringMax = Mathf.Min(ringMax, rMax);
 
         Vector3Int chosenCoord = default;
         Vector3 chosenPos = default;
         bool found = false;
 
-        // Convert your world radius into chunk-ish radius limit too (optional but keeps search tight)
-        int maxRadiusByPick = Mathf.CeilToInt(pickRadius / Mathf.Max(1f, posManager.chunkSize));
-        rMax = Mathf.Min(rMax, Mathf.Max(1, maxRadiusByPick));
-
-        for (int ring = 1; ring <= rMax && !found; ring++)
+        // Search only within ringMin..ringMax to enforce the band + reduce near bias
+        for (int ring = ringMin; ring <= ringMax && !found; ring++)
         {
             int tries = Mathf.Max(1, samplesPerRing);
 
             for (int t = 0; t < tries; t++)
             {
-                // Pick a random point on the surface of a cube "ring"
-                // Choose which axis is the "fixed" +/-ring face
                 int face = rng.Next(0, 6);
 
                 int x = rng.Next(-ring, ring + 1);
                 int y = rng.Next(-ring, ring + 1);
                 int z = rng.Next(-ring, ring + 1);
 
-                // Force one axis to be +/-ring so we're on the ring shell
                 switch (face)
                 {
                     case 0: x = ring; break;
@@ -251,10 +272,11 @@ public class NPCQuestManager : MonoBehaviour
             }
         }
 
-        // Final fallback: relax min distance, keep max radius
+        // Fallback: if band failed, relax back toward your old logic (still bounded by pickRadius)
         if (!found)
         {
             float relaxedMin2 = (minTargetDistance * 0.25f) * (minTargetDistance * 0.25f);
+            float max2 = pickRadius * pickRadius;
 
             for (int ring = 1; ring <= rMax && !found; ring++)
             {
@@ -317,5 +339,19 @@ public class NPCQuestManager : MonoBehaviour
         }
 
         return false;
+    }
+    private static void GetDifficultyBand01(int difficulty, out float tMin, out float tMax)
+    {
+        // difficulty 1 => [0.0, 0.2], 2 => [0.2, 0.4], ... 5 => [0.8, 1.0]
+        difficulty = Mathf.Clamp(difficulty, 1, 5);
+        tMin = (difficulty - 1) * 0.2f;
+        tMax = difficulty * 0.2f;
+        if (difficulty == 5) tMax = 1f; // ensure exact 1.0
+    }
+
+    private static int PickDifficulty1to5(System.Random rng)
+    {
+        // Random for now. Later you can weight this.
+        return 1 + rng.Next(0, 5);
     }
 }

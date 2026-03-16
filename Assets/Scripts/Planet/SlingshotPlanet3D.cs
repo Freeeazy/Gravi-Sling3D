@@ -32,7 +32,7 @@ public class SlingshotPlanet3D : MonoBehaviour
     [Tooltip("Extra degrees applied at launch (along the orbit direction).")]
     public float launchAngleOffsetDeg = 0f;
 
-    [Header("Boost (Optional)")]
+    [Header("Boost")]
     public bool enableBoosting = true;
 
     [Tooltip("Hold Space/LMB to charge. Orbit speed & launch speed increase by this per second.")]
@@ -129,6 +129,8 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         if (BoostManager.Instance)
             BoostManager.Instance.SetMode(BoostManager.Mode.OrbitIdle);
+
+        chargeRate = StatManager.Instance.GetOrbitChargeRate();
 
         Bubble.gameObject.SetActive(false);
 

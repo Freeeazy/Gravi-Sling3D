@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OpenQuestBoard : MonoBehaviour
@@ -9,6 +10,9 @@ public class OpenQuestBoard : MonoBehaviour
     [Header("UI hooks")]
     public NPCDropdownMover dropdownMover;
 
+    [Header("Neighbor Panels")]
+    public List<OpenQuestBoard> siblingBoards = new List<OpenQuestBoard>();
+
     [Header("Input")]
     public KeyCode toggleKey = KeyCode.F;
 
@@ -19,6 +23,7 @@ public class OpenQuestBoard : MonoBehaviour
     public float closedXAngle = 90f;   // folded up
     public float openXAngle = 0f;      // flat / readable
     public float rotateSpeed = 6f;
+    public bool IsOpen => isOpen;
 
     private bool isOpen = false;
     private float targetX;
@@ -38,37 +43,56 @@ public class OpenQuestBoard : MonoBehaviour
     {
         if (!questBoardRoot) return;
 
-        // If you only want this at stations/orbit:
         if (onlyAllowWhenOrbiting)
         {
-            // SlingshotPlanet3D.Active is set when orbit starts, cleared on exit
             if (SlingshotPlanet3D.Active == null || !SlingshotPlanet3D.Active.IsOrbiting || SlingshotPlanet3D.Active.IsCharging)
                 return;
         }
 
         if (Input.GetKeyDown(toggleKey))
         {
-            bool wasOpen = isOpen;
-
-            isOpen = !isOpen;
-            targetX = isOpen ? openXAngle : closedXAngle;
-            UIBlock.IsUIOpen = isOpen;
-
-            // If we just CLOSED, reset the dropdown panel
-            if (wasOpen && !isOpen)
+            if (!isOpen)
             {
-                dropdownMover?.ResetDropdown();
-                // or if you later add Instance:
-                // NPCDropdownMover.Instance?.ResetDropdown();
+                CloseSiblingBoards();
+                OpenBoard();
+            }
+            else
+            {
+                ForceClose();
             }
         }
 
-        // Smooth rotate toward target
         Quaternion targetRot = Quaternion.Euler(targetX, 0f, 0f);
         questBoardRoot.localRotation = Quaternion.Slerp(
             questBoardRoot.localRotation,
             targetRot,
             rotateSpeed * Time.deltaTime
         );
+    }
+
+    private void OpenBoard()
+    {
+        isOpen = true;
+        targetX = openXAngle;
+        UIBlock.IsUIOpen = true;
+    }
+
+    public void ForceClose()
+    {
+        if (!isOpen) return;
+
+        isOpen = false;
+        targetX = closedXAngle;
+        UIBlock.IsUIOpen = false;
+        dropdownMover?.ResetDropdown();
+    }
+
+    private void CloseSiblingBoards()
+    {
+        for (int i = 0; i < siblingBoards.Count; i++)
+        {
+            if (siblingBoards[i] != null && siblingBoards[i] != this && siblingBoards[i].IsOpen)
+                siblingBoards[i].ForceClose();
+        }
     }
 }

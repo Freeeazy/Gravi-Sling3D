@@ -321,7 +321,7 @@ public class SimpleFollowCamera : MonoBehaviour
     }
 
     // “Launch punch” — quick kick that eases out, then returns to whatever mode you choose.
-    public void PlaySlingshotKick(float kickAdd = 10f, float inTime = 0.08f, float holdTime = 0.05f, float outTime = 0.35f, FovMode returnMode = FovMode.FreeFlight)
+    public void PlaySlingshotKick(float kickAdd = 15f, float inTime = 0.28f, float holdTime = 0.5f, float outTime = 1.35f, FovMode returnMode = FovMode.FreeFlight)
     {
         if (_fovKickRoutine != null) StopCoroutine(_fovKickRoutine);
         _fovKickRoutine = StartCoroutine(FovKickRoutine(kickAdd, inTime, holdTime, outTime, returnMode));

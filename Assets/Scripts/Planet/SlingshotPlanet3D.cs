@@ -130,7 +130,10 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (BoostManager.Instance)
             BoostManager.Instance.SetMode(BoostManager.Mode.OrbitIdle);
 
-        chargeRate = StatManager.Instance.GetOrbitChargeRate();
+        if (StatManager.Instance)
+            chargeRate = StatManager.Instance.GetOrbitChargeRate();
+        else
+            chargeRate = 80f;
 
         Bubble.gameObject.SetActive(false);
 

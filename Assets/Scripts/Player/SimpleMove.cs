@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class SimpleMove : MonoBehaviour
 {
+    public static SimpleMove Instance { get; private set; }
+
     [Header("References")]
     public Rigidbody rb; // Assign your CHILD rigidbody here in the inspector.
 
@@ -136,8 +138,18 @@ public class SimpleMove : MonoBehaviour
     private bool _wasBoosting;
 
     private float _rollIdleTimer = 0f;
+
+    private bool _isPaused = false;
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
         if (!rb)
         {
             Debug.LogError("SimpleMove: Assign the child Rigidbody in the inspector.");
@@ -179,13 +191,25 @@ public class SimpleMove : MonoBehaviour
         if (!cameraTransform && Camera.main)
             cameraTransform = Camera.main.transform;
 
-        // --- INPUT (WASD + Space/Ctrl) ---
-        float h = Input.GetAxisRaw("Horizontal"); // A/D
-        float v = Input.GetAxisRaw("Vertical");   // W/S
-
+        float h = 0f;
+        float v = 0f;
         float ud = 0f;
-        if (Input.GetKey(KeyCode.Space)) ud += 1f;
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) ud -= 1f;
+        float roll = 0f;
+        bool boostHeld = false;
+
+        if (!_isPaused)
+        {
+            h = Input.GetAxisRaw("Horizontal");
+            v = Input.GetAxisRaw("Vertical");
+
+            if (Input.GetKey(KeyCode.Space)) ud += 1f;
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) ud -= 1f;
+
+            if (Input.GetKey(KeyCode.Q)) roll += 1f;
+            if (Input.GetKey(KeyCode.E)) roll -= 1f;
+
+            boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
+        }
 
         Vector3 input = new Vector3(h, ud, v);
 
@@ -199,12 +223,6 @@ public class SimpleMove : MonoBehaviour
             float rate = (returnTime <= 0.0001f) ? 999f : (1f / returnTime);
             slipFactor = Mathf.MoveTowards(slipFactor, 0f, rate * Time.fixedDeltaTime);
         }
-
-        float roll = 0f;
-        if (Input.GetKey(KeyCode.Q)) roll += 1f;
-        if (Input.GetKey(KeyCode.E)) roll -= 1f;
-
-        bool boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
 
         var cam = SimpleFollowCamera.Instance;
         if (cam)
@@ -574,5 +592,29 @@ public class SimpleMove : MonoBehaviour
     void OnCollisionStay(Collision c)
     {
         Debug.Log("Colliding with: " + c.collider.name);
+    }
+
+    public void SetPaused(bool paused)
+    {
+        _isPaused = paused;
+
+        if (paused)
+        {
+            // Kill temporary movement states that can get stuck
+            _cruiseTogglePressed = false;
+            cruiseControl = false;
+            _wasBoosting = false;
+            isAutoStabilizingRoll = false;
+            _rollIdleTimer = 0f;
+
+            // Optional: dump boost charge so boost can't resume weirdly
+            boostCharge = 0f;
+
+            if (BoostManager.Instance)
+                BoostManager.Instance.SetBoostInput(false, false);
+
+            UpdateCruiseUI(force: true);
+            UpdateAutoStabilizeUI(force: true);
+        }
     }
 }

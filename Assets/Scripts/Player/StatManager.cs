@@ -66,7 +66,8 @@ public class StatManager : MonoBehaviour
         {
             ApplyTarget(targets[i]);
         }
-        orbitChargeRateText.text = orbitChargeRate.ToString();
+        if (orbitChargeRateText)
+            orbitChargeRateText.text = orbitChargeRate.ToString();
     }
 
     public void ApplyTargetByName(string targetName)

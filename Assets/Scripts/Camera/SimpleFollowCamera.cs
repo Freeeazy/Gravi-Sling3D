@@ -97,6 +97,7 @@ public class SimpleFollowCamera : MonoBehaviour
     private float _driftHoldFovAdd = 0f;
     private Coroutine _fovKickRoutine;
 
+    private bool _isPaused = false;
     private void Awake()
     {
         if (Instance && Instance != this)
@@ -151,7 +152,7 @@ public class SimpleFollowCamera : MonoBehaviour
         UpdateFov(dt);
 
         // Only allow look controls when UI is closed
-        if (!uiOpen)
+        if (!uiOpen && !_isPaused)
         {
             float mx = Input.GetAxis("Mouse X") * mouseSensitivity;
             float my = Input.GetAxis("Mouse Y") * mouseSensitivity;
@@ -427,5 +428,10 @@ public class SimpleFollowCamera : MonoBehaviour
         _currentFov = Mathf.Lerp(_currentFov, _targetFov, t);
 
         cam.fieldOfView = _currentFov;
+    }
+
+    public void SetPaused(bool paused)
+    {
+        _isPaused = paused;
     }
 }

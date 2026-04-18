@@ -19544,6 +19544,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3273688404886696472, guid: 2e030c7b6b6f23c47847893fe9c7443d, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4977131475666943381, guid: 2e030c7b6b6f23c47847893fe9c7443d, type: 3}
     - target: {fileID: 7839205968889626374, guid: 2e030c7b6b6f23c47847893fe9c7443d, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -39999,7 +40003,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 2
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.49411762, g: 0.9070262, b: 1, a: 1}
   m_Intensity: 10000
   m_Range: 5000
   m_SpotAngle: 30
@@ -46216,7 +46220,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 8
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}

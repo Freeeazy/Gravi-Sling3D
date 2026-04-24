@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9454409acc1d074d8e8954d33b574f0, type: 3}
-  m_Name: ChargeRate
+  m_Name: RegenPerSecond
   m_EditorClassIdentifier: 
-  moduleName: ChargeRate++
+  moduleName: RegenPerSecond++
   icon: {fileID: 21300000, guid: 864b5ee03735045418e3c2d5854427cd, type: 3}
-  chargeRateBonus: 10
+  chargeRateBonus: 0
   maxSpeedBonus: 0
   accelerationBonus: 0
+  boostMaxBonus: 0
   capacityBonus: 0
+  drainPerSecondBonus: 0
+  regenPerSecondBonus: 1

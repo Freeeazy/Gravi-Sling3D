@@ -1,7 +1,8 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleSlotUI : MonoBehaviour
+public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
 {
     public Image iconImage;
 
@@ -37,6 +38,29 @@ public class ModuleSlotUI : MonoBehaviour
         {
             iconImage.sprite = null;
             iconImage.enabled = false;
+        }
+
+        if (ModuleLoadoutManager.Instance != null)
+            ModuleLoadoutManager.Instance.RecalculateStats();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Debug.Log($"CLICK DETECTED on {name} | Button: {eventData.button}");
+
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            Debug.Log("RIGHT CLICK CONFIRMED");
+
+            if (!IsEmpty)
+            {
+                Debug.Log("SLOT NOT EMPTY -> CLEARING");
+                ClearModule();
+            }
+            else
+            {
+                Debug.Log("SLOT EMPTY -> NOTHING TO CLEAR");
+            }
         }
     }
 }

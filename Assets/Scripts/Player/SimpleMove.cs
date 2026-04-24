@@ -21,7 +21,7 @@ public class SimpleMove : MonoBehaviour
 
     [Header("Boost (Hold LeftShift) - Additive")]
     [Tooltip("Adds this many m/s to maxSpeed at full boostCharge. (Additive, not multiplicative)")]
-    public float boostMaxSpeedAdd = 8f;     // e.g. maxSpeed 8 + 8 = 16 at full charge
+    public float boostMaxSpeed = 8f;     // e.g. maxSpeed 8 + 8 = 16 at full charge
     [Tooltip("How fast boostCharge fills while held (per second).")]
     public float boostRampUp = 1.2f;
     [Tooltip("How fast boostCharge drains when released (per second).")]
@@ -236,7 +236,7 @@ public class SimpleMove : MonoBehaviour
                 if (isBoosting)
                 {
                     cam.SetBoostFOV(
-                        maxBoostSpeed: maxSpeed + boostMaxSpeedAdd,
+                        maxBoostSpeed: maxSpeed + boostMaxSpeed,
                         extraAdd: 10f,            // tweak
                         sharpnessUp: 12f,
                         sharpnessDown: 5f
@@ -401,7 +401,7 @@ public class SimpleMove : MonoBehaviour
         }
 
         // --- BOOSTED SPEED/ACCEL (ADDITIVE) ---
-        float boostedMaxSpeed = maxSpeed + (boostMaxSpeedAdd * boostCharge);
+        float boostedMaxSpeed = maxSpeed + (boostMaxSpeed * boostCharge);
 
         // optional extra snap while boosting (additive)
         float boostedAccel = acceleration + (boostAccelAdd * boostCharge);
@@ -455,7 +455,7 @@ public class SimpleMove : MonoBehaviour
         {
             // This "input" already exists in your code.
             // speed01 normalized by max speed * boost cap (matches your velocity text logic).
-            float speed01 = Mathf.InverseLerp(0f, maxSpeed + boostMaxSpeedAdd, rb.linearVelocity.magnitude);
+            float speed01 = Mathf.InverseLerp(0f, maxSpeed + boostMaxSpeed, rb.linearVelocity.magnitude);
 
             // boostCharge is private in your file; if you keep it private, just pass 0f.
             // If you want, make a public getter for it. For now we’ll ignore boost:

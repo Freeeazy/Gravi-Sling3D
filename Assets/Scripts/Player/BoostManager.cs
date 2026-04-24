@@ -73,6 +73,29 @@ public class BoostManager : MonoBehaviour
 
     /// <summary>Use this in SimpleMove instead of its private boostCharge.</summary>
     public float Boost01 => _boost01;
+    public void SetCapacity(float value)
+    {
+        float temp;
+        temp = capacity;
+        capacity = value;
+        _energy += capacity - temp;
+    }
+
+    public float GetCapacity() => capacity;
+
+    public void SetDrainPerSecond(float value)
+    {
+        drainPerSecond = value;
+    }
+
+    public float GetDrainPerSecond() => drainPerSecond;
+
+    public void SetRegenPerSecond(float value)
+    {
+        regenPerSecond = value;
+    }
+
+    public float GetRegenPerSecond() => regenPerSecond;
 
     private void Awake()
     {

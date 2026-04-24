@@ -5156,27 +5156,23 @@ MonoBehaviour:
     - {fileID: 738755643}
     objectsToDisable: []
   - title: Boost
-    message: Hold Right-Click to boost. Speed is your friend, but momentum takes
-      practice. Fly through the next rings.
+    message: Hold Left-Click to boost. Speed is your friend, but momentum takes practice.
+      Fly through the next rings.
     ringsRequired: 4
     autoAdvance: 0
     autoAdvanceDelay: 2
-    scriptsToEnable:
-    - {fileID: 1616803245}
-    - {fileID: 330585548}
+    scriptsToEnable: []
     scriptsToDisable: []
     objectsToEnable:
     - {fileID: 976946366}
     objectsToDisable: []
   - title: Station Practice
-    message: You may have noticed you're low on boost. Hold Right-Click to begin
-      charging your Slingshot around the station. When you're ready, let go to launch.
+    message: You may have noticed you're low on boost. Hold Left-Click to begin charging
+      your Slingshot around the station. When you're ready, let go to launch.
     ringsRequired: 2
     autoAdvance: 0
     autoAdvanceDelay: 2
-    scriptsToEnable:
-    - {fileID: 1616803245}
-    - {fileID: 330585548}
+    scriptsToEnable: []
     scriptsToDisable: []
     objectsToEnable:
     - {fileID: 696904735}
@@ -53375,6 +53371,7 @@ MonoBehaviour:
   orbitChargeRateText: {fileID: 0}
   maxSpeed: 200
   acceleration: 100
+  capacity: 100
   targets:
   - targetName: SimpleMove
     targetScript: {fileID: 1616803245}

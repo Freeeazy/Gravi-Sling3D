@@ -37,7 +37,7 @@ public class DraggedModuleUI : MonoBehaviour
             out Vector2 localPoint))
         {
             rectTransform.localPosition = localPoint;
-            Debug.Log($"DraggedModuleUI moved to local: {localPoint}");
+            //Debug.Log($"DraggedModuleUI moved to local: {localPoint}");
         }
     }
 

@@ -17,8 +17,14 @@ public class StatManager : MonoBehaviour
     [Header("Internal / Global Stats")]
     [SerializeField] private float orbitChargeRate = 60.0f;
     public TMP_Text orbitChargeRateText;
+
     [SerializeField] private float maxSpeed = 400f;
     [SerializeField] private float acceleration = 100f;
+
+    [SerializeField] private float boostMaxSpeed = 900f;
+    [SerializeField] private float capacity = 100f;
+    [SerializeField] private float drainPerSecond = 18f;
+    [SerializeField] private float regenPerSecond = 10f;
 
     [Header("Stat Targets")]
     [SerializeField] private List<ScriptStatTarget> targets = new List<ScriptStatTarget>();
@@ -27,12 +33,26 @@ public class StatManager : MonoBehaviour
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
     public void SetOrbitChargeRate(float value) => orbitChargeRate = value;
+
     public void SetMaxSpeed(float value) => maxSpeed = value;
     public void SetAcceleration(float value) => acceleration = value;
 
+    public void SetBoostMaxSpeed(float value) => boostMaxSpeed = value;
+    public void SetCapacity(float value) => capacity = value;
+    public void SetDrainPerSecond(float value) => drainPerSecond = value;
+    public void SetRegenPerSecond(float value) => regenPerSecond = value;
+
+
     public float GetOrbitChargeRate() => orbitChargeRate;
+
     public float GetMaxSpeed() => maxSpeed;
     public float GetAcceleration() => acceleration;
+
+    public float GetBoostMaxSpeed() => boostMaxSpeed;
+    public float GetCapacity() => capacity;
+    public float GetDrainPerSecond() => drainPerSecond;
+    public float GetRegenPerSecond() => regenPerSecond;
+
 
     private void Awake()
     {
@@ -54,6 +74,14 @@ public class StatManager : MonoBehaviour
         {
             simpleMove.maxSpeed = maxSpeed;
             simpleMove.acceleration = acceleration;
+            simpleMove.boostMaxSpeed = boostMaxSpeed;
+        }
+
+        if (BoostManager.Instance != null)
+        {
+            BoostManager.Instance.SetCapacity(capacity);
+            BoostManager.Instance.SetDrainPerSecond(drainPerSecond);
+            BoostManager.Instance.SetRegenPerSecond(regenPerSecond);
         }
 
         RefreshAllStatDisplays();

@@ -15,6 +15,7 @@ public class OpenQuestBoard : MonoBehaviour
 
     [Header("Disable While Open")]
     public List<GameObject> disableWhileOpen = new List<GameObject>();
+    private Dictionary<GameObject, bool> previousStates = new Dictionary<GameObject, bool>();
 
     [Header("Input")]
     public KeyCode toggleKey = KeyCode.F;
@@ -107,8 +108,26 @@ public class OpenQuestBoard : MonoBehaviour
     {
         for (int i = 0; i < disableWhileOpen.Count; i++)
         {
-            if (disableWhileOpen[i] != null)
-                disableWhileOpen[i].SetActive(!boardOpen);
+            var obj = disableWhileOpen[i];
+            if (obj == null) continue;
+
+            if (boardOpen)
+            {
+                // Save current state BEFORE disabling
+                if (!previousStates.ContainsKey(obj))
+                    previousStates[obj] = obj.activeSelf;
+
+                obj.SetActive(false);
+            }
+            else
+            {
+                // Restore previous state if we have one
+                if (previousStates.TryGetValue(obj, out bool wasActive))
+                {
+                    obj.SetActive(wasActive);
+                    previousStates.Remove(obj);
+                }
+            }
         }
     }
 }

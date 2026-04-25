@@ -13,6 +13,9 @@ public class OpenQuestBoard : MonoBehaviour
     [Header("Neighbor Panels")]
     public List<OpenQuestBoard> siblingBoards = new List<OpenQuestBoard>();
 
+    [Header("Disable While Open")]
+    public List<GameObject> disableWhileOpen = new List<GameObject>();
+
     [Header("Input")]
     public KeyCode toggleKey = KeyCode.F;
 
@@ -75,6 +78,8 @@ public class OpenQuestBoard : MonoBehaviour
         isOpen = true;
         targetX = openXAngle;
         UIBlock.IsUIOpen = true;
+
+        SetDisabledObjects(true);
     }
 
     public void ForceClose()
@@ -85,6 +90,8 @@ public class OpenQuestBoard : MonoBehaviour
         targetX = closedXAngle;
         UIBlock.IsUIOpen = false;
         dropdownMover?.ResetDropdown();
+
+        SetDisabledObjects(false);
     }
 
     private void CloseSiblingBoards()
@@ -93,6 +100,15 @@ public class OpenQuestBoard : MonoBehaviour
         {
             if (siblingBoards[i] != null && siblingBoards[i] != this && siblingBoards[i].IsOpen)
                 siblingBoards[i].ForceClose();
+        }
+    }
+
+    private void SetDisabledObjects(bool boardOpen)
+    {
+        for (int i = 0; i < disableWhileOpen.Count; i++)
+        {
+            if (disableWhileOpen[i] != null)
+                disableWhileOpen[i].SetActive(!boardOpen);
         }
     }
 }

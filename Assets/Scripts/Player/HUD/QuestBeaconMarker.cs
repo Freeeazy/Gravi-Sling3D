@@ -9,6 +9,12 @@ public class QuestBeaconMarker : MonoBehaviour
     public Image beaconImage;
     public TextMeshProUGUI distanceText;
 
+    [Header("Highlight")]
+    public Color normalColor = Color.white;
+    public Color highlightColor = Color.yellow;
+
+    private bool _highlighted;
+
     [Header("Ellipse Dead Zone (match pointer values!)")]
     public Vector2 ellipseFrac = new Vector2(0.42f, 0.30f);
     public Vector2 ellipsePaddingPx = new Vector2(40f, 40f);
@@ -28,6 +34,23 @@ public class QuestBeaconMarker : MonoBehaviour
     private Vector3 _targetPos;
     private bool _hasTarget;
 
+    public void SetHighlighted(bool highlighted)
+    {
+        _highlighted = highlighted;
+        ApplyColor();
+    }
+
+    private void ApplyColor()
+    {
+        Color c = _highlighted ? highlightColor : normalColor;
+
+        if (beaconImage)
+            beaconImage.color = c;
+
+        if (distanceText)
+            distanceText.color = c;
+    }
+
     private void Awake()
     {
         _rt = (RectTransform)transform;
@@ -35,6 +58,8 @@ public class QuestBeaconMarker : MonoBehaviour
 
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas) _canvasRt = _canvas.GetComponent<RectTransform>();
+
+        ApplyColor();
     }
 
     public void SetTarget(Camera cam, Vector3 targetPos, bool hasTarget)
@@ -46,6 +71,9 @@ public class QuestBeaconMarker : MonoBehaviour
 
     public void SetSlotActive(bool on)
     {
+        if (!on)
+            SetHighlighted(false);
+
         gameObject.SetActive(on);
     }
 

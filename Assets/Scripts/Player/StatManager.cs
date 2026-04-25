@@ -20,6 +20,7 @@ public class StatManager : MonoBehaviour
 
     [SerializeField] private float maxSpeed = 400f;
     [SerializeField] private float acceleration = 100f;
+    [SerializeField] private float boostAccelAdd = 50f;
 
     [SerializeField] private float boostMaxSpeed = 900f;
     [SerializeField] private float capacity = 100f;
@@ -36,6 +37,8 @@ public class StatManager : MonoBehaviour
 
     public void SetMaxSpeed(float value) => maxSpeed = value;
     public void SetAcceleration(float value) => acceleration = value;
+    public void SetBoostAccelAdd(float value) => boostAccelAdd = value;
+
 
     public void SetBoostMaxSpeed(float value) => boostMaxSpeed = value;
     public void SetCapacity(float value) => capacity = value;
@@ -47,6 +50,7 @@ public class StatManager : MonoBehaviour
 
     public float GetMaxSpeed() => maxSpeed;
     public float GetAcceleration() => acceleration;
+    public float GetBoostAccelAdd() => boostAccelAdd;
 
     public float GetBoostMaxSpeed() => boostMaxSpeed;
     public float GetCapacity() => capacity;
@@ -75,6 +79,7 @@ public class StatManager : MonoBehaviour
             simpleMove.maxSpeed = maxSpeed;
             simpleMove.acceleration = acceleration;
             simpleMove.boostMaxSpeed = boostMaxSpeed;
+            simpleMove.boostAccelAdd = boostAccelAdd;
         }
 
         if (BoostManager.Instance != null)

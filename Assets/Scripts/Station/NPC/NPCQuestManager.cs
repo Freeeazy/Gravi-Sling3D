@@ -47,6 +47,10 @@ public class NPCQuestManager : MonoBehaviour
         public float distanceAtAccept;
     }
 
+    public bool HasClosestQuest { get; private set; }
+    public ActiveQuest ClosestQuest { get; private set; }
+    public Vector3Int ClosestQuestCoord => ClosestQuest.toCoord;
+
     // Offered quest per NPC at the *current station context*
     private readonly Dictionary<int, QuestOffer> _offersByNpc = new();
 
@@ -137,6 +141,7 @@ public class NPCQuestManager : MonoBehaviour
         };
 
         _active.Add(q);
+        RefreshClosestQuest();
         return true;
     }
 
@@ -151,6 +156,10 @@ public class NPCQuestManager : MonoBehaviour
                 removed++;
             }
         }
+
+        if (removed > 0)
+            RefreshClosestQuest();
+
         return removed;
     }
 
@@ -353,5 +362,29 @@ public class NPCQuestManager : MonoBehaviour
     {
         // Random for now. Later you can weight this.
         return 1 + rng.Next(0, 5);
+    }
+
+    private void RefreshClosestQuest()
+    {
+        HasClosestQuest = false;
+        ClosestQuest = default;
+
+        if (_active.Count == 0)
+            return;
+
+        int bestIndex = 0;
+        float bestDistance = _active[0].distanceAtAccept;
+
+        for (int i = 1; i < _active.Count; i++)
+        {
+            if (_active[i].distanceAtAccept < bestDistance)
+            {
+                bestDistance = _active[i].distanceAtAccept;
+                bestIndex = i;
+            }
+        }
+
+        ClosestQuest = _active[bestIndex];
+        HasClosestQuest = true;
     }
 }

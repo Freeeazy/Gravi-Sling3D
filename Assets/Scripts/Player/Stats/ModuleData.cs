@@ -12,6 +12,7 @@ public class ModuleData : ScriptableObject
     // Player Movement
     public float maxSpeedBonus;
     public float accelerationBonus;
+    public float boostAccelAddBonus;
 
     // Boosting
     public float boostMaxBonus;

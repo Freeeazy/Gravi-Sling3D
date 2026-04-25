@@ -149,6 +149,9 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (PlayerThrustManager.Instance)
             PlayerThrustManager.Instance.SetOrbiting(0.5f);
 
+        if (OpenQuestBoardPopUp.Instance)
+            OpenQuestBoardPopUp.Instance.OpenQuestBoard();
+
         cachedRb = rb;
         cachedMoveScript = moveScript;
 
@@ -245,6 +248,9 @@ public class SlingshotPlanet3D : MonoBehaviour
                     float dt = Time.fixedDeltaTime;
 
                     isCharging = true;
+
+                    if (OpenQuestBoardPopUp.Instance)
+                        OpenQuestBoardPopUp.Instance.CloseQuestBoard();
 
                     // Shrink radius
                     currentRadius = Mathf.MoveTowards(currentRadius, planetRadius, shrinkRate * dt);

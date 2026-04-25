@@ -7,6 +7,10 @@ public class QuestPointerMarker : MonoBehaviour
     [Header("Refs")]
     public Image arrowImage;
 
+    [Header("Highlight")]
+    public Color normalColor = Color.white;
+    public Color highlightColor = Color.yellow;
+
     [Header("Ellipse Dead Zone")]
     public Vector2 ellipseFrac = new Vector2(0.42f, 0.30f);
     public Vector2 ellipsePaddingPx = new Vector2(40f, 40f);
@@ -28,6 +32,19 @@ public class QuestPointerMarker : MonoBehaviour
     private Vector3 _targetPos;
     private bool _hasTarget;
 
+    private bool _highlighted;
+
+    public void SetHighlighted(bool highlighted)
+    {
+        _highlighted = highlighted;
+        ApplyColor();
+    }
+
+    private void ApplyColor()
+    {
+        if (arrowImage)
+            arrowImage.color = _highlighted ? highlightColor : normalColor;
+    }
     private void Awake()
     {
         _rt = (RectTransform)transform;
@@ -36,7 +53,10 @@ public class QuestPointerMarker : MonoBehaviour
 
         _canvas = GetComponentInParent<Canvas>();
         if (_canvas) _canvasRt = _canvas.GetComponent<RectTransform>();
+
+        ApplyColor();
     }
+
 
     public void SetTarget(Camera cam, Vector3 targetPos, bool hasTarget)
     {
@@ -47,6 +67,8 @@ public class QuestPointerMarker : MonoBehaviour
 
     public void SetSlotActive(bool on)
     {
+        if (!on)
+            SetHighlighted(false);
         // Disable whole GO so it stops updating layout / raycast etc
         gameObject.SetActive(on);
     }

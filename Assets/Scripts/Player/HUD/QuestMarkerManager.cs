@@ -51,24 +51,37 @@ public class QuestMarkerManager : MonoBehaviour
         {
             Vector3 target = _uniqueWorldTargets[i];
 
+            bool isClosest = questManager.HasClosestQuest && TryGetCoordForTarget(target, active, out var coord) && coord == questManager.ClosestQuestCoord;
+
             if (pointers[i])
             {
                 pointers[i].SetTarget(cam, target, hasTarget: true);
                 pointers[i].SetSlotActive(true);
+                pointers[i].SetHighlighted(isClosest);
             }
 
             if (beacons[i])
             {
                 beacons[i].SetTarget(cam, target, hasTarget: true);
                 beacons[i].SetSlotActive(true);
+                beacons[i].SetHighlighted(isClosest);
             }
         }
 
         // Disable unused slots
         for (int i = count; i < maxSlots; i++)
         {
-            if (pointers[i]) pointers[i].SetSlotActive(false);
-            if (beacons[i]) beacons[i].SetSlotActive(false);
+            if (pointers[i])
+            {
+                pointers[i].SetHighlighted(false);
+                pointers[i].SetSlotActive(false);
+            }
+
+            if (beacons[i])
+            {
+                beacons[i].SetHighlighted(false);
+                beacons[i].SetSlotActive(false);
+            }
         }
 
         if (hideAllWhenNoQuests && uniqueCount == 0)
@@ -101,5 +114,27 @@ public class QuestMarkerManager : MonoBehaviour
         if (beacons != null)
             for (int i = 0; i < beacons.Length; i++)
                 if (beacons[i]) beacons[i].SetSlotActive(on);
+    }
+
+    private bool TryGetCoordForTarget(
+    Vector3 target,
+    IReadOnlyList<NPCQuestManager.ActiveQuest> active,
+    out Vector3Int coord)
+    {
+        coord = default;
+
+        if (active == null)
+            return false;
+
+        for (int i = 0; i < active.Count; i++)
+        {
+            if (active[i].toWorldPos == target)
+            {
+                coord = active[i].toCoord;
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -13,6 +13,7 @@ public class ModuleLoadoutManager : MonoBehaviour
     [Header("Player Movement Stats")]
     public float baseMaxSpeed = 200f;
     public float baseAcceleration = 100f;
+    public float baseBoostAccelAdd = 50f;
 
     [Header("Boost Stats")]
     public float baseBoostMaxSpeed = 900f;
@@ -31,6 +32,7 @@ public class ModuleLoadoutManager : MonoBehaviour
 
         float speedBonus = 0f;
         float accelBonus = 0f;
+        float boostAccelAddBonus = 0f;
 
         float boostMaxSpeedBonus = 0f;
         float capBonus = 0f;
@@ -46,6 +48,7 @@ public class ModuleLoadoutManager : MonoBehaviour
 
             speedBonus += slot.EquippedModule.maxSpeedBonus;
             accelBonus += slot.EquippedModule.accelerationBonus;
+            boostAccelAddBonus += slot.EquippedModule.boostAccelAddBonus;
 
             boostMaxSpeedBonus += slot.EquippedModule.boostMaxBonus;
             capBonus += slot.EquippedModule.capacityBonus;
@@ -59,6 +62,7 @@ public class ModuleLoadoutManager : MonoBehaviour
         //  Player Movement
         float finalMaxSpeed = baseMaxSpeed + speedBonus;
         float finalAcceleration = baseAcceleration + accelBonus;
+        float finalBoostAccelAdd = baseBoostAccelAdd + boostAccelAddBonus;
 
         //  Boosting
         float finalBoostMaxSpeed = baseBoostMaxSpeed + boostMaxSpeedBonus;
@@ -72,6 +76,7 @@ public class ModuleLoadoutManager : MonoBehaviour
 
             StatManager.Instance.SetMaxSpeed(finalMaxSpeed);
             StatManager.Instance.SetAcceleration(finalAcceleration);
+            StatManager.Instance.SetBoostAccelAdd(finalBoostAccelAdd);
 
             StatManager.Instance.SetBoostMaxSpeed(finalBoostMaxSpeed);
             StatManager.Instance.SetCapacity(finalCapacity);

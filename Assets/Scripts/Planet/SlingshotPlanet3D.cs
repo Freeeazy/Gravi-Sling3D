@@ -120,6 +120,11 @@ public class SlingshotPlanet3D : MonoBehaviour
         var move = other.GetComponent<SimpleMove>();
         if (!move) return;
 
+        if (WormholeConeTether.Instance != null)
+        {
+            WormholeConeTether.Instance.SetTargets(transform, other.transform);
+        }
+
         StartCoroutine(OrbitAndCharge(rb, move));
     }
 
@@ -352,8 +357,11 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (Mathf.Abs(launchAngleOffsetDeg) > 0.001f)
             tangent = Quaternion.AngleAxis(launchAngleOffsetDeg, orbitAxis) * tangent;
 
-        if (PlayerThrustManager.Instance)
-            PlayerThrustManager.Instance.OnLaunch();
+        if (PlayerThrustManager.Instance)                                                   // ALSO LAUNCH
+            PlayerThrustManager.Instance.OnLaunch(launchSpeed);
+
+        if (WormholeConeTether.Instance)
+            WormholeConeTether.Instance.StopTether();
 
         isCharging = false;
 
@@ -482,7 +490,7 @@ public class SlingshotPlanet3D : MonoBehaviour
             tangent = Quaternion.AngleAxis(launchAngleOffsetDeg, orbitAxis) * tangent;
 
         if (PlayerThrustManager.Instance)
-            PlayerThrustManager.Instance.OnLaunch();
+            PlayerThrustManager.Instance.OnLaunch(launchSpeed);
 
         rb.linearVelocity = tangent * launchSpeed;
 

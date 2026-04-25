@@ -24,6 +24,16 @@ public class PlayerThrustManager : MonoBehaviour
     [SerializeField] private ParticleSystem centerThruster;
     [SerializeField] private ParticleSystem MachRing;
 
+    [Header("Mach Ring Scaling")]
+    [SerializeField] private float mach_minLaunchSpeed = 100f;
+    [SerializeField] private float mach_maxLaunchSpeed = 2000f;
+
+    [SerializeField] private Vector2 mach_startSpeedAtMin = new Vector2(20f, 30f);
+    [SerializeField] private Vector2 mach_startSpeedAtMax = new Vector2(190f, 200f);
+
+    [SerializeField] private int mach_burstCountAtMin = 30;
+    [SerializeField] private int mach_burstCountAtMax = 200;
+
     [Header("Global Multipliers")]
     [Tooltip("Master scale for all thruster size (keeps tuning easy).")]
     [SerializeField] private float globalSize = 1f;
@@ -301,7 +311,7 @@ public class PlayerThrustManager : MonoBehaviour
     /// <summary>
     /// Call exactly when you launch/exit orbit. Cuts all emission quickly.
     /// </summary>
-    public void OnLaunch()
+    public void OnLaunch(float launchSpeed)
     {
         _state = ThrustState.LaunchCut;
 
@@ -312,7 +322,7 @@ public class PlayerThrustManager : MonoBehaviour
         );
 
         // Mach ring burst
-        PlayOneShot(MachRing);
+        PlayMachRing(launchSpeed);
     }
 
     /// <summary>
@@ -371,5 +381,40 @@ public class PlayerThrustManager : MonoBehaviour
 
         if (ps)
             ps.gameObject.SetActive(false);
+    }
+
+    private void PlayMachRing(float launchSpeed)
+    {
+        if (!MachRing) return;
+
+        float clampedSpeed = Mathf.Clamp(
+            launchSpeed,
+            mach_minLaunchSpeed,
+            mach_maxLaunchSpeed
+        );
+
+        float t = Mathf.InverseLerp(
+            mach_minLaunchSpeed,
+            mach_maxLaunchSpeed,
+            clampedSpeed
+        );
+
+        var main = MachRing.main;
+        var emission = MachRing.emission;
+
+        float minStartSpeed = Mathf.Lerp(mach_startSpeedAtMin.x, mach_startSpeedAtMax.x, t);
+        float maxStartSpeed = Mathf.Lerp(mach_startSpeedAtMin.y, mach_startSpeedAtMax.y, t);
+        int burstCount = Mathf.RoundToInt(Mathf.Lerp(mach_burstCountAtMin, mach_burstCountAtMax, t));
+
+        main.startSpeed = new ParticleSystem.MinMaxCurve(minStartSpeed, maxStartSpeed);
+
+        ParticleSystem.Burst burst = new ParticleSystem.Burst(
+            0f,
+            (short)burstCount
+        );
+
+        emission.SetBursts(new ParticleSystem.Burst[] { burst });
+
+        PlayOneShot(MachRing);
     }
 }

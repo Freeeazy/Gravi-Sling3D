@@ -11516,7 +11516,7 @@ MonoBehaviour:
   acceleration: 100
   damping: 2
   normalizeInput: 1
-  boostMaxSpeedAdd: 900
+  boostMaxSpeed: 8
   boostRampUp: 1.2
   boostRampDown: 1
   boostAccelAdd: 50
@@ -11652,6 +11652,12 @@ MonoBehaviour:
   rightThruster: {fileID: 1794132164}
   centerThruster: {fileID: 1193835582}
   MachRing: {fileID: 1066601804}
+  mach_minLaunchSpeed: 100
+  mach_maxLaunchSpeed: 2000
+  mach_startSpeedAtMin: {x: 20, y: 30}
+  mach_startSpeedAtMax: {x: 190, y: 200}
+  mach_burstCountAtMin: 30
+  mach_burstCountAtMax: 200
   globalSize: 1
   globalEmission: 1
   free_lr_minRate: 0

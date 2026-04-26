@@ -182,7 +182,7 @@ public class SimpleMove : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(cruiseKey))
+        if (!UIBlock.IsUIOpen && !_isPaused && Input.GetKeyDown(cruiseKey))
             _cruiseTogglePressed = true;
     }
 
@@ -196,8 +196,9 @@ public class SimpleMove : MonoBehaviour
         float ud = 0f;
         float roll = 0f;
         bool boostHeld = false;
+        bool inputBlocked = _isPaused || UIBlock.IsUIOpen;
 
-        if (!_isPaused)
+        if (!inputBlocked)
         {
             h = Input.GetAxisRaw("Horizontal");
             v = Input.GetAxisRaw("Vertical");

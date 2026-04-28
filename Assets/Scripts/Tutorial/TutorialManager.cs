@@ -54,7 +54,7 @@ public class TutorialManager : MonoBehaviour
     private int currentRingCount = 0;
     private bool tutorialFinished = false;
     private Coroutine stageTextRoutine;
-
+    private string currentVisibleBody = "";
     private void Start()
     {
         if (exitPromptObject != null)
@@ -125,7 +125,7 @@ public class TutorialManager : MonoBehaviour
             return;
 
         currentRingCount++;
-        UpdateTutorialText(stage, stage.message);
+        UpdateTutorialText(stage, currentVisibleBody);
 
         if (currentRingCount >= stage.ringsRequired)
         {
@@ -168,16 +168,60 @@ public class TutorialManager : MonoBehaviour
     private IEnumerator TypeStageText(TutorialStage stage)
     {
         string fullMessage = stage.message;
-        string visibleText = "";
+        currentVisibleBody = "";
 
-        for (int i = 0; i <= fullMessage.Length; i++)
+        for (int i = 0; i < fullMessage.Length; i++)
         {
-            visibleText = fullMessage.Substring(0, i);
-            UpdateTutorialText(stage, visibleText);
+            // Pause command: @2, @1.5, etc.
+            if (fullMessage[i] == '@')
+            {
+                int start = i + 1;
+                int end = start;
+
+                while (end < fullMessage.Length &&
+                       (char.IsDigit(fullMessage[end]) || fullMessage[end] == '.'))
+                {
+                    end++;
+                }
+
+                if (end > start && float.TryParse(fullMessage.Substring(start, end - start), out float pauseTime))
+                {
+                    yield return new WaitForSeconds(pauseTime);
+                    i = end - 1;
+                    continue;
+                }
+            }
+
+            // Literal "\n" command = clear current body/page
+            if (fullMessage[i] == '\\' && i + 1 < fullMessage.Length && fullMessage[i + 1] == 'n')
+            {
+                currentVisibleBody = "";
+                UpdateTutorialText(stage, currentVisibleBody);
+                i++; // skip the 'n'
+                continue;
+            }
+
+            // TMP rich text tag: append instantly, don't type character-by-character
+            if (fullMessage[i] == '<')
+            {
+                int tagEnd = fullMessage.IndexOf('>', i);
+
+                if (tagEnd != -1)
+                {
+                    currentVisibleBody += fullMessage.Substring(i, tagEnd - i + 1);
+                    UpdateTutorialText(stage, currentVisibleBody);
+                    i = tagEnd;
+                    continue;
+                }
+            }
+
+            currentVisibleBody += fullMessage[i];
+            UpdateTutorialText(stage, currentVisibleBody);
+
             yield return new WaitForSeconds(1f / Mathf.Max(1f, charactersPerSecond));
         }
 
-        UpdateTutorialText(stage, fullMessage);
+        UpdateTutorialText(stage, currentVisibleBody);
     }
 
     private void FinishTutorial()

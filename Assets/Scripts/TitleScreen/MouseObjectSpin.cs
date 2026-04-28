@@ -35,6 +35,15 @@ public class MouseObjectSpin : MonoBehaviour
     public float stationaryPixelsPerSec = 10f;  // “not moving” threshold
     public float stationaryDelay = 0.35f;       // time before idle returns while hovered
 
+    [Header("Physics Explosion")]
+    public Transform explosionOrigin;
+
+    public float maxExplosionVelocity = 12f;
+    public float minExplosionVelocity = 2f;
+    public float explosionRadius = 8f;
+    public float randomVelocityJitter = 1.5f;
+    public float torqueStrength = 8f;
+
     private Quaternion restRotation;
     private Camera cam;
     private Coroutine running;
@@ -52,6 +61,10 @@ public class MouseObjectSpin : MonoBehaviour
     private float idleBlend; // 0..1
     private bool isSpinning;
 
+    private Rigidbody rb;
+    private bool isExploded;
+    private Coroutine returnRoutine;
+
     void Awake()
     {
         cam = Camera.main;
@@ -60,6 +73,14 @@ public class MouseObjectSpin : MonoBehaviour
         restLocalPos = transform.localPosition;
         restLocalScale = transform.localScale;
         lastMouse = Input.mousePosition;
+
+        rb = GetComponent<Rigidbody>();
+
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
     }
 
     void OnMouseEnter()
@@ -74,6 +95,9 @@ public class MouseObjectSpin : MonoBehaviour
 
     private void Update()
     {
+        if (isExploded)
+            return;
+
         Vector2 mouse = Input.mousePosition;
         float mouseSpeed = (mouse - lastMouse).magnitude / Mathf.Max(Time.unscaledDeltaTime, 0.0001f);
         lastMouse = mouse;
@@ -114,6 +138,65 @@ public class MouseObjectSpin : MonoBehaviour
 
         transform.localPosition = Vector3.Lerp(restLocalPos, idlePos, idleBlend);
         transform.localScale = Vector3.Lerp(restLocalScale, idleScale, idleBlend);
+    }
+
+    public void ExplodeFromPoint(Vector3 hitPoint, float autoResetDelay = 1.5f, float returnDuration = 1f)
+    {
+        if (explosionOrigin != null)
+            explosionOrigin.position = hitPoint;
+
+        ExplodeFromOrigin();
+
+        if (autoResetDelay > 0f)
+            StartCoroutine(AutoReturnRoutine(autoResetDelay, returnDuration));
+    }
+
+    private System.Collections.IEnumerator AutoReturnRoutine(float delay, float returnDuration)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        ReturnToRest(returnDuration);
+    }
+    public void ExplodeFromOrigin()
+    {
+        if (rb == null || explosionOrigin == null)
+            return;
+
+        if (running != null)
+        {
+            StopCoroutine(running);
+            running = null;
+        }
+
+        isSpinning = false;
+        isExploded = true;
+
+        rb.isKinematic = false;
+        rb.useGravity = false;
+
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        Vector3 awayDirection = transform.position - explosionOrigin.position;
+
+        if (awayDirection.sqrMagnitude < 0.0001f)
+            awayDirection = Random.onUnitSphere;
+
+        float distance = awayDirection.magnitude;
+        awayDirection.Normalize();
+
+        // 1 = very close, 0 = outside radius
+        float proximity01 = 1f - Mathf.Clamp01(distance / explosionRadius);
+
+        float velocityStrength = Mathf.Lerp(
+            minExplosionVelocity,
+            maxExplosionVelocity,
+            proximity01
+        );
+
+        Vector3 randomJitter = Random.insideUnitSphere * randomVelocityJitter;
+
+        rb.linearVelocity = awayDirection * velocityStrength + randomJitter;
+        rb.angularVelocity = Random.insideUnitSphere * torqueStrength;
     }
 
     void TriggerSpin()
@@ -205,5 +288,47 @@ public class MouseObjectSpin : MonoBehaviour
         transform.localRotation = restRotation;
         isSpinning = false;
         running = null;
+    }
+
+    public void ReturnToRest(float returnDuration = 1f)
+    {
+        if (returnRoutine != null)
+            StopCoroutine(returnRoutine);
+
+        returnRoutine = StartCoroutine(ReturnToRestRoutine(returnDuration));
+    }
+
+    private System.Collections.IEnumerator ReturnToRestRoutine(float duration)
+    {
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.isKinematic = true;
+        }
+
+        Vector3 startPos = transform.localPosition;
+        Quaternion startRot = transform.localRotation;
+
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            float a = Mathf.Clamp01(t / duration);
+            float eased = 1f - Mathf.Pow(1f - a, 3f);
+
+            transform.localPosition = Vector3.Lerp(startPos, restLocalPos, eased);
+            transform.localRotation = Quaternion.Slerp(startRot, restRotation, eased);
+
+            yield return null;
+        }
+
+        transform.localPosition = restLocalPos;
+        transform.localRotation = restRotation;
+
+        idleBlend = 0f;
+        isExploded = false;
+        returnRoutine = null;
     }
 }

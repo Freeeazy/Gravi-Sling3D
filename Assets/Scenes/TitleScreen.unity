@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 30694319}
   - component: {fileID: 30694322}
   - component: {fileID: 30694321}
+  - component: {fileID: 30694323}
   m_Layer: 0
   m_Name: Letter_G (1)
   m_TagString: Untagged
@@ -228,7 +229,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4.2, y: 4.2, z: 0.79999995}
-  m_Center: {x: -0.00000023841858, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &30694322
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,6 +259,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &30694323
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30694317}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &53806276
 GameObject:
   m_ObjectHideFlags: 0
@@ -777,8 +811,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1615,7 +1649,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -5, z: -25}
+  m_LocalPosition: {x: 0, y: -5, z: -30}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1786,8 +1820,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -7311,6 +7345,7 @@ GameObject:
   - component: {fileID: 467203155}
   - component: {fileID: 467203158}
   - component: {fileID: 467203157}
+  - component: {fileID: 467203159}
   m_Layer: 0
   m_Name: Letter_I (2)
   m_TagString: Untagged
@@ -7407,7 +7442,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 4.2, z: 0.79999995}
-  m_Center: {x: 0.000000029802322, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &467203158
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7437,6 +7472,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &467203159
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 467203153}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &507946306
 GameObject:
   m_ObjectHideFlags: 0
@@ -7450,6 +7518,7 @@ GameObject:
   - component: {fileID: 507946308}
   - component: {fileID: 507946311}
   - component: {fileID: 507946310}
+  - component: {fileID: 507946312}
   m_Layer: 0
   m_Name: Letter_G (2)
   m_TagString: Untagged
@@ -7546,7 +7615,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4.2, y: 4.2, z: 0.79999995}
-  m_Center: {x: -0.00000023841858, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &507946311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7576,6 +7645,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &507946312
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507946306}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &559222919
 GameObject:
   m_ObjectHideFlags: 0
@@ -7826,9 +7928,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 365}
-  m_SizeDelta: {x: 500, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 50, y: 310}
+  m_SizeDelta: {x: 400, y: 90}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!95 &589808864
 Animator:
   serializedVersion: 7
@@ -8020,6 +8122,7 @@ GameObject:
   - component: {fileID: 610668397}
   - component: {fileID: 610668400}
   - component: {fileID: 610668399}
+  - component: {fileID: 610668401}
   m_Layer: 0
   m_Name: Letter_45 (1)
   m_TagString: Untagged
@@ -8116,7 +8219,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4, y: 1, z: 0.79999995}
-  m_Center: {x: 0, y: 0.000000029802322, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &610668400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8146,6 +8249,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &610668401
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 610668395}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &772635530
 GameObject:
   m_ObjectHideFlags: 0
@@ -8767,9 +8903,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 240}
-  m_SizeDelta: {x: 500, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 50, y: 200}
+  m_SizeDelta: {x: 400, y: 90}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &955524829
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9208,8 +9344,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -9446,6 +9582,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1114822825}
+  - component: {fileID: 1114822826}
   m_Layer: 0
   m_Name: TitleLetters
   m_TagString: Untagged
@@ -9462,7 +9599,7 @@ Transform:
   m_GameObject: {fileID: 1114822824}
   serializedVersion: 2
   m_LocalRotation: {x: -0.043619405, y: 0, z: 0, w: 0.9990483}
-  m_LocalPosition: {x: 0, y: 20, z: 55}
+  m_LocalPosition: {x: 0, y: 20, z: 50}
   m_LocalScale: {x: 1.3, y: 1.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9477,8 +9614,39 @@ Transform:
   - {fileID: 467203154}
   - {fileID: 1877399687}
   - {fileID: 507946307}
+  - {fileID: 2008012031}
+  - {fileID: 1653539641}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: -5, y: 0, z: 0}
+--- !u!114 &1114822826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1114822824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9819d24a520e6674cada664d6646d652, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggeringTag: Player
+  spinObjects:
+  - {fileID: 30694322}
+  - {fileID: 2038572831}
+  - {fileID: 1829462156}
+  - {fileID: 2119224710}
+  - {fileID: 2025856463}
+  - {fileID: 610668400}
+  - {fileID: 2107493051}
+  - {fileID: 1457133983}
+  - {fileID: 467203158}
+  - {fileID: 1877399691}
+  - {fileID: 507946311}
+  sharedExplosionOrigin: {fileID: 2008012031}
+  autoResetDelay: 2
+  returnDuration: 2
+  collisionCooldown: 2.1
 --- !u!1 &1180310911
 GameObject:
   m_ObjectHideFlags: 0
@@ -9716,9 +9884,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 115}
-  m_SizeDelta: {x: 500, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 50, y: 90}
+  m_SizeDelta: {x: 400, y: 90}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1234114999
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9936,7 +10104,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 3b8ab7c9823bb18469e2b94fd3b684cf, type: 2}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -10048,9 +10216,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 300, y: 490}
-  m_SizeDelta: {x: 500, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 50, y: 420}
+  m_SizeDelta: {x: 400, y: 90}
+  m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1321174017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10251,7 +10419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 2100000, guid: 3b8ab7c9823bb18469e2b94fd3b684cf, type: 2}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -10437,8 +10605,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 60
-  m_fontSizeBase: 60
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -10851,6 +11019,7 @@ GameObject:
   - component: {fileID: 1457133980}
   - component: {fileID: 1457133983}
   - component: {fileID: 1457133982}
+  - component: {fileID: 1457133984}
   m_Layer: 0
   m_Name: Letter_L (1)
   m_TagString: Untagged
@@ -10947,7 +11116,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 3.4, y: 4.2, z: 0.79999995}
-  m_Center: {x: -0.000000059604645, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1457133983
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10977,6 +11146,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &1457133984
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457133978}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1504039628
 GameObject:
   m_ObjectHideFlags: 0
@@ -11516,13 +11718,13 @@ MonoBehaviour:
   acceleration: 100
   damping: 2
   normalizeInput: 1
-  boostMaxSpeed: 8
+  boostMaxSpeed: 900
   boostRampUp: 1.2
   boostRampDown: 1
   boostAccelAdd: 50
   limitBaseThrustToMaxSpeed: 1
   enableRotation: 1
-  rotationSpeed: 12
+  rotationSpeed: 10
   minSpeedToRotate: 0.15
   baseEulerOffset: {x: 0, y: 0, z: 0}
   manualRollSpeed: 360
@@ -11532,10 +11734,10 @@ MonoBehaviour:
   autoStabilizeDelay: 4
   autoStabilizeDegPerSec: 60
   autoStabilizeEpsilon: 0.15
-  bankDegrees: 40
+  bankDegrees: 20
   bankResponse: 10
-  thrustWobbleDegrees: 5
-  thrustWobbleSpeed: 6
+  thrustWobbleDegrees: 8
+  thrustWobbleSpeed: 5
   enableSlip: 1
   slipReturnTimeNoInput: 60
   slipReturnTimeWithInput: 60
@@ -11598,7 +11800,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 8
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -11711,6 +11913,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   posManager: {fileID: 2048073271}
   stationNameText: {fileID: 0}
+--- !u!1 &1653539640
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1653539641}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1653539641
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1653539640}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1114822825}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!1001 &1754030809
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12095,6 +12328,7 @@ GameObject:
   - component: {fileID: 1829462153}
   - component: {fileID: 1829462156}
   - component: {fileID: 1829462155}
+  - component: {fileID: 1829462157}
   m_Layer: 0
   m_Name: Letter_A (1)
   m_TagString: Untagged
@@ -12191,7 +12425,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4.2, y: 3.8000002, z: 0.79999995}
-  m_Center: {x: -0.00000023841858, y: 0.000000059604645, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1829462156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12221,6 +12455,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &1829462157
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829462151}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1840492992
 GameObject:
   m_ObjectHideFlags: 0
@@ -12493,6 +12760,7 @@ GameObject:
   - component: {fileID: 1877399688}
   - component: {fileID: 1877399691}
   - component: {fileID: 1877399690}
+  - component: {fileID: 1877399692}
   m_Layer: 0
   m_Name: Letter_N (1)
   m_TagString: Untagged
@@ -12589,7 +12857,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4.2, y: 3.9, z: 0.79999995}
-  m_Center: {x: -0.00000023841858, y: -0.000000059604645, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1877399691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12619,6 +12887,70 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &1877399692
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877399686}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!1 &2008012030
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2008012031}
+  m_Layer: 0
+  m_Name: ExplosionPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2008012031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008012030}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.1, y: -8.3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1114822825}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2017626052
 GameObject:
   m_ObjectHideFlags: 0
@@ -12753,6 +13085,7 @@ GameObject:
   - component: {fileID: 2025856460}
   - component: {fileID: 2025856463}
   - component: {fileID: 2025856462}
+  - component: {fileID: 2025856464}
   m_Layer: 0
   m_Name: Letter_I (1)
   m_TagString: Untagged
@@ -12849,7 +13182,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 4.2, z: 0.79999995}
-  m_Center: {x: 0.000000029802322, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2025856463
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12879,6 +13212,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &2025856464
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2025856458}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &2038572826
 GameObject:
   m_ObjectHideFlags: 0
@@ -12892,6 +13258,7 @@ GameObject:
   - component: {fileID: 2038572828}
   - component: {fileID: 2038572831}
   - component: {fileID: 2038572830}
+  - component: {fileID: 2038572832}
   m_Layer: 0
   m_Name: Letter_R (1)
   m_TagString: Untagged
@@ -12988,7 +13355,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4, y: 4.2, z: 0.79999995}
-  m_Center: {x: 0, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2038572831
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13018,6 +13385,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &2038572832
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038572826}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &2048073270
 GameObject:
   m_ObjectHideFlags: 0
@@ -13360,6 +13760,7 @@ GameObject:
   - component: {fileID: 2107493048}
   - component: {fileID: 2107493051}
   - component: {fileID: 2107493050}
+  - component: {fileID: 2107493052}
   m_Layer: 0
   m_Name: Letter_S (1)
   m_TagString: Untagged
@@ -13456,7 +13857,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4, y: 4.2, z: 0.79999995}
-  m_Center: {x: 0, y: -0.00000023841858, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2107493051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13486,6 +13887,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &2107493052
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2107493046}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &2119224705
 GameObject:
   m_ObjectHideFlags: 0
@@ -13499,6 +13933,7 @@ GameObject:
   - component: {fileID: 2119224707}
   - component: {fileID: 2119224710}
   - component: {fileID: 2119224709}
+  - component: {fileID: 2119224711}
   m_Layer: 0
   m_Name: Letter_V (1)
   m_TagString: Untagged
@@ -13595,7 +14030,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 4.2, y: 3.7000003, z: 0.79999995}
-  m_Center: {x: -0.00000023841858, y: 0.000000059604645, z: -0.000000014901161}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2119224710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13625,6 +14060,39 @@ MonoBehaviour:
   idleZScale: 0.02
   stationaryPixelsPerSec: 10
   stationaryDelay: 0.35
+  explosionOrigin: {fileID: 2008012031}
+  maxExplosionVelocity: 50
+  minExplosionVelocity: 10
+  explosionRadius: 100
+  randomVelocityJitter: 1.5
+  torqueStrength: 8
+--- !u!54 &2119224711
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119224705}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &2138073069
 GameObject:
   m_ObjectHideFlags: 0

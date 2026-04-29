@@ -12,10 +12,6 @@ public class MouseObjectSpin : MonoBehaviour
     [Header("Axis")]
     public Vector3 spinAxis = Vector3.up;
 
-    [Header("Retrigger Behavior")]
-    [Tooltip("If true, each retrigger treats the current rotation as the new 'rest' rotation.")]
-    public bool retriggerResetsRest = true;
-
     [Header("Anti-Runaway Guard")]
     [Tooltip("Minimum time between triggers (prevents jittery enter/exit spam).")]
     public float minRetriggerSeconds = 0.20f;
@@ -65,13 +61,21 @@ public class MouseObjectSpin : MonoBehaviour
     private bool isExploded;
     private Coroutine returnRoutine;
 
+    private Quaternion originalLocalRotation;
+    private Vector3 originalLocalPos;
+    private Vector3 originalLocalScale;
+
     void Awake()
     {
         cam = Camera.main;
         spinAxis = spinAxis.sqrMagnitude > 0f ? spinAxis.normalized : Vector3.up;
-        restRotation = transform.localRotation;
-        restLocalPos = transform.localPosition;
-        restLocalScale = transform.localScale;
+        originalLocalRotation = transform.localRotation;
+        originalLocalPos = transform.localPosition;
+        originalLocalScale = transform.localScale;
+
+        restRotation = originalLocalRotation;
+        restLocalPos = originalLocalPos;
+        restLocalScale = originalLocalScale;
         lastMouse = Input.mousePosition;
 
         rb = GetComponent<Rigidbody>();
@@ -229,19 +233,17 @@ public class MouseObjectSpin : MonoBehaviour
         lastTriggerMousePos = mouse;
         hasMousePos = true;
 
-        // Interrupt current animation immediately
         if (running != null)
         {
             StopCoroutine(running);
             running = null;
+        }
 
-            if (retriggerResetsRest)
-                restRotation = transform.localRotation;
-        }
-        else
-        {
-            restRotation = transform.localRotation;
-        }
+        // Never overwrite the true rest pose.
+        // Scene-start transform is the only valid rest state.
+        restRotation = originalLocalRotation;
+        restLocalPos = originalLocalPos;
+        restLocalScale = originalLocalScale;
 
         running = StartCoroutine(SpinRoutine(direction));
     }
@@ -309,6 +311,7 @@ public class MouseObjectSpin : MonoBehaviour
 
         Vector3 startPos = transform.localPosition;
         Quaternion startRot = transform.localRotation;
+        Vector3 startScale = transform.localScale;
 
         float t = 0f;
 
@@ -318,14 +321,20 @@ public class MouseObjectSpin : MonoBehaviour
             float a = Mathf.Clamp01(t / duration);
             float eased = 1f - Mathf.Pow(1f - a, 3f);
 
-            transform.localPosition = Vector3.Lerp(startPos, restLocalPos, eased);
-            transform.localRotation = Quaternion.Slerp(startRot, restRotation, eased);
+            transform.localPosition = Vector3.Lerp(startPos, originalLocalPos, eased);
+            transform.localRotation = Quaternion.Slerp(startRot, originalLocalRotation, eased);
+            transform.localScale = Vector3.Lerp(startScale, originalLocalScale, eased);
 
             yield return null;
         }
 
-        transform.localPosition = restLocalPos;
-        transform.localRotation = restRotation;
+        transform.localPosition = originalLocalPos;
+        transform.localRotation = originalLocalRotation;
+        transform.localScale = originalLocalScale;
+
+        restLocalPos = originalLocalPos;
+        restRotation = originalLocalRotation;
+        restLocalScale = originalLocalScale;
 
         idleBlend = 0f;
         isExploded = false;

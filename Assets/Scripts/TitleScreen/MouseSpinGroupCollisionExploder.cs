@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class MouseSpinGroupCollisionExploder : MonoBehaviour
 {
-    [Header("Trigger Rules")]
-    public string triggeringTag = "Player";
-
     [Header("Letters To Explode")]
     public MouseObjectSpin[] spinObjects;
 
@@ -19,23 +16,19 @@ public class MouseSpinGroupCollisionExploder : MonoBehaviour
     public float collisionCooldown = 0.25f;
 
     private float lastTriggerTime = -999f;
+    private Coroutine resetRoutine;
 
     private void Reset()
     {
         spinObjects = FindObjectsByType<MouseObjectSpin>(FindObjectsSortMode.None);
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void ExplodeFromPoint(Vector3 hitPoint)
     {
-        if (!other.CompareTag(triggeringTag))
-            return;
-
         if (Time.unscaledTime - lastTriggerTime < collisionCooldown)
             return;
 
         lastTriggerTime = Time.unscaledTime;
-
-        Vector3 hitPoint = other.ClosestPoint(transform.position);
 
         if (sharedExplosionOrigin != null)
             sharedExplosionOrigin.position = hitPoint;
@@ -44,13 +37,14 @@ public class MouseSpinGroupCollisionExploder : MonoBehaviour
         {
             if (spin == null) continue;
 
-            if (sharedExplosionOrigin != null)
-                spin.explosionOrigin = sharedExplosionOrigin;
-
+            spin.explosionOrigin = sharedExplosionOrigin;
             spin.ExplodeFromOrigin();
         }
 
-        StartCoroutine(ResetAllAfterDelay());
+        if (resetRoutine != null)
+            StopCoroutine(resetRoutine);
+
+        resetRoutine = StartCoroutine(ResetAllAfterDelay());
     }
 
     private System.Collections.IEnumerator ResetAllAfterDelay()
@@ -62,5 +56,7 @@ public class MouseSpinGroupCollisionExploder : MonoBehaviour
             if (spin == null) continue;
             spin.ReturnToRest(returnDuration);
         }
+
+        resetRoutine = null;
     }
 }

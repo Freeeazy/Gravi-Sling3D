@@ -3,6 +3,13 @@ using UnityEngine;
 
 public class TutorialBoundsManager : MonoBehaviour
 {
+    [Header("Player Rigidbody")]
+    public Rigidbody playerRb;
+
+    [Header("Outside Safe Zone Drag")]
+    public float minOutsideDamping = 0.01f;
+    public float maxOutsideDamping = 0.5f;
+
     [Header("Safe Zones")]
     public Collider[] safeZones;
 
@@ -19,6 +26,9 @@ public class TutorialBoundsManager : MonoBehaviour
 
     [Header("Leviathan Prototype")]
     public GameObject leviathanHead;
+
+    public GameObject[] leviathanBodySegments;
+
     public float leviathanSpawnDistanceFromPlayer = 250f;
     public float leviathanSideOffset = 40f;
     public float leviathanUpOffset = 25f;
@@ -33,6 +43,15 @@ public class TutorialBoundsManager : MonoBehaviour
 
         if (leviathanHead)
             leviathanHead.SetActive(false);
+
+        if (leviathanBodySegments != null)
+        {
+            foreach (GameObject segment in leviathanBodySegments)
+            {
+                if (segment)
+                    segment.SetActive(false);
+            }
+        }
     }
 
     private void Update()
@@ -42,6 +61,8 @@ public class TutorialBoundsManager : MonoBehaviour
 
         bool insideAnySafeZone = IsInsideAnySafeZone();
 
+        LeviathanStalker stalker = GetLeviathanStalker();
+
         if (insideAnySafeZone)
         {
             if (outsideBoundsObject)
@@ -49,14 +70,35 @@ public class TutorialBoundsManager : MonoBehaviour
 
             ResetCountdown();
 
-            if (leviathanHead)
-                leviathanHead.SetActive(false);
+            if (leviathanHead && leviathanHead.activeInHierarchy && stalker)
+            {
+                stalker.BeginFlee();
+            }
+
+            if (playerRb)
+                playerRb.linearDamping = 0f;
 
             return;
         }
 
         if (outsideBoundsObject)
             outsideBoundsObject.SetActive(true);
+
+
+        if (leviathanHead && leviathanHead.activeInHierarchy && stalker && stalker.IsFleeing)
+        {
+            Collider activeZone = GetCurrentActiveSafeZone();
+
+            if (activeZone)
+                stalker.ResumeStalking(activeZone.transform);
+
+            leviathanStarted = true;
+
+            if (countdownParentObject)
+                countdownParentObject.SetActive(false);
+
+            return;
+        }
 
         RunCountdown();
     }
@@ -97,6 +139,17 @@ public class TutorialBoundsManager : MonoBehaviour
             countdownParentObject.SetActive(true);
 
         countdownTimer -= Time.deltaTime;
+
+        if (playerRb)
+        {
+            float normalizedTimeSpentOutside = 1f - (countdownTimer / countdownDuration);
+
+            playerRb.linearDamping = Mathf.Lerp(
+                minOutsideDamping,
+                maxOutsideDamping,
+                normalizedTimeSpentOutside
+            );
+        }
 
         int secondsLeft = Mathf.CeilToInt(Mathf.Max(0f, countdownTimer));
 
@@ -181,6 +234,15 @@ public class TutorialBoundsManager : MonoBehaviour
 
         leviathanHead.SetActive(true);
 
+        if (leviathanBodySegments != null)
+        {
+            foreach (GameObject segment in leviathanBodySegments)
+            {
+                if (segment)
+                    segment.SetActive(true);
+            }
+        }
+
         LeviathanStalker stalker = leviathanHead.GetComponent<LeviathanStalker>();
 
         if (stalker)
@@ -190,5 +252,13 @@ public class TutorialBoundsManager : MonoBehaviour
             if (activeZone)
                 stalker.safeZoneCenter = activeZone.transform;
         }
+    }
+
+    private LeviathanStalker GetLeviathanStalker()
+    {
+        if (!leviathanHead)
+            return null;
+
+        return leviathanHead.GetComponent<LeviathanStalker>();
     }
 }

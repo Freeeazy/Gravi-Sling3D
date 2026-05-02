@@ -46,32 +46,26 @@ public class ModuleInventoryManager : MonoBehaviour
 
     private void Update()
     {
-        // Numpad 1 = Spawn first module prefab entry
-        if (Input.GetKeyDown(KeyCode.Keypad1))
+        if (Input.GetKeyDown(KeyCode.Keypad1)) TrySpawnModule(0);
+        if (Input.GetKeyDown(KeyCode.Keypad2)) TrySpawnModule(1);
+        if (Input.GetKeyDown(KeyCode.Keypad3)) TrySpawnModule(2);
+        if (Input.GetKeyDown(KeyCode.Keypad4)) TrySpawnModule(3);
+        if (Input.GetKeyDown(KeyCode.Keypad5)) TrySpawnModule(4);
+        if (Input.GetKeyDown(KeyCode.Keypad6)) TrySpawnModule(5);
+        if (Input.GetKeyDown(KeyCode.Keypad7)) TrySpawnModule(6);
+        if (Input.GetKeyDown(KeyCode.Keypad8)) TrySpawnModule(7);
+        if (Input.GetKeyDown(KeyCode.Keypad9)) TrySpawnModule(8);
+    }
+    private void TrySpawnModule(int index)
+    {
+        if (modulePrefabs.Count > index && modulePrefabs[index].moduleData != null)
         {
-            if (modulePrefabs.Count > 0 && modulePrefabs[0].moduleData != null)
-            {
-                AddModule(modulePrefabs[0].moduleData, 1);
-                Debug.Log($"[DEBUG] Added module: {modulePrefabs[0].displayName}");
-            }
-            else
-            {
-                Debug.LogWarning("[DEBUG] ModulePrefab index 0 is missing.");
-            }
+            AddModule(modulePrefabs[index].moduleData, 1);
+            Debug.Log($"[DEBUG] Added module: {modulePrefabs[index].displayName}");
         }
-
-        // Numpad 2 = Spawn second module prefab entry
-        if (Input.GetKeyDown(KeyCode.Keypad2))
+        else
         {
-            if (modulePrefabs.Count > 1 && modulePrefabs[1].moduleData != null)
-            {
-                AddModule(modulePrefabs[1].moduleData, 1);
-                Debug.Log($"[DEBUG] Added module: {modulePrefabs[1].displayName}");
-            }
-            else
-            {
-                Debug.LogWarning("[DEBUG] ModulePrefab index 1 is missing.");
-            }
+            Debug.LogWarning($"[DEBUG] ModulePrefab index {index} is missing.");
         }
     }
 

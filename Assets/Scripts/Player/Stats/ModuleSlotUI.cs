@@ -32,6 +32,8 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
 
     public void ClearModule()
     {
+        ModuleData removedModule = EquippedModule;
+
         EquippedModule = null;
 
         if (iconImage != null)
@@ -39,6 +41,9 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
             iconImage.sprite = null;
             iconImage.enabled = false;
         }
+
+        if (ModuleInventoryManager.Instance != null && removedModule != null)
+            ModuleInventoryManager.Instance.AddModule(removedModule, 1);
 
         if (ModuleLoadoutManager.Instance != null)
             ModuleLoadoutManager.Instance.RecalculateStats();

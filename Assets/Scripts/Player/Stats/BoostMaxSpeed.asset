@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: BoostMaxSpeed
   m_EditorClassIdentifier: 
   moduleName: BoostMaxSpeed++
+  moduleTier: Tier 1
   icon: {fileID: 21300000, guid: 864b5ee03735045418e3c2d5854427cd, type: 3}
   chargeRateBonus: 0
   maxSpeedBonus: 0
   accelerationBonus: 0
+  boostAccelAddBonus: 0
   boostMaxBonus: 100
   capacityBonus: 0
   drainPerSecondBonus: 0

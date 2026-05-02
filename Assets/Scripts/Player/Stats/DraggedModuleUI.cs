@@ -61,6 +61,9 @@ public class DraggedModuleUI : MonoBehaviour
                 {
                     slot.SetModule(moduleData);
 
+                    if (ModuleInventoryManager.Instance != null)
+                        ModuleInventoryManager.Instance.RemoveModule(moduleData, 1);
+
                     if (ModuleLoadoutManager.Instance != null)
                         ModuleLoadoutManager.Instance.RecalculateStats();
 

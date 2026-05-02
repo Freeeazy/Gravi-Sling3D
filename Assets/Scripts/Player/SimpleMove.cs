@@ -303,15 +303,18 @@ public class SimpleMove : MonoBehaviour
                 {
                     isAutoStabilizingRoll = true;
 
-                    // Drive roll back to zero
-                    _manualRoll = Mathf.MoveTowards(_manualRoll, 0f, autoStabilizeDegPerSec * dt);
-                    _manualRoll = Mathf.Repeat(_manualRoll, 360f);
+                    float deltaToZero = Mathf.DeltaAngle(_manualRoll, 0f);
+                    float step = autoStabilizeDegPerSec * dt;
 
-                    // Done? snap and stop updating
-                    if (Mathf.Abs(_manualRoll) <= autoStabilizeEpsilon)
+                    if (Mathf.Abs(deltaToZero) <= step || Mathf.Abs(deltaToZero) <= autoStabilizeEpsilon)
                     {
                         _manualRoll = 0f;
                         isAutoStabilizingRoll = false;
+                    }
+                    else
+                    {
+                        _manualRoll += Mathf.Sign(deltaToZero) * step;
+                        _manualRoll = Mathf.Repeat(_manualRoll, 360f);
                     }
                 }
             }

@@ -4,6 +4,7 @@ using UnityEngine;
 public class ModuleData : ScriptableObject
 {
     public string moduleName;
+    public string moduleTier;
     public Sprite icon;
 
     //  Orbit

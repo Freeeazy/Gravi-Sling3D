@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,8 +11,19 @@ public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     public ScrollRect parentScrollRect;
     public Camera uiCamera;
 
+    [Header("Inventory Display")]
+    public TMP_Text amountText;
+
+    private int currentAmount;
     private DraggedModuleUI currentDragged;
 
+    public void SetAmount(int amount)
+    {
+        currentAmount = amount;
+
+        if (amountText != null)
+            amountText.text = amount > 1 ? amount.ToString() : "";
+    }
     public void OnBeginDrag(PointerEventData eventData)
     {
         Debug.Log($"BeginDrag on: {name}");

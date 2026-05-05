@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class ModuleInventoryManager : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class ModuleInventoryManager : MonoBehaviour
     public List<ModulePrefabEntry> modulePrefabs = new List<ModulePrefabEntry>();
     public GameObject emptySlotPrefab;
     public int totalSlots = 30;
+
+    [Header("Inventory Counter")]
+    public TMP_Text inventoryCounterText;
 
     [Header("UI Parent")]
     public Transform moduleListParent;
@@ -147,6 +151,8 @@ public class ModuleInventoryManager : MonoBehaviour
             usedSlots++;
         }
 
+        UpdateInventoryCounter();
+
         int emptySlotsToCreate = Mathf.Max(0, totalSlots - usedSlots);
 
         for (int i = 0; i < emptySlotsToCreate; i++)
@@ -173,5 +179,38 @@ public class ModuleInventoryManager : MonoBehaviour
         {
             Destroy(moduleListParent.GetChild(i).gameObject);
         }
+    }
+    private void UpdateInventoryCounter()
+    {
+        if (inventoryCounterText == null)
+            return;
+
+        int uniqueCount = ownedModules.Count;
+        inventoryCounterText.text = $"{uniqueCount}/{totalSlots}";
+    }
+    public bool TryGiveModuleByIndex(int index, int amount = 1)
+    {
+        if (index < 0 || index >= modulePrefabs.Count)
+        {
+            Debug.LogWarning($"[Inventory] Invalid module reward index: {index}");
+            return false;
+        }
+
+        ModulePrefabEntry entry = modulePrefabs[index];
+
+        if (entry == null || entry.moduleData == null)
+        {
+            Debug.LogWarning($"[Inventory] Module reward index {index} is missing ModuleData.");
+            return false;
+        }
+
+        AddModule(entry.moduleData, amount);
+
+        Debug.Log($"[Inventory] Reward added: {entry.displayName} x{amount}");
+
+        if (RewardPopupUI.Instance != null)
+            RewardPopupUI.Instance.ShowReward(entry.displayName);
+
+        return true;
     }
 }

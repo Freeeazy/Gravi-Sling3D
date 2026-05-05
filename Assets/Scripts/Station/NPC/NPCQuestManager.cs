@@ -6,6 +6,7 @@ public class NPCQuestManager : MonoBehaviour
 {
     [Header("Refs")]
     public StationPosManager posManager;
+    public ModuleInventoryManager inventoryManager;
 
     [Tooltip("Optional: used for consistent selection across stations.")]
     public int globalSeed = 12345;
@@ -34,6 +35,7 @@ public class NPCQuestManager : MonoBehaviour
 
         public float distance; // from station -> target (world distance)
         public int difficulty; // 1..5
+        public int rewardModuleIndex;
         public bool valid;
     }
 
@@ -45,6 +47,8 @@ public class NPCQuestManager : MonoBehaviour
         public Vector3Int toCoord;
         public Vector3 toWorldPos;
         public float distanceAtAccept;
+        public int difficulty;
+        public int rewardModuleIndex;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -137,39 +141,48 @@ public class NPCQuestManager : MonoBehaviour
             npcId = npcId,
             toCoord = offer.toCoord,
             toWorldPos = offer.toWorldPos,
-            distanceAtAccept = offer.distance
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            rewardModuleIndex = offer.rewardModuleIndex
         };
 
         _active.Add(q);
+        if (PackageDurabilityManager.Instance != null)
+            PackageDurabilityManager.Instance.RegisterQuest(q);
         RefreshClosestQuest();
         return true;
     }
 
-    public int RemoveAllQuestsByCoord(Vector3Int coord)
+    private int CompleteQuestsByCoord(Vector3Int coord)
     {
-        int removed = 0;
+        int completed = 0;
+
         for (int i = _active.Count - 1; i >= 0; i--)
         {
             if (_active[i].toCoord == coord)
             {
+                GiveQuestReward(_active[i]);
+
+                if (PackageDurabilityManager.Instance != null)
+                    PackageDurabilityManager.Instance.RemoveQuest(_active[i].questId);
+
                 _active.RemoveAt(i);
-                removed++;
+                completed++;
             }
         }
 
-        if (removed > 0)
+        if (completed > 0)
             RefreshClosestQuest();
 
-        return removed;
+        return completed;
     }
 
     public void NotifyArrivedAt(Vector3Int coord)
     {
-        // Complete ALL quests that target this coord.
-        int removed = RemoveAllQuestsByCoord(coord);
+        int completed = CompleteQuestsByCoord(coord);
 
-        // Optional debug
-        if (removed > 0) Debug.Log($"Completed {removed} quest(s) at {coord}");
+        if (completed > 0)
+            Debug.Log($"Completed {completed} quest(s) at {coord}");
     }
 
     private QuestOffer GenerateOfferForNpc(int npcId)
@@ -192,6 +205,9 @@ public class NPCQuestManager : MonoBehaviour
         // Pick difficulty (random for now, deterministic due to seed)
         int difficulty = PickDifficulty1to5(rng);
         offer.difficulty = difficulty;
+
+        int rewardIndex = PickRewardModuleIndex(rng);
+        offer.rewardModuleIndex = rewardIndex;
 
         // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
         float tMin01, tMax01;
@@ -386,5 +402,30 @@ public class NPCQuestManager : MonoBehaviour
 
         ClosestQuest = _active[bestIndex];
         HasClosestQuest = true;
+    }
+    private int PickRewardModuleIndex(System.Random rng)
+    {
+        ModuleInventoryManager inv = inventoryManager ? inventoryManager : ModuleInventoryManager.Instance;
+
+        if (inv == null || inv.modulePrefabs == null || inv.modulePrefabs.Count == 0)
+            return -1;
+
+        return rng.Next(0, inv.modulePrefabs.Count);
+    }
+    private void GiveQuestReward(ActiveQuest quest)
+    {
+        ModuleInventoryManager inv = inventoryManager ? inventoryManager : ModuleInventoryManager.Instance;
+
+        if (inv == null)
+        {
+            Debug.LogWarning("[NPCQuestManager] Cannot give quest reward. No inventory manager found.");
+            return;
+        }
+
+        bool gaveReward = inv.TryGiveModuleByIndex(quest.rewardModuleIndex, 1);
+
+        Debug.Log(gaveReward
+            ? $"[NPCQuestManager] Quest reward given. Module index={quest.rewardModuleIndex}"
+            : $"[NPCQuestManager] Failed to give quest reward. Module index={quest.rewardModuleIndex}");
     }
 }

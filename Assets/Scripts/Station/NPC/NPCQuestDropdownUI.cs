@@ -13,6 +13,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public TMP_Text acceptText;
     public Button acceptButton;
 
+    [Header("Difficulty Stars")]
+    public GameObject[] difficultyStars;
+
     private int _currentNpcId = -1;
 
     public void ShowForNpc(int npcId)
@@ -23,11 +26,15 @@ public class NPCQuestDropdownUI : MonoBehaviour
         {
             if (distanceText)
                 distanceText.text = $"{offer.distance:0} Units";
+
+            UpdateDifficultyStars(offer.difficulty);
         }
         else
         {
             if (distanceText)
                 distanceText.text = "----";
+
+            UpdateDifficultyStars(0);
         }
 
         if (questManager && !questManager.HasActiveQuestFromNpc(npcId))
@@ -73,5 +80,17 @@ public class NPCQuestDropdownUI : MonoBehaviour
     {
         _currentNpcId = -1;
         if (distanceText) distanceText.text = "----";
+    }
+    private void UpdateDifficultyStars(int difficulty)
+    {
+        difficulty = Mathf.Clamp(difficulty, 0, difficultyStars.Length);
+
+        for (int i = 0; i < difficultyStars.Length; i++)
+        {
+            if (difficultyStars[i] == null)
+                continue;
+
+            difficultyStars[i].SetActive(i < difficulty);
+        }
     }
 }

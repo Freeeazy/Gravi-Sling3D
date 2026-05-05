@@ -12,6 +12,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 {
     [Header("References")]
     public AsteroidFieldData fieldData;
+    public SimpleMove simpleMove;
 
     [Tooltip("Player Rigidbody (likely the same child RB used by SimpleMove).")]
     public Rigidbody playerRb;
@@ -432,10 +433,16 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
                 // Fraction of speed removed this smash (0..1)
                 float lossFrac = 1f - keep;
 
+                float cargoSeverity = k;
+
+                if (simpleMove != null && simpleMove.enabled && PackageDurabilityManager.Instance != null)
+                    PackageDurabilityManager.Instance.ApplyImpactDamage(cargoSeverity);
+
                 // Kick direction: opposite the impact (pushNormal is asteroid -> player)
                 Vector3 kickDir = pushNormal;
 
-                SimpleFollowCamera.Instance.AddShakeImpulse(kickDir, lossFrac);
+                if (simpleMove.enabled)
+                    SimpleFollowCamera.Instance.AddShakeImpulse(kickDir, lossFrac);
             }
         }
 
@@ -491,7 +498,16 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             Vector3 asteroidPos = chunkWorldOrigin + fieldData.positions[index];
             Vector3 hitPos = playerBox.bounds.ClosestPoint(asteroidPos);
 
-            smashVfxPool.SpawnImpact(hitPos, smashDir, dirSpeed, radialSpeed, randomSpeed, count, asteroidColor);
+            bool useMutedVfx = simpleMove != null && !simpleMove.enabled;
+
+            if (useMutedVfx)
+            {
+                smashVfxPool.SpawnImpactMuted(hitPos, smashDir, dirSpeed, radialSpeed, randomSpeed, count, asteroidColor);
+            }
+            else
+            {
+                smashVfxPool.SpawnImpact(hitPos, smashDir, dirSpeed, radialSpeed, randomSpeed, count, asteroidColor);
+            }
         }
 
         // Hide from instanced renderer (visual deletion)

@@ -522,7 +522,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: + 10 Charge Rate
+  m_text: +5 Charge Rate
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 63c96e678ec7071458461f22e2ba55ce, type: 2}
   m_sharedMaterial: {fileID: -6518121590025742155, guid: 63c96e678ec7071458461f22e2ba55ce, type: 2}
@@ -779,7 +779,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moduleData: {fileID: 11400000, guid: 89eaf89fd4684e242b6426c5f9ecbb66, type: 2}
-  draggedModulePrefab: {fileID: 858292027542123401, guid: af4e6261d7d4d414390ec1d404ce2d47, type: 3}
+  draggedModulePrefab: {fileID: 858292027542123401, guid: eb4f6713a64e68c48a953a4222577041, type: 3}
   dragCanvas: {fileID: 0}
   parentScrollRect: {fileID: 0}
   uiCamera: {fileID: 0}
@@ -924,6 +924,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 65
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 65
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5704423923895198317, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5926544189542055631, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5926544189542055631, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6382252111876391382, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
       propertyPath: m_Name
       value: Proto-Upgrade
@@ -932,9 +968,34 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 7089d19703030274caef959b106a6640, type: 3}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: db42e253d75c0024a8d1c358de0284ac, type: 3}
+    - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 8112772148698109657, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+    - {fileID: 3861860319205172121, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}

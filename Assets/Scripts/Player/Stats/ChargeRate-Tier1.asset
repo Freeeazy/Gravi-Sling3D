@@ -15,7 +15,7 @@ MonoBehaviour:
   moduleName: ChargeRate++
   moduleTier: Tier 1
   icon: {fileID: 21300000, guid: 6ff4521097433f340b5fe7c97becfade, type: 3}
-  chargeRateBonus: 10
+  chargeRateBonus: 5
   maxSpeedBonus: 0
   accelerationBonus: 0
   boostAccelAddBonus: 0

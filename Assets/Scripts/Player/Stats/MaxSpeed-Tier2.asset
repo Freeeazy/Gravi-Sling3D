@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: MaxSpeed-Tier2
   m_EditorClassIdentifier: 
   moduleName: MaxSpeed++
-  moduleTier: Tier 1
-  icon: {fileID: 21300000, guid: ec106872c5d53d2439d052de55f557b9, type: 3}
+  moduleTier: Tier 2
+  icon: {fileID: 21300000, guid: fd7434effc145354d9e9e96131c6fa78, type: 3}
   chargeRateBonus: 0
   maxSpeedBonus: 100
   accelerationBonus: 0

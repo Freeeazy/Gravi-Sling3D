@@ -21,9 +21,10 @@ public class StationProxyManager : MonoBehaviour
     private void OnEnable()
     {
         if (!posManager) return;
-        posManager.OnChunkCreated += HandleChunkCreated;
 
-        // Bootstrap existing chunks so we don't miss the initial grid
+        posManager.OnChunkCreated += HandleChunkCreated;
+        posManager.OnChunkRemoved += HandleChunkRemoved;
+
         if (posManager.Chunks != null && player)
         {
             foreach (var kv in posManager.Chunks)
@@ -34,7 +35,13 @@ public class StationProxyManager : MonoBehaviour
     private void OnDisable()
     {
         if (!posManager) return;
+
         posManager.OnChunkCreated -= HandleChunkCreated;
+        posManager.OnChunkRemoved -= HandleChunkRemoved;
+    }
+    private void HandleChunkRemoved(Vector3Int coord)
+    {
+        ReleaseProxy(coord);
     }
 
     private void HandleChunkCreated(Vector3Int coord, StationFieldData data)

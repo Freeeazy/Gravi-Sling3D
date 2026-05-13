@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class PackageDurabilityManager : MonoBehaviour
 {
@@ -53,13 +54,20 @@ public class PackageDurabilityManager : MonoBehaviour
     [Header("UI Updates")]
     public float distanceUpdateInterval = 0.25f;
 
+    [Header("Average Delivery Durability")]
+    public TMP_Text averageDurabilityText;
+    public int maxStoredDeliveries = 100;
+
     private readonly Dictionary<int, TrackedPackage> _packagesByQuestId = new Dictionary<int, TrackedPackage>();
 
     private float _distanceUpdateTimer;
 
+    private readonly List<float> _recentDeliveryDurabilities = new List<float>();
+
     private void Awake()
     {
         Instance = this;
+        RefreshAverageDurabilityText();
     }
 
     private void OnDestroy()
@@ -108,6 +116,8 @@ public class PackageDurabilityManager : MonoBehaviour
     {
         if (!_packagesByQuestId.TryGetValue(questId, out var package))
             return;
+
+        RecordCompletedDelivery(package.integrity);
 
         if (package.card != null)
             Destroy(package.card.gameObject);
@@ -175,5 +185,52 @@ public class PackageDurabilityManager : MonoBehaviour
 
         int index = Mathf.Abs(quest.questId) % deliveryItems.Count;
         return deliveryItems[index].itemName;
+    }
+    private void RecordCompletedDelivery(float finalIntegrity)
+    {
+        _recentDeliveryDurabilities.Add(Mathf.Clamp(finalIntegrity, 0f, 100f));
+
+        if (_recentDeliveryDurabilities.Count > maxStoredDeliveries)
+            _recentDeliveryDurabilities.RemoveAt(0);
+
+        RefreshAverageDurabilityText();
+    }
+
+    private void RefreshAverageDurabilityText()
+    {
+        if (averageDurabilityText == null)
+            return;
+
+        if (_recentDeliveryDurabilities.Count == 0)
+        {
+            averageDurabilityText.text = "--%";
+            return;
+        }
+
+        float total = 0f;
+
+        for (int i = 0; i < _recentDeliveryDurabilities.Count; i++)
+        {
+            total += _recentDeliveryDurabilities[i];
+        }
+
+        float average = total / _recentDeliveryDurabilities.Count;
+
+        averageDurabilityText.text = FormatAveragePercent(average);
+    }
+
+    private string FormatAveragePercent(float value)
+    {
+        value = Mathf.Clamp(value, 0f, 100f);
+
+        if (Mathf.Approximately(value, 100f))
+            return "100%";
+
+        float roundedToOneDecimal = Mathf.Round(value * 10f) / 10f;
+
+        if (Mathf.Approximately(roundedToOneDecimal % 1f, 0f))
+            return $"{Mathf.RoundToInt(roundedToOneDecimal)}%";
+
+        return $"{roundedToOneDecimal:0.#}%";
     }
 }

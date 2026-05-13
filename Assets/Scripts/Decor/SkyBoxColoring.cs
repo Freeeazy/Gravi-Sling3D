@@ -1,0 +1,459 @@
+using UnityEngine;
+
+public class SkyBoxColoring : MonoBehaviour
+{
+    [Header("References")]
+    public Transform player;
+
+    [Tooltip("Skybox material using the ProceduralSpace shader.")]
+    public Material skyboxMaterial;
+
+    [Header("Sampling")]
+    [Tooltip("Bigger value = skybox changes over larger distances.")]
+    [Min(1f)] public float regionSize = 8000f;
+
+    [Tooltip("Extra seed for procedural skybox region variation.")]
+    public int noiseSeed = 777;
+
+    [Tooltip("How quickly material values interpolate to the target.")]
+    [Min(0.01f)] public float transitionSpeed = 0.5f;
+
+    [Header("Shader Seed Scroll")]
+    public bool animateSeed = true;
+
+    [Tooltip("Base seed value for the shader.")]
+    public float baseShaderSeed = 900f;
+
+    [Tooltip("Very small value. This should barely move.")]
+    public float seedScrollAmount = 0.025f;
+
+    [Header("Dust")]
+    [Range(0f, 1f)] public float minDustAmount = 0.04f;
+    [Range(0f, 1f)] public float maxDustAmount = 0.18f;
+
+    [Header("Nebula Strengths")]
+    [Range(0f, 1f)] public float minNebula1Strength = 0.05f;
+    [Range(0f, 1f)] public float maxNebula1Strength = 0.42f;
+
+    [Range(0f, 1f)] public float minNebula2Strength = 0.00f;
+    [Range(0f, 1f)] public float maxNebula2Strength = 0.22f;
+
+    [Header("Star Colors")]
+    public Gradient starColor1Gradient;
+    public Gradient starColor2Gradient;
+
+    [Header("Nebula 1 Colors")]
+    public Gradient nebula1MainGradient;
+    public Gradient nebula1MidGradient;
+
+    [Header("Nebula 2 Colors")]
+    public Gradient nebula2Color1Gradient;
+    public Gradient nebula2Color2Gradient;
+
+    public enum Axis
+    {
+        X,
+        Y,
+        Z
+    }
+
+    [Header("Asteroid Material Tinting")]
+    public bool tintAsteroidMaterials = true;
+
+    [Tooltip("The 5 shared asteroid materials used by the instanced renderer.")]
+    public Material[] asteroidMaterials;
+
+    [Tooltip("Create runtime copies of asteroid materials so project assets are not overwritten.")]
+    public bool instanceAsteroidMaterials = true;
+
+    [Range(0f, 1f)]
+    [Tooltip("How strongly the skybox color influences asteroid base color.")]
+    public float asteroidBaseTintStrength = 0.15f;
+
+    [Range(0f, 3f)]
+    [Tooltip("Brightness multiplier for the rim lighting color.")]
+    public float asteroidRimColorIntensity = 1.25f;
+
+    [Range(0f, 1f)]
+    [Tooltip("How strongly the environment color affects rim color.")]
+    public float asteroidRimTintStrength = 0.85f;
+
+    [Tooltip("Optional fallback if material does not already have a base color.")]
+    public Color fallbackAsteroidBaseColor = Color.gray;
+
+    [Tooltip("Renderer whose 15 type materials should be replaced with the 5 runtime asteroid materials.")]
+    public AsteroidFieldInstancedRenderer asteroidRenderer;
+
+    [Tooltip("How many renderer type entries share each asteroid material. For 15 types / 5 materials, use 3.")]
+    [Min(1)] public int rendererTypesPerMaterial = 3;
+
+    private static readonly int SeedID = Shader.PropertyToID("_Seed");
+    private static readonly int StarColor1ID = Shader.PropertyToID("_StarColor1");
+    private static readonly int StarColor2ID = Shader.PropertyToID("_StarColor2");
+    private static readonly int DustAmountID = Shader.PropertyToID("_DustAmount");
+    private static readonly int Nebula1StrengthID = Shader.PropertyToID("_Nebular1Strength");
+    private static readonly int Nebula1ColorMainID = Shader.PropertyToID("_Nebular1ColorMain");
+    private static readonly int Nebula1ColorMidID = Shader.PropertyToID("_Nebular1ColorMid");
+    private static readonly int Nebula2StrengthID = Shader.PropertyToID("_Nebular2Strength");
+    private static readonly int Nebula2Color1ID = Shader.PropertyToID("_Nebular2Color1");
+    private static readonly int Nebula2Color2ID = Shader.PropertyToID("_Nebular2Color2");
+    private static readonly int AsteroidBaseColorID = Shader.PropertyToID("_BaseColor");
+    private static readonly int AsteroidRimNearColorID = Shader.PropertyToID("_RimNearColor");
+
+    private Material _runtimeSkyboxMaterial;
+    private Material[] _runtimeAsteroidMaterials;
+    private Color[] _originalAsteroidBaseColors;
+    private Color[] _originalAsteroidRimColors;
+
+    private void Reset()
+    {
+        player = Camera.main ? Camera.main.transform : null;
+        skyboxMaterial = RenderSettings.skybox;
+
+        SetupDefaultGradients();
+    }
+    private void OnDestroy()
+    {
+        if (_runtimeSkyboxMaterial != null)
+        {
+            Destroy(_runtimeSkyboxMaterial);
+            _runtimeSkyboxMaterial = null;
+        }
+
+        if (_runtimeAsteroidMaterials != null)
+        {
+            for (int i = 0; i < _runtimeAsteroidMaterials.Length; i++)
+            {
+                if (_runtimeAsteroidMaterials[i] != null)
+                    Destroy(_runtimeAsteroidMaterials[i]);
+            }
+
+            _runtimeAsteroidMaterials = null;
+        }
+    }
+
+    private void Awake()
+    {
+        if (!player)
+            player = Camera.main ? Camera.main.transform : transform;
+
+        if (!skyboxMaterial)
+            skyboxMaterial = RenderSettings.skybox;
+
+        if (skyboxMaterial)
+        {
+            // Create a runtime-only copy so we don't overwrite the actual project material asset.
+            _runtimeSkyboxMaterial = new Material(skyboxMaterial);
+            _runtimeSkyboxMaterial.name = skyboxMaterial.name + " (Runtime Instance)";
+
+            RenderSettings.skybox = _runtimeSkyboxMaterial;
+
+            // From this point forward, all edits hit the clone, not the asset.
+            skyboxMaterial = _runtimeSkyboxMaterial;
+        }
+
+        EnsureGradientsExist();
+        SetupAsteroidMaterialInstances();
+    }
+
+    private void Update()
+    {
+        if (!player || !skyboxMaterial)
+            return;
+
+        Vector3 samplePos = player.position / Mathf.Max(1f, regionSize);
+
+        float colorNoiseA = SmoothValueNoise3D(samplePos, noiseSeed);
+        float colorNoiseB = SmoothValueNoise3D(samplePos + new Vector3(31.7f, 11.2f, 5.9f), noiseSeed + 91);
+        float strengthNoise = SmoothValueNoise3D(samplePos + new Vector3(7.1f, 43.3f, 19.4f), noiseSeed + 217);
+        float dustNoise = SmoothValueNoise3D(samplePos + new Vector3(63.0f, 2.5f, 28.8f), noiseSeed + 503);
+
+        Color targetStar1 = starColor1Gradient.Evaluate(colorNoiseA);
+        Color targetStar2 = starColor2Gradient.Evaluate(colorNoiseB);
+
+        Color targetNeb1Main = nebula1MainGradient.Evaluate(colorNoiseA);
+        Color targetNeb1Mid = nebula1MidGradient.Evaluate(colorNoiseB);
+
+        Color targetNeb2Color1 = nebula2Color1Gradient.Evaluate(colorNoiseB);
+        Color targetNeb2Color2 = nebula2Color2Gradient.Evaluate(colorNoiseA);
+
+        Color asteroidEnvironmentColor = Color.Lerp(targetNeb1Main, targetNeb1Mid, 0.5f);       // RIM TINT COLOR
+
+        float targetDust = Mathf.Lerp(minDustAmount, maxDustAmount, dustNoise);
+        float targetNeb1Strength = Mathf.Lerp(minNebula1Strength, maxNebula1Strength, strengthNoise);
+        float targetNeb2Strength = Mathf.Lerp(minNebula2Strength, maxNebula2Strength, colorNoiseB);
+
+        float t = 1f - Mathf.Exp(-transitionSpeed * Time.deltaTime);
+
+        skyboxMaterial.SetColor(StarColor1ID, Color.Lerp(skyboxMaterial.GetColor(StarColor1ID), targetStar1, t));
+        skyboxMaterial.SetColor(StarColor2ID, Color.Lerp(skyboxMaterial.GetColor(StarColor2ID), targetStar2, t));
+
+        skyboxMaterial.SetColor(Nebula1ColorMainID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMainID), targetNeb1Main, t));
+        skyboxMaterial.SetColor(Nebula1ColorMidID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMidID), targetNeb1Mid, t));
+
+        skyboxMaterial.SetColor(Nebula2Color1ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color1ID), targetNeb2Color1, t));
+        skyboxMaterial.SetColor(Nebula2Color2ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color2ID), targetNeb2Color2, t));
+
+        skyboxMaterial.SetFloat(DustAmountID, Mathf.Lerp(skyboxMaterial.GetFloat(DustAmountID), targetDust, t));
+        skyboxMaterial.SetFloat(Nebula1StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula1StrengthID), targetNeb1Strength, t));
+        skyboxMaterial.SetFloat(Nebula2StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula2StrengthID), targetNeb2Strength, t));
+
+        if (tintAsteroidMaterials)
+        {
+            UpdateAsteroidMaterials(asteroidEnvironmentColor, t);
+        }
+
+        if (animateSeed)
+        {
+            Vector3 p = player.position / Mathf.Max(1f, regionSize);
+
+            float combinedAxisValue =
+                p.x * 0.57f +
+                p.y * 0.31f +
+                p.z * 0.73f;
+
+            float targetSeed = baseShaderSeed + combinedAxisValue * seedScrollAmount;
+
+            skyboxMaterial.SetFloat(SeedID, Mathf.Lerp(skyboxMaterial.GetFloat(SeedID), targetSeed, t));
+        }
+    }
+
+    private void EnsureGradientsExist()
+    {
+        if (starColor1Gradient == null || starColor1Gradient.colorKeys.Length == 0)
+            SetupDefaultGradients();
+    }
+
+    [ContextMenu("Setup Default Gradients")]
+    private void SetupDefaultGradients()
+    {
+        starColor1Gradient = MakeGradient(
+            new Color(0.75f, 0.95f, 1f),
+            new Color(1f, 0.88f, 0.65f),
+            new Color(0.95f, 0.75f, 1f)
+        );
+
+        starColor2Gradient = MakeGradient(
+            new Color(0.45f, 0.85f, 1f),
+            new Color(0.9f, 1f, 0.75f),
+            new Color(1f, 0.72f, 0.55f)
+        );
+
+        nebula1MainGradient = MakeGradient(
+            new Color(0.02f, 0.08f, 0.35f),
+            new Color(0.25f, 0.02f, 0.35f),
+            new Color(0.35f, 0.08f, 0.02f)
+        );
+
+        nebula1MidGradient = MakeGradient(
+            new Color(0.15f, 0.75f, 1f),
+            new Color(0.85f, 0.45f, 1f),
+            new Color(0.95f, 0.8f, 0.35f)
+        );
+
+        nebula2Color1Gradient = MakeGradient(
+            new Color(0.0f, 0.2f, 0.8f),
+            new Color(0.1f, 0.7f, 0.9f),
+            new Color(0.6f, 0.1f, 0.9f)
+        );
+
+        nebula2Color2Gradient = MakeGradient(
+            new Color(0.0f, 0.75f, 1f),
+            new Color(0.9f, 0.25f, 1f),
+            new Color(1f, 0.45f, 0.1f)
+        );
+    }
+
+    private Gradient MakeGradient(Color a, Color b, Color c)
+    {
+        Gradient g = new Gradient();
+
+        g.SetKeys(
+            new GradientColorKey[]
+            {
+                new GradientColorKey(a, 0f),
+                new GradientColorKey(b, 0.5f),
+                new GradientColorKey(c, 1f)
+            },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(1f, 0f),
+                new GradientAlphaKey(1f, 1f)
+            }
+        );
+
+        return g;
+    }
+
+    private static float SmoothValueNoise3D(Vector3 p, int seed)
+    {
+        int x0 = Mathf.FloorToInt(p.x);
+        int y0 = Mathf.FloorToInt(p.y);
+        int z0 = Mathf.FloorToInt(p.z);
+
+        int x1 = x0 + 1;
+        int y1 = y0 + 1;
+        int z1 = z0 + 1;
+
+        float tx = SmoothStep01(p.x - x0);
+        float ty = SmoothStep01(p.y - y0);
+        float tz = SmoothStep01(p.z - z0);
+
+        float c000 = Hash01(x0, y0, z0, seed);
+        float c100 = Hash01(x1, y0, z0, seed);
+        float c010 = Hash01(x0, y1, z0, seed);
+        float c110 = Hash01(x1, y1, z0, seed);
+
+        float c001 = Hash01(x0, y0, z1, seed);
+        float c101 = Hash01(x1, y0, z1, seed);
+        float c011 = Hash01(x0, y1, z1, seed);
+        float c111 = Hash01(x1, y1, z1, seed);
+
+        float x00 = Mathf.Lerp(c000, c100, tx);
+        float x10 = Mathf.Lerp(c010, c110, tx);
+        float x01 = Mathf.Lerp(c001, c101, tx);
+        float x11 = Mathf.Lerp(c011, c111, tx);
+
+        float y0v = Mathf.Lerp(x00, x10, ty);
+        float y1v = Mathf.Lerp(x01, x11, ty);
+
+        return Mathf.Lerp(y0v, y1v, tz);
+    }
+
+    private static float SmoothStep01(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
+    }
+
+    private static float Hash01(int x, int y, int z, int seed)
+    {
+        unchecked
+        {
+            int h = seed;
+            h = h * 374761393 + x * 668265263;
+            h = h * 1274126177 + y * 1442695041;
+            h = h * 326648991 + z * 1597334677;
+
+            h ^= h >> 13;
+            h *= 1274126177;
+            h ^= h >> 16;
+
+            uint u = (uint)h;
+            return u / (float)uint.MaxValue;
+        }
+    }
+    private void SetupAsteroidMaterialInstances()
+    {
+        if (!tintAsteroidMaterials || asteroidMaterials == null || asteroidMaterials.Length == 0)
+            return;
+
+        _originalAsteroidBaseColors = new Color[asteroidMaterials.Length];
+        _originalAsteroidRimColors = new Color[asteroidMaterials.Length];
+
+        if (instanceAsteroidMaterials)
+            _runtimeAsteroidMaterials = new Material[asteroidMaterials.Length];
+
+        for (int i = 0; i < asteroidMaterials.Length; i++)
+        {
+            Material mat = asteroidMaterials[i];
+            if (!mat)
+                continue;
+
+            if (instanceAsteroidMaterials)
+            {
+                Material runtimeMat = new Material(mat);
+                runtimeMat.name = mat.name + " (Runtime Instance)";
+
+                _runtimeAsteroidMaterials[i] = runtimeMat;
+                asteroidMaterials[i] = runtimeMat;
+                mat = runtimeMat;
+            }
+
+            _originalAsteroidBaseColors[i] = mat.HasProperty(AsteroidBaseColorID)
+                ? mat.GetColor(AsteroidBaseColorID)
+                : fallbackAsteroidBaseColor;
+
+            _originalAsteroidRimColors[i] = mat.HasProperty(AsteroidRimNearColorID)
+                ? mat.GetColor(AsteroidRimNearColorID)
+                : Color.white;
+        }
+
+        ApplyAsteroidMaterialsToRendererByIndex();
+    }
+    private void ApplyAsteroidMaterialsToRendererByIndex()
+    {
+        if (!asteroidRenderer || asteroidRenderer.typeRenders == null)
+            return;
+
+        if (asteroidMaterials == null || asteroidMaterials.Length == 0)
+            return;
+
+        int groupSize = Mathf.Max(1, rendererTypesPerMaterial);
+
+        for (int typeIndex = 0; typeIndex < asteroidRenderer.typeRenders.Length; typeIndex++)
+        {
+            var tr = asteroidRenderer.typeRenders[typeIndex];
+            if (tr == null)
+                continue;
+
+            int matIndex = typeIndex / groupSize;
+
+            if (matIndex < 0 || matIndex >= asteroidMaterials.Length)
+                continue;
+
+            Material mat = asteroidMaterials[matIndex];
+            if (!mat)
+                continue;
+
+            tr.material = mat;
+        }
+    }
+
+    private void UpdateAsteroidMaterials(Color environmentColor, float t)
+    {
+        if (asteroidMaterials == null || asteroidMaterials.Length == 0)
+            return;
+
+        Color rimTarget = environmentColor * asteroidRimColorIntensity;
+        rimTarget.a = 1f;
+
+        for (int i = 0; i < asteroidMaterials.Length; i++)
+        {
+            Material mat = asteroidMaterials[i];
+            if (!mat)
+                continue;
+
+            Color originalBase = GetOriginalBaseColor(i);
+            Color originalRim = GetOriginalRimColor(i);
+
+            Color targetBase = Color.Lerp(originalBase, environmentColor, asteroidBaseTintStrength);
+            targetBase.a = originalBase.a;
+
+            Color targetRim = Color.Lerp(originalRim, rimTarget, asteroidRimTintStrength);
+            targetRim.a = originalRim.a;
+
+            if (mat.HasProperty(AsteroidBaseColorID))
+                mat.SetColor(AsteroidBaseColorID, Color.Lerp(mat.GetColor(AsteroidBaseColorID), targetBase, t));
+
+            if (mat.HasProperty(AsteroidRimNearColorID))
+                mat.SetColor(AsteroidRimNearColorID, Color.Lerp(mat.GetColor(AsteroidRimNearColorID), targetRim, t));
+        }
+    }
+
+    private Color GetOriginalBaseColor(int index)
+    {
+        if (_originalAsteroidBaseColors == null || index < 0 || index >= _originalAsteroidBaseColors.Length)
+            return fallbackAsteroidBaseColor;
+
+        return _originalAsteroidBaseColors[index];
+    }
+
+    private Color GetOriginalRimColor(int index)
+    {
+        if (_originalAsteroidRimColors == null || index < 0 || index >= _originalAsteroidRimColors.Length)
+            return Color.white;
+
+        return _originalAsteroidRimColors[index];
+    }
+}

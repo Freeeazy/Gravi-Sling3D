@@ -72,6 +72,12 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     [Tooltip("Place Asteroid VFX Particle Systems when asteroids are destroyed")]
     public AsteroidVFXPoolManager smashVfxPool;
 
+    [Header("Density")]
+    public AsteroidPosManager posManager;
+
+    [Tooltip("How many asteroids are currently allowed to collide/render in this chunk.")]
+    public int visibleCount = int.MaxValue;
+
     // Spatial hash: cellKey -> indices in that cell
     private Dictionary<long, List<int>> _cellToIndices;
 
@@ -85,11 +91,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 
     private void Awake()
     {
-        if (!playerRb)
-            playerRb = GetComponentInChildren<Rigidbody>();
 
-        if (!playerBox)
-            playerBox = GetComponentInChildren<BoxCollider>();
     }
 
     private void OnEnable()
@@ -145,8 +147,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             list.Add(i);
         }
     }
-    public void Rebuild()
+    public void Rebuild(int newVisibleCount)
     {
+        visibleCount = Mathf.Max(0, newVisibleCount);
         BuildIndex();
     }
     private void FixedUpdate()
@@ -181,6 +184,11 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
                     {
                         int i = list[li];
 
+                        // Density-hidden asteroids should not collide.
+                        if (i >= visibleCount)
+                            continue;
+
+                        // Smashed asteroids should not collide.
                         if (_destroyed != null && _destroyed[i])
                             continue;
 
@@ -520,5 +528,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         c.g *= mult;
         c.b *= mult;
         return c;
+    }
+    private bool IsDensityHidden(int index)
+    {
+        return index < 0 || index >= visibleCount;
     }
 }

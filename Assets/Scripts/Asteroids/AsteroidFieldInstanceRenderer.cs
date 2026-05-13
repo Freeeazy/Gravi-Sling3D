@@ -399,6 +399,8 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         // Reset any "destroyed/hidden" visual state when this data is reused elsewhere
         ClearHidden(data);
 
+        ApplyChunkDensityMask(coord, data);
+
         if (_cacheByData.TryGetValue(data, out var cache) && cache != null)
             cache.initialized = false;
     }
@@ -408,5 +410,21 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
         private static readonly Stack<List<T>> _pool = new();
         public static List<T> Get() => _pool.Count > 0 ? _pool.Pop() : new List<T>(64);
         public static void Release(List<T> list) { list.Clear(); _pool.Push(list); }
+    }
+    private void ApplyChunkDensityMask(Vector3Int coord, AsteroidFieldData data)
+    {
+        if (data == null || data.count <= 0)
+            return;
+
+        if (!posManager)
+            return;
+
+        int visibleCount = posManager.GetVisibleCountForChunk(coord, data);
+
+        for (int i = 0; i < data.count; i++)
+        {
+            bool shouldHide = i >= visibleCount;
+            SetInstanceHidden(data, i, shouldHide);
+        }
     }
 }

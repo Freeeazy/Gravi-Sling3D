@@ -86,4 +86,29 @@ public class ModuleLoadoutManager : MonoBehaviour
             StatManager.Instance.ApplyRuntimeStats();
         }
     }
+    public bool TryEquipToFirstEmptySlot(ModuleData moduleData)
+    {
+        if (moduleData == null)
+            return false;
+
+        foreach (var slot in slots)
+        {
+            if (slot == null)
+                continue;
+
+            if (!slot.IsEmpty)
+                continue;
+
+            slot.SetModule(moduleData);
+
+            if (ModuleInventoryManager.Instance != null)
+                ModuleInventoryManager.Instance.RemoveModule(moduleData, 1);
+
+            RecalculateStats();
+
+            return true;
+        }
+
+        return false;
+    }
 }

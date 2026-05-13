@@ -28,6 +28,7 @@ public class StationPosManager : MonoBehaviour
     /// For station data, contents DO change when moved (we refill for new coord).
     /// </summary>
     public event Action<Vector3Int, StationFieldData> OnChunkCreated;
+    public event Action<Vector3Int> OnChunkRemoved;
 
     private readonly Dictionary<Vector3Int, StationFieldData> _chunks = new Dictionary<Vector3Int, StationFieldData>(64);
 
@@ -173,6 +174,7 @@ public class StationPosManager : MonoBehaviour
 
             StationFieldData data = _chunks[oldCoord];
             _chunks.Remove(oldCoord);
+            OnChunkRemoved?.Invoke(oldCoord);
 
             _chunks[newCoord] = data;
 

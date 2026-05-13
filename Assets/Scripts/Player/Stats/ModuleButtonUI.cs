@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     public ModuleData moduleData;
     public DraggedModuleUI draggedModulePrefab;
@@ -59,6 +59,28 @@ public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         {
             currentDragged.TryDrop(eventData);
             currentDragged = null;
+        }
+    }
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button != PointerEventData.InputButton.Right)
+            return;
+
+        if (moduleData == null)
+            return;
+
+        if (ModuleLoadoutManager.Instance == null)
+            return;
+
+        bool equipped = ModuleLoadoutManager.Instance.TryEquipToFirstEmptySlot(moduleData);
+
+        if (equipped)
+        {
+            Debug.Log($"Equipped {moduleData.name} to first empty slot.");
+        }
+        else
+        {
+            Debug.Log("No empty module slot available.");
         }
     }
 }

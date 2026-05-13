@@ -24,6 +24,21 @@ public class AsteroidPosManager : MonoBehaviour
     public int globalSeed = 12345;
     public AsteroidFieldRuntimeGenerator.Settings settings = new AsteroidFieldRuntimeGenerator.Settings();
 
+    [Header("Asteroid Density")]
+    public bool useDensity = true;
+
+    [Tooltip("Lowest possible density multiplier. 0.25 means 25% of the generated asteroids can show.")]
+    [Range(0f, 1f)] public float minDensity = 0.35f;
+
+    [Tooltip("Highest possible density multiplier. 0.75 means at most 75% of generated asteroids can show.")]
+    [Range(0f, 1f)] public float maxDensity = 0.75f;
+
+    [Tooltip("How zoomed-in/out the density noise is. Smaller = smoother larger regions.")]
+    [Min(0.0001f)] public float densityFrequency = 0.12f;
+
+    [Tooltip("Separate seed just for density noise.")]
+    public int densitySeed = 9999;
+
     [Header("Debug")]
     public bool generateOnStart = true;
     public bool logChunkCreates = true;
@@ -167,6 +182,13 @@ public class AsteroidPosManager : MonoBehaviour
 
             // Tell listeners the coord assignment changed (data contents did NOT change)
             OnChunkCreated?.Invoke(newCoord, data);
+
+            if (logChunkCreates)
+            {
+                float density = GetDensityForChunk(newCoord);
+                int visible = GetVisibleCountForChunk(newCoord, data);
+                Debug.Log($"[AsteroidDensity] Chunk {newCoord} density={density:0.00}, visible={visible}/{data.count}");
+            }
         }
 
         // Safety: if something got out of sync, fill missing with new allocations (rare)
@@ -183,7 +205,9 @@ public class AsteroidPosManager : MonoBehaviour
         {
             collisionDetector.fieldData = data;
             collisionDetector.chunkWorldOrigin = ChunkCoordToWorldOrigin(centerChunk);
-            collisionDetector.Rebuild();
+
+            int visible = GetVisibleCountForChunk(centerChunk, data);
+            collisionDetector.Rebuild(visible);
         }
     }
 
@@ -209,6 +233,89 @@ public class AsteroidPosManager : MonoBehaviour
             h = (h * 397) ^ c.y;
             h = (h * 397) ^ c.z;
             return h;
+        }
+    }
+    public float GetDensityForChunk(Vector3Int coord)
+    {
+        if (!useDensity)
+            return 1f;
+
+        // Sample at chunk center in "chunk coordinate space"
+        Vector3 sample = new Vector3(
+            coord.x * densityFrequency,
+            coord.y * densityFrequency,
+            coord.z * densityFrequency
+        );
+
+        float noise01 = SmoothValueNoise3D(sample, densitySeed);
+
+        return Mathf.Lerp(minDensity, maxDensity, noise01);
+    }
+
+    public int GetVisibleCountForChunk(Vector3Int coord, AsteroidFieldData data)
+    {
+        if (data == null || data.count <= 0)
+            return 0;
+
+        float density = GetDensityForChunk(coord);
+        return Mathf.Clamp(Mathf.RoundToInt(data.count * density), 0, data.count);
+    }
+    private static float SmoothValueNoise3D(Vector3 p, int seed)
+    {
+        int x0 = Mathf.FloorToInt(p.x);
+        int y0 = Mathf.FloorToInt(p.y);
+        int z0 = Mathf.FloorToInt(p.z);
+
+        int x1 = x0 + 1;
+        int y1 = y0 + 1;
+        int z1 = z0 + 1;
+
+        float tx = SmoothStep01(p.x - x0);
+        float ty = SmoothStep01(p.y - y0);
+        float tz = SmoothStep01(p.z - z0);
+
+        float c000 = Hash01(x0, y0, z0, seed);
+        float c100 = Hash01(x1, y0, z0, seed);
+        float c010 = Hash01(x0, y1, z0, seed);
+        float c110 = Hash01(x1, y1, z0, seed);
+
+        float c001 = Hash01(x0, y0, z1, seed);
+        float c101 = Hash01(x1, y0, z1, seed);
+        float c011 = Hash01(x0, y1, z1, seed);
+        float c111 = Hash01(x1, y1, z1, seed);
+
+        float x00 = Mathf.Lerp(c000, c100, tx);
+        float x10 = Mathf.Lerp(c010, c110, tx);
+        float x01 = Mathf.Lerp(c001, c101, tx);
+        float x11 = Mathf.Lerp(c011, c111, tx);
+
+        float y0v = Mathf.Lerp(x00, x10, ty);
+        float y1v = Mathf.Lerp(x01, x11, ty);
+
+        return Mathf.Lerp(y0v, y1v, tz);
+    }
+
+    private static float SmoothStep01(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * (3f - 2f * t);
+    }
+
+    private static float Hash01(int x, int y, int z, int seed)
+    {
+        unchecked
+        {
+            int h = seed;
+            h = h * 374761393 + x * 668265263;
+            h = h * 1274126177 + y * 2246822519.GetHashCode();
+            h = h * 3266489917.GetHashCode() + z * 1597334677;
+
+            h ^= h >> 13;
+            h *= 1274126177;
+            h ^= h >> 16;
+
+            uint u = (uint)h;
+            return u / (float)uint.MaxValue;
         }
     }
 

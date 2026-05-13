@@ -84,10 +84,10 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 0
     m_Colors:
-    - _BaseColor: {r: 0.09803922, g: 0.18039216, b: 0.27058825, a: 1}
+    - _BaseColor: {r: 0.14324492, g: 0.17401965, b: 0.2735849, a: 1}
     - _FadeColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 0}
     - _RimFarColor: {r: 0, g: 0, b: 0, a: 0}
-    - _RimNearColor: {r: 0, g: 0.44350702, b: 0.764151, a: 0}
+    - _RimNearColor: {r: 0.17065683, g: 0.3508225, b: 0.6132076, a: 0.90641063}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

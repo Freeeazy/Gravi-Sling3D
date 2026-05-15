@@ -29674,9 +29674,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1616803246}
   skyboxMaterial: {fileID: 2100000, guid: 779eaa8b697bb774b918eb1ccc633c08, type: 2}
-  regionSize: 8000
+  regionSize: 2000
   noiseSeed: 777
-  transitionSpeed: 0.05
+  transitionSpeed: 1
   animateSeed: 1
   baseShaderSeed: 900
   seedScrollAmount: 0.1
@@ -29750,15 +29750,137 @@ MonoBehaviour:
     serializedVersion: 2
     key0: {r: 0.02, g: 0.08, b: 0.35, a: 1}
     key1: {r: 0.25, g: 0.02, b: 0.35, a: 1}
-    key2: {r: 0.054901954, g: 0.3764706, b: 0.31555852, a: 0}
-    key3: {r: 0.5, g: 0.08928572, b: 0, a: 0}
+    key2: {r: 0.35, g: 0.08, b: 0.02, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 15976
-    ctime2: 41163
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  nebula1MidGradient:
+    serializedVersion: 2
+    key0: {r: 0.15, g: 0.75, b: 1, a: 1}
+    key1: {r: 0.85, g: 0.45, b: 1, a: 1}
+    key2: {r: 0.95, g: 0.8, b: 0.35, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  nebula2Color1Gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0.2, b: 0.8, a: 1}
+    key1: {r: 0.1, g: 0.7, b: 0.9, a: 1}
+    key2: {r: 0.6, g: 0.1, b: 0.9, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  nebula2Color2Gradient:
+    serializedVersion: 2
+    key0: {r: 0, g: 0.75, b: 1, a: 1}
+    key1: {r: 0.9, g: 0.25, b: 1, a: 1}
+    key2: {r: 1, g: 0.45, b: 0.1, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  repaintAsteroidBaseColors: 1
+  asteroidBaseRepaintStrength: 1
+  asteroidBaseGradientA:
+    serializedVersion: 2
+    key0: {r: 0.18, g: 0.28, b: 0.38, a: 1}
+    key1: {r: 0.38, g: 0.22, b: 0.42, a: 1}
+    key2: {r: 0.29436633, g: 0.3899731, b: 0.46226418, a: 0}
+    key3: {r: 0.42, g: 0.3, b: 0.18, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32768
+    ctime2: 51658
     ctime3: 65535
     ctime4: 0
     ctime5: 0
@@ -29776,20 +29898,20 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 4
     m_NumAlphaKeys: 2
-  nebula1MidGradient:
+  asteroidBaseGradientB:
     serializedVersion: 2
-    key0: {r: 0.1490196, g: 1, b: 0.2792534, a: 1}
-    key1: {r: 0.15, g: 0.75, b: 1, a: 1}
-    key2: {r: 0.85, g: 0.45, b: 1, a: 0}
-    key3: {r: 1, g: 0, b: 0.20000029, a: 0}
-    key4: {r: 0.95, g: 0.8, b: 0.35, a: 0}
+    key0: {r: 0.16, g: 0.36, b: 0.32, a: 1}
+    key1: {r: 0.37375167, g: 0.3773585, b: 0.24029905, a: 1}
+    key2: {r: 0.34, g: 0.32, b: 0.42, a: 0}
+    key3: {r: 0.22352941, g: 0.2540177, b: 0.44313726, a: 0}
+    key4: {r: 0.46, g: 0.24, b: 0.2, a: 0}
     key5: {r: 0, g: 0, b: 0, a: 0}
     key6: {r: 0, g: 0, b: 0, a: 0}
     key7: {r: 0, g: 0, b: 0, a: 0}
     ctime0: 0
-    ctime1: 17258
-    ctime2: 31951
-    ctime3: 48627
+    ctime1: 15742
+    ctime2: 32768
+    ctime3: 49210
     ctime4: 65535
     ctime5: 0
     ctime6: 0
@@ -29806,66 +29928,8 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
-  nebula2Color1Gradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 0.93113893, b: 0.10196078, a: 1}
-    key1: {r: 1, g: 0.45, b: 0.1, a: 1}
-    key2: {r: 0.9, g: 0.25, b: 1, a: 0}
-    key3: {r: 0.427451, g: 1, b: 0.54013246, a: 0}
-    key4: {r: 0, g: 0.75, b: 1, a: 0}
-    key5: {r: 1, g: 0.020420859, b: 0, a: 0}
-    key6: {r: 0.5826187, g: 0, b: 1, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 9795
-    ctime2: 20407
-    ctime3: 32651
-    ctime4: 43729
-    ctime5: 53874
-    ctime6: 65535
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 7
-    m_NumAlphaKeys: 2
-  nebula2Color2Gradient:
-    serializedVersion: 2
-    key0: {r: 0.5826187, g: 0, b: 1, a: 1}
-    key1: {r: 0, g: 0.75, b: 1, a: 1}
-    key2: {r: 0.427451, g: 1, b: 0.54013246, a: 0}
-    key3: {r: 0.9, g: 0.25, b: 1, a: 0}
-    key4: {r: 1, g: 0.020420859, b: 0, a: 0}
-    key5: {r: 1, g: 0.45, b: 0.1, a: 0}
-    key6: {r: 1, g: 0.93113893, b: 0.10196078, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 10845
-    ctime2: 21223
-    ctime3: 31835
-    ctime4: 43496
-    ctime5: 53058
-    ctime6: 64252
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 7
-    m_NumAlphaKeys: 2
+  asteroidBaseColorSpacing: 0.19
+  asteroidBaseColorIntensity: 0.85
   tintAsteroidMaterials: 1
   asteroidMaterials:
   - {fileID: 2100000, guid: d2b02721be384d243a1e3a0def1521df, type: 2}

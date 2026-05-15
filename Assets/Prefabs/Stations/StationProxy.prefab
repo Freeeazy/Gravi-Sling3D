@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 300, y: 300, z: 300}
+  m_LocalScale: {x: 260, y: 260, z: 260}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5551375006432599013}
@@ -65,7 +65,7 @@ MeshRenderer:
   m_RenderingLayerMask: 2
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 418142b328b7e5341879b011a8a9b924, type: 2}
+  - {fileID: 2100000, guid: 62073bb20623f5c46970441cc56faaae, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -357,11 +357,14 @@ MonoBehaviour:
   bubble: {fileID: 1858667739632006358}
   bubbleRenderer: {fileID: 3555375457191696723}
   bubbleMaterials:
-  - {fileID: 2100000, guid: 418142b328b7e5341879b011a8a9b924, type: 2}
-  - {fileID: 2100000, guid: 304cf8b2101c2c24cb9fd9c30a444c8e, type: 2}
-  - {fileID: 2100000, guid: 050e0ac6f939fb642b4eb08c92dc9ac3, type: 2}
-  - {fileID: 2100000, guid: 82ebd3826ff19fa41b7b6e3615895d6f, type: 2}
-  - {fileID: 2100000, guid: bfd2a80adb2407b49b6fa2f76ea1be59, type: 2}
+  - {fileID: 2100000, guid: 62073bb20623f5c46970441cc56faaae, type: 2}
+  - {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}
+  - {fileID: 2100000, guid: 8b54ee87de298934398e01fa59f62484, type: 2}
+  - {fileID: 2100000, guid: 501b3c45f32539449b99c4f6ed35e118, type: 2}
+  - {fileID: 2100000, guid: a0bff04a9e8d3594da6af34613fb0e4b, type: 2}
+  - {fileID: 2100000, guid: 748fcb5cea418e548b731b3067f35887, type: 2}
+  - {fileID: 2100000, guid: 1f394a6b61d90fb428104dba79d8df47, type: 2}
+  - {fileID: 2100000, guid: d03e778d09eeaf841914f2e83afb89af, type: 2}
 --- !u!1 &5975128302669208982
 GameObject:
   m_ObjectHideFlags: 0

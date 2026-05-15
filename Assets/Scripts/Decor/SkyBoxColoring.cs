@@ -50,12 +50,26 @@ public class SkyBoxColoring : MonoBehaviour
     public Gradient nebula2Color1Gradient;
     public Gradient nebula2Color2Gradient;
 
-    public enum Axis
-    {
-        X,
-        Y,
-        Z
-    }
+    [Header("Asteroid Base Repainting")]
+    public bool repaintAsteroidBaseColors = true;
+
+    [Range(0f, 1f)]
+    [Tooltip("0 = keep original asteroid base color, 1 = fully repaint asteroid base color.")]
+    public float asteroidBaseRepaintStrength = 1f;
+
+    [Tooltip("Gradient used for asteroid base colors on materials 0, 2, and 4.")]
+    public Gradient asteroidBaseGradientA;
+
+    [Tooltip("Gradient used for asteroid base colors on materials 1 and 3.")]
+    public Gradient asteroidBaseGradientB;
+
+    [Range(0.05f, 0.4f)]
+    [Tooltip("How far apart the 5 asteroid material color samples are on the gradient. Higher = less sibling-like colors.")]
+    public float asteroidBaseColorSpacing = 0.19f;
+
+    [Range(0f, 2f)]
+    [Tooltip("Brightness multiplier for asteroid base repaint colors.")]
+    public float asteroidBaseColorIntensity = 0.85f;
 
     [Header("Asteroid Material Tinting")]
     public bool tintAsteroidMaterials = true;
@@ -105,6 +119,8 @@ public class SkyBoxColoring : MonoBehaviour
     private Color[] _originalAsteroidBaseColors;
     private Color[] _originalAsteroidRimColors;
 
+    private bool _forceFirstApply = true;
+
     private void Reset()
     {
         player = Camera.main ? Camera.main.transform : null;
@@ -142,86 +158,33 @@ public class SkyBoxColoring : MonoBehaviour
 
         if (skyboxMaterial)
         {
-            // Create a runtime-only copy so we don't overwrite the actual project material asset.
             _runtimeSkyboxMaterial = new Material(skyboxMaterial);
             _runtimeSkyboxMaterial.name = skyboxMaterial.name + " (Runtime Instance)";
 
             RenderSettings.skybox = _runtimeSkyboxMaterial;
-
-            // From this point forward, all edits hit the clone, not the asset.
             skyboxMaterial = _runtimeSkyboxMaterial;
         }
 
         EnsureGradientsExist();
         SetupAsteroidMaterialInstances();
+
+        ApplyColorState(1f); // force starting values immediately
     }
 
     private void Update()
     {
-        if (!player || !skyboxMaterial)
-            return;
-
-        Vector3 samplePos = player.position / Mathf.Max(1f, regionSize);
-
-        float colorNoiseA = SmoothValueNoise3D(samplePos, noiseSeed);
-        float colorNoiseB = SmoothValueNoise3D(samplePos + new Vector3(31.7f, 11.2f, 5.9f), noiseSeed + 91);
-        float strengthNoise = SmoothValueNoise3D(samplePos + new Vector3(7.1f, 43.3f, 19.4f), noiseSeed + 217);
-        float dustNoise = SmoothValueNoise3D(samplePos + new Vector3(63.0f, 2.5f, 28.8f), noiseSeed + 503);
-
-        Color targetStar1 = starColor1Gradient.Evaluate(colorNoiseA);
-        Color targetStar2 = starColor2Gradient.Evaluate(colorNoiseB);
-
-        Color targetNeb1Main = nebula1MainGradient.Evaluate(colorNoiseA);
-        Color targetNeb1Mid = nebula1MidGradient.Evaluate(colorNoiseB);
-
-        Color targetNeb2Color1 = nebula2Color1Gradient.Evaluate(colorNoiseB);
-        Color targetNeb2Color2 = nebula2Color2Gradient.Evaluate(colorNoiseA);
-
-        Color asteroidEnvironmentColor = Color.Lerp(targetNeb1Main, targetNeb1Mid, 0.5f);       // RIM TINT COLOR
-
-        float targetDust = Mathf.Lerp(minDustAmount, maxDustAmount, dustNoise);
-        float targetNeb1Strength = Mathf.Lerp(minNebula1Strength, maxNebula1Strength, strengthNoise);
-        float targetNeb2Strength = Mathf.Lerp(minNebula2Strength, maxNebula2Strength, colorNoiseB);
-
         float t = 1f - Mathf.Exp(-transitionSpeed * Time.deltaTime);
-
-        skyboxMaterial.SetColor(StarColor1ID, Color.Lerp(skyboxMaterial.GetColor(StarColor1ID), targetStar1, t));
-        skyboxMaterial.SetColor(StarColor2ID, Color.Lerp(skyboxMaterial.GetColor(StarColor2ID), targetStar2, t));
-
-        skyboxMaterial.SetColor(Nebula1ColorMainID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMainID), targetNeb1Main, t));
-        skyboxMaterial.SetColor(Nebula1ColorMidID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMidID), targetNeb1Mid, t));
-
-        skyboxMaterial.SetColor(Nebula2Color1ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color1ID), targetNeb2Color1, t));
-        skyboxMaterial.SetColor(Nebula2Color2ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color2ID), targetNeb2Color2, t));
-
-        skyboxMaterial.SetFloat(DustAmountID, Mathf.Lerp(skyboxMaterial.GetFloat(DustAmountID), targetDust, t));
-        skyboxMaterial.SetFloat(Nebula1StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula1StrengthID), targetNeb1Strength, t));
-        skyboxMaterial.SetFloat(Nebula2StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula2StrengthID), targetNeb2Strength, t));
-
-        if (tintAsteroidMaterials)
-        {
-            UpdateAsteroidMaterials(asteroidEnvironmentColor, t);
-        }
-
-        if (animateSeed)
-        {
-            Vector3 p = player.position / Mathf.Max(1f, regionSize);
-
-            float combinedAxisValue =
-                p.x * 0.57f +
-                p.y * 0.31f +
-                p.z * 0.73f;
-
-            float targetSeed = baseShaderSeed + combinedAxisValue * seedScrollAmount;
-
-            skyboxMaterial.SetFloat(SeedID, Mathf.Lerp(skyboxMaterial.GetFloat(SeedID), targetSeed, t));
-        }
+        ApplyColorState(t);
     }
 
     private void EnsureGradientsExist()
     {
-        if (starColor1Gradient == null || starColor1Gradient.colorKeys.Length == 0)
+        if (starColor1Gradient == null || starColor1Gradient.colorKeys.Length == 0 ||
+            asteroidBaseGradientA == null || asteroidBaseGradientA.colorKeys.Length == 0 ||
+            asteroidBaseGradientB == null || asteroidBaseGradientB.colorKeys.Length == 0)
+        {
             SetupDefaultGradients();
+        }
     }
 
     [ContextMenu("Setup Default Gradients")]
@@ -261,6 +224,18 @@ public class SkyBoxColoring : MonoBehaviour
             new Color(0.0f, 0.75f, 1f),
             new Color(0.9f, 0.25f, 1f),
             new Color(1f, 0.45f, 0.1f)
+        );
+
+        asteroidBaseGradientA = MakeGradient(
+            new Color(0.18f, 0.28f, 0.38f),   // blue gray
+            new Color(0.38f, 0.22f, 0.42f),   // muted purple
+            new Color(0.42f, 0.30f, 0.18f)    // dusty bronze
+        );
+
+        asteroidBaseGradientB = MakeGradient(
+            new Color(0.16f, 0.36f, 0.32f),   // muted teal
+            new Color(0.34f, 0.32f, 0.42f),   // cool slate purple
+            new Color(0.46f, 0.24f, 0.20f)    // rusty red-brown
         );
     }
 
@@ -410,13 +385,23 @@ public class SkyBoxColoring : MonoBehaviour
         }
     }
 
-    private void UpdateAsteroidMaterials(Color environmentColor, float t)
+    private void UpdateAsteroidMaterials(Color environmentColor, Vector3 samplePos, float t)
     {
         if (asteroidMaterials == null || asteroidMaterials.Length == 0)
             return;
 
         Color rimTarget = environmentColor * asteroidRimColorIntensity;
         rimTarget.a = 1f;
+
+        float asteroidNoiseA = SmoothValueNoise3D(
+            samplePos + new Vector3(101.7f, 12.4f, 67.9f),
+            noiseSeed + 811
+        );
+
+        float asteroidNoiseB = SmoothValueNoise3D(
+            samplePos + new Vector3(44.2f, 93.6f, 18.5f),
+            noiseSeed + 1249
+        );
 
         for (int i = 0; i < asteroidMaterials.Length; i++)
         {
@@ -427,8 +412,30 @@ public class SkyBoxColoring : MonoBehaviour
             Color originalBase = GetOriginalBaseColor(i);
             Color originalRim = GetOriginalRimColor(i);
 
-            Color targetBase = Color.Lerp(originalBase, environmentColor, asteroidBaseTintStrength);
-            targetBase.a = originalBase.a;
+            Color targetBase;
+
+            if (repaintAsteroidBaseColors)
+            {
+                float baseNoise = i % 2 == 0 ? asteroidNoiseA : asteroidNoiseB;
+
+                // Offsets each asteroid material along the gradient so the 5 colors are related,
+                // but not nearly identical.
+                float colorSample = Repeat01(baseNoise + i * asteroidBaseColorSpacing);
+
+                Gradient selectedGradient = i % 2 == 0 ? asteroidBaseGradientA : asteroidBaseGradientB;
+
+                targetBase = selectedGradient.Evaluate(colorSample) * asteroidBaseColorIntensity;
+                targetBase.a = originalBase.a;
+
+                // Allows you to blend between original asteroid color and full repaint.
+                targetBase = Color.Lerp(originalBase, targetBase, asteroidBaseRepaintStrength);
+                targetBase.a = originalBase.a;
+            }
+            else
+            {
+                targetBase = Color.Lerp(originalBase, environmentColor, asteroidBaseTintStrength);
+                targetBase.a = originalBase.a;
+            }
 
             Color targetRim = Color.Lerp(originalRim, rimTarget, asteroidRimTintStrength);
             targetRim.a = originalRim.a;
@@ -455,5 +462,66 @@ public class SkyBoxColoring : MonoBehaviour
             return Color.white;
 
         return _originalAsteroidRimColors[index];
+    }
+    private static float Repeat01(float value)
+    {
+        return value - Mathf.Floor(value);
+    }
+    private void ApplyColorState(float t)
+    {
+        if (!player || !skyboxMaterial)
+            return;
+
+        Vector3 samplePos = player.position / Mathf.Max(1f, regionSize);
+
+        float colorNoiseA = SmoothValueNoise3D(samplePos, noiseSeed);
+        float colorNoiseB = SmoothValueNoise3D(samplePos + new Vector3(31.7f, 11.2f, 5.9f), noiseSeed + 91);
+        float strengthNoise = SmoothValueNoise3D(samplePos + new Vector3(7.1f, 43.3f, 19.4f), noiseSeed + 217);
+        float dustNoise = SmoothValueNoise3D(samplePos + new Vector3(63.0f, 2.5f, 28.8f), noiseSeed + 503);
+
+        Color targetStar1 = starColor1Gradient.Evaluate(colorNoiseA);
+        Color targetStar2 = starColor2Gradient.Evaluate(colorNoiseB);
+
+        Color targetNeb1Main = nebula1MainGradient.Evaluate(colorNoiseA);
+        Color targetNeb1Mid = nebula1MidGradient.Evaluate(colorNoiseB);
+
+        Color targetNeb2Color1 = nebula2Color1Gradient.Evaluate(colorNoiseB);
+        Color targetNeb2Color2 = nebula2Color2Gradient.Evaluate(colorNoiseA);
+
+        Color asteroidEnvironmentColor = Color.Lerp(targetNeb1Main, targetNeb1Mid, 0.5f);
+
+        float targetDust = Mathf.Lerp(minDustAmount, maxDustAmount, dustNoise);
+        float targetNeb1Strength = Mathf.Lerp(minNebula1Strength, maxNebula1Strength, strengthNoise);
+        float targetNeb2Strength = Mathf.Lerp(minNebula2Strength, maxNebula2Strength, colorNoiseB);
+
+        skyboxMaterial.SetColor(StarColor1ID, Color.Lerp(skyboxMaterial.GetColor(StarColor1ID), targetStar1, t));
+        skyboxMaterial.SetColor(StarColor2ID, Color.Lerp(skyboxMaterial.GetColor(StarColor2ID), targetStar2, t));
+
+        skyboxMaterial.SetColor(Nebula1ColorMainID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMainID), targetNeb1Main, t));
+        skyboxMaterial.SetColor(Nebula1ColorMidID, Color.Lerp(skyboxMaterial.GetColor(Nebula1ColorMidID), targetNeb1Mid, t));
+
+        skyboxMaterial.SetColor(Nebula2Color1ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color1ID), targetNeb2Color1, t));
+        skyboxMaterial.SetColor(Nebula2Color2ID, Color.Lerp(skyboxMaterial.GetColor(Nebula2Color2ID), targetNeb2Color2, t));
+
+        skyboxMaterial.SetFloat(DustAmountID, Mathf.Lerp(skyboxMaterial.GetFloat(DustAmountID), targetDust, t));
+        skyboxMaterial.SetFloat(Nebula1StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula1StrengthID), targetNeb1Strength, t));
+        skyboxMaterial.SetFloat(Nebula2StrengthID, Mathf.Lerp(skyboxMaterial.GetFloat(Nebula2StrengthID), targetNeb2Strength, t));
+
+        if (tintAsteroidMaterials)
+        {
+            UpdateAsteroidMaterials(asteroidEnvironmentColor, samplePos, t);
+        }
+
+        if (animateSeed)
+        {
+            float combinedAxisValue =
+                samplePos.x * 0.57f +
+                samplePos.y * 0.31f +
+                samplePos.z * 0.73f;
+
+            float targetSeed = baseShaderSeed + combinedAxisValue * seedScrollAmount;
+
+            skyboxMaterial.SetFloat(SeedID, Mathf.Lerp(skyboxMaterial.GetFloat(SeedID), targetSeed, t));
+        }
     }
 }

@@ -3229,6 +3229,11 @@ MonoBehaviour:
     candidatesPerCell: 6
     maxPerCell: 2
     maxCellPicks: 1500
+  useDensity: 1
+  minDensity: 0.35
+  maxDensity: 0.75
+  densityFrequency: 0.12
+  densitySeed: 9999
   generateOnStart: 1
   logChunkCreates: 0
 --- !u!4 &103438303
@@ -3512,6 +3517,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 347241324}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1f394a6b61d90fb428104dba79d8df47, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -5548,7 +5557,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 82ebd3826ff19fa41b7b6e3615895d6f, type: 2}
+      objectReference: {fileID: 2100000, guid: a0bff04a9e8d3594da6af34613fb0e4b, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -20940,6 +20949,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 645011628}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 748fcb5cea418e548b731b3067f35887, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -21542,6 +21555,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1146286232}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a0bff04a9e8d3594da6af34613fb0e4b, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -27572,6 +27589,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 58486380}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a0bff04a9e8d3594da6af34613fb0e4b, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -27719,7 +27740,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 050e0ac6f939fb642b4eb08c92dc9ac3, type: 2}
+      objectReference: {fileID: 2100000, guid: 1f394a6b61d90fb428104dba79d8df47, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -29565,7 +29586,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 304cf8b2101c2c24cb9fd9c30a444c8e, type: 2}
+      objectReference: {fileID: 2100000, guid: 62073bb20623f5c46970441cc56faaae, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -29751,6 +29772,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 649823859}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 748fcb5cea418e548b731b3067f35887, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -32275,6 +32300,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 131069313}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -36147,6 +36176,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1281711022}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d03e778d09eeaf841914f2e83afb89af, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -36750,7 +36783,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &696904736
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37076,6 +37109,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1367384873}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8b54ee87de298934398e01fa59f62484, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -38899,6 +38936,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1102755575}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8b54ee87de298934398e01fa59f62484, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -40630,6 +40671,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fieldData: {fileID: 0}
+  simpleMove: {fileID: 0}
   playerRb: {fileID: 1616803247}
   playerBox: {fileID: 1616803248}
   cellSize: 20
@@ -40673,6 +40715,8 @@ MonoBehaviour:
   smashMinSpeedFraction: 0.15
   instancedRenderer: {fileID: 821560723}
   smashVfxPool: {fileID: 1090598851}
+  posManager: {fileID: 0}
+  visibleCount: 2147483647
 --- !u!114 &821560726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41089,6 +41133,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1452967363}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -51158,7 +51206,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 82ebd3826ff19fa41b7b6e3615895d6f, type: 2}
+      objectReference: {fileID: 2100000, guid: d03e778d09eeaf841914f2e83afb89af, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -51228,6 +51276,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 646569649}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 501b3c45f32539449b99c4f6ed35e118, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -84142,6 +84194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfxPrefab: {fileID: 2633214162274065907, guid: 81a0a1bc4dbad4e44bd3e33cefb2249e, type: 3}
+  mutedVfxPrefab: {fileID: 0}
   prewarmCount: 5
   maxPoolSize: 10
   allowExpand: 1
@@ -94738,17 +94791,17 @@ MonoBehaviour:
   fleeSpeed: 40
   despawnDistanceFromPlayer: 2000
   useClosingSpiral: 1
-  phase1LurkDurationMin: 8
-  phase1LurkDurationMax: 15
-  phase2CloseDurationMin: 25
-  phase2CloseDurationMax: 45
+  phase1LurkDurationMin: 5
+  phase1LurkDurationMax: 10
+  phase2CloseDurationMin: 10
+  phase2CloseDurationMax: 20
   phase2OutwardOffset: 0
   phase2OrbitRadius: 250
   simpleMove: {fileID: 1616803245}
   graspRange: 450
-  graspDuration: 10
-  phase3StartDelay: 2
-  phase3OrbitRadius: 200
+  graspDuration: 7
+  phase3StartDelay: 1
+  phase3OrbitRadius: 250
   phase3StartRotationSpeed: 40
   phase3EndRotationSpeed: 400
   phase3Duration: 6
@@ -105606,7 +105659,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 304cf8b2101c2c24cb9fd9c30a444c8e, type: 2}
+      objectReference: {fileID: 2100000, guid: 501b3c45f32539449b99c4f6ed35e118, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -118178,6 +118231,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1483800563}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1f394a6b61d90fb428104dba79d8df47, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -119016,6 +119073,7 @@ MonoBehaviour:
   shadowCasting: 1
   receiveShadows: 1
   renderLayer: 0
+  stationScale: 1
   onlyRenderInPlayMode: 0
 --- !u!1 &1318480883
 GameObject:
@@ -120060,6 +120118,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 114999756}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d03e778d09eeaf841914f2e83afb89af, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -148367,7 +148429,6 @@ MonoBehaviour:
   free_center_boostRate: 800
   free_center_boostSpeed: 0
   orbit_center_idleRate: 0
-  orbit_center_rate: 0
   orbit_center_lifetime: 0
   orbit_center_speed: 0
   orbit_center_size: 0
@@ -148775,7 +148836,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 304cf8b2101c2c24cb9fd9c30a444c8e, type: 2}
+      objectReference: {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -159562,6 +159623,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 357655481}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -162410,6 +162475,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   posManager: {fileID: 2048073271}
+  inventoryManager: {fileID: 0}
   globalSeed: 12345
   pickRadius: 20000
   minTargetDistance: 2000
@@ -162417,6 +162483,8 @@ MonoBehaviour:
   maxRingRadiusChunks: 40
   samplesPerRing: 12
   maxAcceptedQuests: 10
+  baseCreditReward: 100
+  rewardPerDifficulty: 50
 --- !u!4 &1780358254
 Transform:
   m_ObjectHideFlags: 0
@@ -177029,6 +177097,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1478740597}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 748fcb5cea418e548b731b3067f35887, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -178754,7 +178826,7 @@ PrefabInstance:
     - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 82ebd3826ff19fa41b7b6e3615895d6f, type: 2}
+      objectReference: {fileID: 2100000, guid: 8b54ee87de298934398e01fa59f62484, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy
@@ -183623,6 +183695,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1529356432}
     m_Modifications:
+    - target: {fileID: 3555375457191696723, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 501b3c45f32539449b99c4f6ed35e118, type: 2}
     - target: {fileID: 4653939491283774447, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_Name
       value: StationProxy

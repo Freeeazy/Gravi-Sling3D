@@ -20,6 +20,10 @@ public class ModuleInventoryManager : MonoBehaviour
     public GameObject emptySlotPrefab;
     public int totalSlots = 30;
 
+    [Header("Currency")]
+    public float credits = 0f;
+    public TMP_Text creditsText;
+
     [Header("Inventory Counter")]
     public TMP_Text inventoryCounterText;
 
@@ -41,6 +45,7 @@ public class ModuleInventoryManager : MonoBehaviour
             moduleListParent = transform;
 
         RefreshInventoryUI();
+        UpdateCreditsText();
     }
     private void OnDestroy()
     {
@@ -208,9 +213,28 @@ public class ModuleInventoryManager : MonoBehaviour
 
         Debug.Log($"[Inventory] Reward added: {entry.displayName} x{amount}");
 
-        if (RewardPopupUI.Instance != null)
-            RewardPopupUI.Instance.ShowReward(entry.displayName);
+        //if (RewardPopupUI.Instance != null)
+        //    RewardPopupUI.Instance.ShowModuleReward(entry.displayName);
 
         return true;
+    }
+
+    public void GiveXCredits(float creditsToGive)
+    {
+        if (creditsToGive <= 0f)
+            return;
+
+        credits += creditsToGive;
+
+        UpdateCreditsText();
+
+        Debug.Log($"[Inventory] Credits added: {creditsToGive}. Total credits: {credits}");
+    }
+    private void UpdateCreditsText()
+    {
+        if (creditsText == null)
+            return;
+
+        creditsText.text = $"{credits:0} credits";
     }
 }

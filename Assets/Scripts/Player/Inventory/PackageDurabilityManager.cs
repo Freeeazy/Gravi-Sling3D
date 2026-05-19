@@ -125,6 +125,69 @@ public class PackageDurabilityManager : MonoBehaviour
         _packagesByQuestId.Remove(questId);
     }
 
+    public enum DeliveryQuality
+    {
+        Perfect,
+        Good,
+        Damaged,
+        BarelyDelivered,
+        Failed
+    }
+
+    public bool TryGetPackageIntegrity(int questId, out float integrity)
+    {
+        integrity = 0f;
+
+        if (!_packagesByQuestId.TryGetValue(questId, out var package))
+            return false;
+
+        integrity = Mathf.Clamp(package.integrity, 0f, 100f);
+        return true;
+    }
+
+    public DeliveryQuality GetDeliveryQuality(float integrity)
+    {
+        integrity = Mathf.Clamp(integrity, 0f, 100f);
+
+        if (integrity <= 0f)
+            return DeliveryQuality.Failed;
+
+        if (integrity < 30f)
+            return DeliveryQuality.BarelyDelivered;
+
+        if (integrity < 60f)
+            return DeliveryQuality.Damaged;
+
+        if (integrity < 90f)
+            return DeliveryQuality.Good;
+
+        return DeliveryQuality.Perfect;
+    }
+
+    public float GetRewardMultiplier(DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case DeliveryQuality.Perfect:
+                return 1.25f; // full pay + bonus
+
+            case DeliveryQuality.Good:
+                return 1f; // normal pay
+
+            case DeliveryQuality.Damaged:
+                return 0.5f; // reduced pay
+
+            case DeliveryQuality.BarelyDelivered:
+                return 0.15f; // tiny pay
+
+            case DeliveryQuality.Failed:
+                return 0f; // no pay
+
+            default:
+                return 0f;
+        }
+    }
+
     public void ApplyImpactDamage(float impactSeverity)
     {
         if (_packagesByQuestId.Count == 0)

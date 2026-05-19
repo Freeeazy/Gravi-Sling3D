@@ -23,6 +23,10 @@ public class NPCQuestManager : MonoBehaviour
     [Header("Accepted Quests")]
     public int maxAcceptedQuests = 5;
 
+    [Header("Credit Rewards")]
+    public float baseCreditReward = 100f;
+    public float rewardPerDifficulty = 50f;
+
     [Serializable]
     public struct QuestOffer
     {
@@ -153,15 +157,23 @@ public class NPCQuestManager : MonoBehaviour
         return true;
     }
 
-    private int CompleteQuestsByCoord(Vector3Int coord)
+    private int CompleteQuestsByCoord(Vector3Int coord, out int completed)
     {
-        int completed = 0;
+        completed = 0;
+
+        // -1 means no delivery completed.
+        int returnedQualityIndex = -1;
 
         for (int i = _active.Count - 1; i >= 0; i--)
         {
             if (_active[i].toCoord == coord)
             {
-                GiveQuestReward(_active[i]);
+                int qualityIndex = GiveQuestReward(_active[i]);
+
+                // If multiple quests complete at the same station,
+                // return the worst quality so the station reaction matches the harshest delivery.
+                if (returnedQualityIndex == -1 || qualityIndex < returnedQualityIndex)
+                    returnedQualityIndex = qualityIndex;
 
                 if (PackageDurabilityManager.Instance != null)
                     PackageDurabilityManager.Instance.RemoveQuest(_active[i].questId);
@@ -174,15 +186,18 @@ public class NPCQuestManager : MonoBehaviour
         if (completed > 0)
             RefreshClosestQuest();
 
-        return completed;
+        return returnedQualityIndex;
     }
 
-    public void NotifyArrivedAt(Vector3Int coord)
+    public int NotifyArrivedAt(Vector3Int coord)
     {
-        int completed = CompleteQuestsByCoord(coord);
+        int completed;
+        int qualityIndex = CompleteQuestsByCoord(coord, out completed);
 
         if (completed > 0)
-            Debug.Log($"Completed {completed} quest(s) at {coord}");
+            Debug.Log($"Completed {completed} quest(s) at {coord}. QualityIndex={qualityIndex}");
+
+        return qualityIndex;
     }
 
     private QuestOffer GenerateOfferForNpc(int npcId)
@@ -412,20 +427,123 @@ public class NPCQuestManager : MonoBehaviour
 
         return rng.Next(0, inv.modulePrefabs.Count);
     }
-    private void GiveQuestReward(ActiveQuest quest)
+    private int GiveQuestReward(ActiveQuest quest)
     {
         ModuleInventoryManager inv = inventoryManager ? inventoryManager : ModuleInventoryManager.Instance;
 
         if (inv == null)
         {
             Debug.LogWarning("[NPCQuestManager] Cannot give quest reward. No inventory manager found.");
-            return;
+            return 0;
         }
 
-        bool gaveReward = inv.TryGiveModuleByIndex(quest.rewardModuleIndex, 1);
+        float integrity = 100f;
 
-        Debug.Log(gaveReward
-            ? $"[NPCQuestManager] Quest reward given. Module index={quest.rewardModuleIndex}"
-            : $"[NPCQuestManager] Failed to give quest reward. Module index={quest.rewardModuleIndex}");
+        if (PackageDurabilityManager.Instance != null)
+        {
+            PackageDurabilityManager.Instance.TryGetPackageIntegrity(quest.questId, out integrity);
+        }
+
+        PackageDurabilityManager.DeliveryQuality quality =
+            PackageDurabilityManager.Instance != null
+                ? PackageDurabilityManager.Instance.GetDeliveryQuality(integrity)
+                : PackageDurabilityManager.DeliveryQuality.Good;
+
+        float multiplier =
+            PackageDurabilityManager.Instance != null
+                ? PackageDurabilityManager.Instance.GetRewardMultiplier(quality)
+                : 1f;
+
+        float rawCredits = baseCreditReward + (quest.difficulty * rewardPerDifficulty);
+        float finalCredits = rawCredits * multiplier;
+
+        if (finalCredits > 0f)
+            inv.GiveXCredits(finalCredits);
+
+        float moduleRewardChance = GetModuleRewardChance(quality);
+        bool shouldGiveModule = UnityEngine.Random.value <= moduleRewardChance;
+
+        bool gaveModule = false;
+
+        if (shouldGiveModule)
+            gaveModule = inv.TryGiveModuleByIndex(quest.rewardModuleIndex, 1);
+
+        if (RewardPopupUI.Instance != null)
+        {
+            RewardPopupUI.Instance.ShowDeliveryReward(
+                FormatDeliveryQuality(quality),
+                finalCredits,
+                gaveModule,
+                gaveModule ? inv.modulePrefabs[quest.rewardModuleIndex].displayName : ""
+            );
+        }
+
+        Debug.Log(
+            $"[NPCQuestManager] Delivery complete. " +
+            $"Quality={quality}, Integrity={integrity:0}%, " +
+            $"Credits={finalCredits:0}, ModuleGiven={gaveModule}"
+        );
+
+        return GetDeliveryQualityIndex(quality);
+    }
+    private float GetModuleRewardChance(PackageDurabilityManager.DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case PackageDurabilityManager.DeliveryQuality.Perfect:
+                return 0.50f; // 50% chance
+
+            case PackageDurabilityManager.DeliveryQuality.Good:
+                return 0.25f; // 25% chance
+
+            default:
+                return 0f;
+        }
+    }
+    private int GetDeliveryQualityIndex(PackageDurabilityManager.DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case PackageDurabilityManager.DeliveryQuality.Failed:
+                return 0;
+
+            case PackageDurabilityManager.DeliveryQuality.BarelyDelivered:
+                return 1;
+
+            case PackageDurabilityManager.DeliveryQuality.Damaged:
+                return 2;
+
+            case PackageDurabilityManager.DeliveryQuality.Good:
+                return 3;
+
+            case PackageDurabilityManager.DeliveryQuality.Perfect:
+                return 4;
+
+            default:
+                return -1;
+        }
+    }
+    private string FormatDeliveryQuality(PackageDurabilityManager.DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case PackageDurabilityManager.DeliveryQuality.Perfect:
+                return "<color=#B84DFF>Perfect Delivery</color>";
+
+            case PackageDurabilityManager.DeliveryQuality.Good:
+                return "<color=#4DFF88>Good Delivery</color>";
+
+            case PackageDurabilityManager.DeliveryQuality.Damaged:
+                return "<color=#FFD84D>Damaged Delivery</color>";
+
+            case PackageDurabilityManager.DeliveryQuality.BarelyDelivered:
+                return "<color=#FF8A3D>Barely Delivered</color>";
+
+            case PackageDurabilityManager.DeliveryQuality.Failed:
+                return "<color=#FF3D3D>Delivery Failed</color>";
+
+            default:
+                return "<color=#FFFFFF>Delivery Complete</color>";
+        }
     }
 }

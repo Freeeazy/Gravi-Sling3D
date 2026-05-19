@@ -101,6 +101,20 @@ public class SkyBoxColoring : MonoBehaviour
     [Tooltip("How many renderer type entries share each asteroid material. For 15 types / 5 materials, use 3.")]
     [Min(1)] public int rendererTypesPerMaterial = 3;
 
+    [Header("Particle Trail Coloring")]
+    public ParticleSystem trailParticleSystem;
+
+    [Range(0f, 1f)]
+    public float trailNebula2Mix = 0.35f;
+
+    [Range(0f, 1f)]
+    public float trailWhiteBlend = 0.75f;
+
+    [Range(0f, 3f)]
+    public float trailColorIntensity = 1.25f;
+
+    public bool useRandomBetweenTwoTrailGradients = true;
+
     private static readonly int SeedID = Shader.PropertyToID("_Seed");
     private static readonly int StarColor1ID = Shader.PropertyToID("_StarColor1");
     private static readonly int StarColor2ID = Shader.PropertyToID("_StarColor2");
@@ -118,8 +132,6 @@ public class SkyBoxColoring : MonoBehaviour
     private Material[] _runtimeAsteroidMaterials;
     private Color[] _originalAsteroidBaseColors;
     private Color[] _originalAsteroidRimColors;
-
-    private bool _forceFirstApply = true;
 
     private void Reset()
     {
@@ -488,6 +500,8 @@ public class SkyBoxColoring : MonoBehaviour
         Color targetNeb2Color1 = nebula2Color1Gradient.Evaluate(colorNoiseB);
         Color targetNeb2Color2 = nebula2Color2Gradient.Evaluate(colorNoiseA);
 
+        UpdateParticleTrailColors(targetNeb1Main, targetNeb1Mid, targetNeb2Color1, targetNeb2Color2);
+
         Color asteroidEnvironmentColor = Color.Lerp(targetNeb1Main, targetNeb1Mid, 0.5f);
 
         float targetDust = Mathf.Lerp(minDustAmount, maxDustAmount, dustNoise);
@@ -523,5 +537,32 @@ public class SkyBoxColoring : MonoBehaviour
 
             skyboxMaterial.SetFloat(SeedID, Mathf.Lerp(skyboxMaterial.GetFloat(SeedID), targetSeed, t));
         }
+    }
+
+    private void UpdateParticleTrailColors(Color neb1Main, Color neb1Mid, Color neb2Color1, Color neb2Color2)
+    {
+        if (trailParticleSystem == null)
+            return;
+
+        Color trailColor = MakeTrailTintFromNebula(neb1Mid);
+
+        var trails = trailParticleSystem.trails;
+        trails.colorOverTrail = new ParticleSystem.MinMaxGradient(trailColor);
+    }
+
+    private Color MakeTrailTintFromNebula(Color sourceColor)
+    {
+        Color.RGBToHSV(sourceColor, out float h, out float s, out float v);
+
+        // Hard-coded "color picker square" position:
+        // Hue comes from the nebula/color wheel.
+        // Saturation and brightness stay fixed so trails remain visible.
+        s = 0.5f;
+        v = 1.0f;
+
+        Color result = Color.HSVToRGB(h, s, v);
+
+        result.a = 1f;
+        return result;
     }
 }

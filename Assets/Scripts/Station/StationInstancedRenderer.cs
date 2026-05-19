@@ -23,6 +23,9 @@ public class StationInstancedRenderer : MonoBehaviour
     public bool receiveShadows = true;
     public int renderLayer = 0;
 
+    [Header("Instance Scale")]
+    public float stationScale = 1f;
+
     [Tooltip("Only render in play mode? If false, will also render in edit mode.")]
     public bool onlyRenderInPlayMode = false;
 
@@ -164,6 +167,8 @@ public class StationInstancedRenderer : MonoBehaviour
         if (stationCount == 0 || _parts.Count == 0)
             return;
 
+        Matrix4x4 scaleMatrix = Matrix4x4.Scale(Vector3.one * stationScale);
+
         // For each part of the prefab, draw all station instances
         for (int p = 0; p < _parts.Count; p++)
         {
@@ -175,10 +180,9 @@ public class StationInstancedRenderer : MonoBehaviour
                 int batchCount = Mathf.Min(MaxInstancesPerCall, stationCount - offset);
                 var buffer = MatrixBufferCache.Get();
 
-                // Each instance matrix = stationRoot * partLocalToRoot
                 for (int i = 0; i < batchCount; i++)
                 {
-                    buffer[i] = _stationRootMatrices[offset + i] * part.localToRoot;
+                    buffer[i] = _stationRootMatrices[offset + i] * scaleMatrix * part.localToRoot;
                 }
 
                 Graphics.DrawMeshInstanced(

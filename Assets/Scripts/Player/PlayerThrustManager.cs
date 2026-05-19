@@ -67,7 +67,7 @@ public class PlayerThrustManager : MonoBehaviour
 
     [Header("Orbiting - Center On")]
     [SerializeField] private float orbit_center_idleRate = 0f; // center thruster when just orbiting (not charging)
-    [SerializeField] private float orbit_center_rate = 25f;
+    // [SerializeField] private float orbit_center_rate = 25f;
     [SerializeField] private float orbit_center_lifetime = 0.16f;
     [SerializeField] private float orbit_center_speed = 2.1f;
     [SerializeField] private float orbit_center_size = 0.18f;
@@ -99,8 +99,6 @@ public class PlayerThrustManager : MonoBehaviour
     [Header("Smoothing")]
     [Tooltip("How fast particle properties blend to targets (bigger = snappier).")]
     [SerializeField] private float lerpSpeed = 14f;
-
-    private ThrustState _state = ThrustState.Idle;
 
     // Cached current values so we can smooth without fighting modules each frame.
     private float _lRate, _rRate, _cRate;
@@ -199,8 +197,6 @@ public class PlayerThrustManager : MonoBehaviour
     /// </summary>
     public void SetFreeFlight(Vector3 input, float speed01, float boost01 = 0f)
     {
-        _state = ThrustState.FreeFlight;
-
         float inputMag = Mathf.Clamp01(input.magnitude);
 
         // Emphasize strafing jets if you want “fighter” vibe.
@@ -254,8 +250,6 @@ public class PlayerThrustManager : MonoBehaviour
     /// </summary>
     public void SetOrbiting(float orbitStrength01 = 0.5f)
     {
-        _state = ThrustState.Orbiting;
-
         float s = Mathf.Clamp01(orbitStrength01);
 
         // Idle-orbit: center OFF (or very low if you want a faint glow)
@@ -281,8 +275,6 @@ public class PlayerThrustManager : MonoBehaviour
     /// </summary>
     public void SetCharging(float charge01)
     {
-        _state = ThrustState.Charging;
-
         float t = Mathf.Clamp01(charge01);
 
         float cRate = Mathf.Lerp(charge_center_minRate, charge_center_maxRate, t);
@@ -313,8 +305,6 @@ public class PlayerThrustManager : MonoBehaviour
     /// </summary>
     public void OnLaunch(float launchSpeed)
     {
-        _state = ThrustState.LaunchCut;
-
         SetTargets(
             0f, _lLife, 0f, _lSize,
             0f, _rLife, 0f, _rSize,
@@ -330,8 +320,6 @@ public class PlayerThrustManager : MonoBehaviour
     /// </summary>
     public void ResetToIdle(bool immediate = false)
     {
-        _state = ThrustState.Idle;
-
         if (immediate)
         {
             _lRate = _rRate = _cRate = 0f;

@@ -47,7 +47,30 @@ public class StationQuestArrivedTrigger : MonoBehaviour
         // Multi-target
         if (_questManager)
         {
-            _questManager.NotifyArrivedAt(_targetCoord);
+            int qualityIndex = _questManager.NotifyArrivedAt(_targetCoord);
+
+            if (qualityIndex >= 0)
+            {
+                Debug.Log($"[StationQuestArrivedTrigger] Delivery completed. QualityIndex={qualityIndex} on {gameObject.name}");
+
+                StationDeliveryReactionEmitter emitter =
+                    GetComponentInParent<StationDeliveryReactionEmitter>();
+
+                if (emitter != null)
+                {
+                    Debug.Log($"[StationQuestArrivedTrigger] Found StationDeliveryReactionEmitter on {emitter.gameObject.name}. Showing reaction.");
+                    emitter.ShowReaction(qualityIndex);
+                }
+                else
+                {
+                    Debug.LogWarning($"[StationQuestArrivedTrigger] No StationDeliveryReactionEmitter found in parent family of {gameObject.name}.");
+                }
+            }
+            else
+            {
+                Debug.Log($"[StationQuestArrivedTrigger] Arrived at {_targetCoord}, but no quest completed. QualityIndex={qualityIndex}");
+            }
+
             return;
         }
     }

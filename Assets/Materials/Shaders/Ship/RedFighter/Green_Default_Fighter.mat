@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GPTColors 2
+  m_Name: Green_Default_Fighter
   m_Shader: {fileID: -6465566751694194690, guid: 45cc104d8243535439c540bd8f1302d5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -72,14 +72,14 @@ Material:
     - _RimIntensity: 5
     - _RimPower: 4
     m_Colors:
-    - _Color168_CockpitAccent: {r: 0.4465309, g: 2.9960785, b: 2.8808446, a: 0}
-    - _Color169_AccentLights: {r: 0, g: 383.49805, b: 140.54903, a: 0}
-    - _Color170_Thrusters: {r: 10.401482, g: 74.87258, b: 95.87451, a: 0}
-    - _Color176_MainBody_WingTips: {r: 0.18635, g: 1.0140661, b: 1.4631926, a: 0}
-    - _Color177_SecondaryBody: {r: 0.32549024, g: 1, b: 0.9441312, a: 0}
-    - _Color178_AccentWiring: {r: 0.47120413, g: 2, b: 1.4415684, a: 0}
-    - _Color179_ThrusterEdge_Accents: {r: 0.43867922, g: 0.84017944, b: 1, a: 0}
-    - _Color80_Wings: {r: 0.15356888, g: 0.25237682, b: 0.2735849, a: 0}
+    - _Color168_CockpitAccent: {r: 0.6184594, g: 2.1932354, b: 0.32691595, a: 0}
+    - _Color169_AccentLights: {r: 53.61256, g: 683.5601, b: 0, a: 0}
+    - _Color170_Thrusters: {r: 12.575825, g: 138.64664, b: 1.8311747, a: 0}
+    - _Color176_MainBody_WingTips: {r: 0.009900765, g: 0.50192565, b: 0, a: 0}
+    - _Color177_SecondaryBody: {r: 0.27340806, g: 1, b: 0, a: 0}
+    - _Color178_AccentWiring: {r: 2.82908, g: 3.5648696, b: 0, a: 0}
+    - _Color179_ThrusterEdge_Accents: {r: 0.27450982, g: 1, b: 0, a: 0}
+    - _Color80_Wings: {r: 0.02102427, g: 0.14716971, b: 0, a: 0}
     - _RimColor: {r: 0, g: 0.35534602, b: 0.6132076, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

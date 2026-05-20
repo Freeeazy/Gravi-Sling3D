@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3168835163187610415
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 10
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Blue_Default_Runner
+  m_Shader: {fileID: -6465566751694194690, guid: cd03843d6acaf534fa3b72b200f0012d, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 2
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Color170_Metallic_1: 0
+    - _Color170_Smoothness_1: 0
+    - _Color171_Metallic: 0
+    - _Color171_Smoothness: 0
+    - _Color172_Metallic: 0
+    - _Color172_Smoothness: 0
+    - _Color208_Metallic: 0
+    - _Color208_Smoothness: 0
+    - _Color210_Metallic: 0
+    - _Color210_Smoothness: 0
+    - _Color78_Metallic: 0
+    - _Color78_Smoothness: 0
+    - _Color94_Metallic: 0
+    - _Color94_Smoothness: 0
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _RimIntensity: 1
+    - _RimPower: 4
+    m_Colors:
+    - _Color170_AccentLights: {r: 0, g: 181.01933, b: 66.342186, a: 0}
+    - _Color171_Thrusters: {r: 14.9074745, g: 106.481964, b: 135.58704, a: 0}
+    - _Color172_Cockpit: {r: 0.35849035, g: 2, b: 1.9487028, a: 0}
+    - _Color208_SecondaryAccents: {r: 0, g: 0.078431375, b: 0.16470589, a: 0}
+    - _Color210_SecondaryBody: {r: 2, g: 2, b: 2, a: 0}
+    - _Color78_MainBody: {r: 0.069270164, g: 0.43331784, b: 0.78113204, a: 0}
+    - _Color94_MainBodyAccent: {r: 2.1296384, g: 65.09036, b: 136.61832, a: 0}
+    - _RimColor: {r: 0, g: 0.35686275, b: 0.6117647, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

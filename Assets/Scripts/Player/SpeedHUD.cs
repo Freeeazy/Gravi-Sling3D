@@ -23,7 +23,7 @@ public class SpeedHUD : MonoBehaviour
     {
         if (!speedText) return;
         float v = speedUnitsPerSec * multiplier;
-        int iv = Mathf.RoundToInt(v * 2);
+        int iv = Mathf.RoundToInt(v);
         speedText.text = iv.ToString("D4");
     }
     public float GetCurrentSpeed()

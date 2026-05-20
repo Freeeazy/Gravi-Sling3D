@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Runner_Blue_Default
+  m_Name: Green_Default_Runner
   m_Shader: {fileID: -6465566751694194690, guid: cd03843d6acaf534fa3b72b200f0012d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -67,16 +67,16 @@ Material:
     - _Color94_Smoothness: 0
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _RimIntensity: 1
+    - _RimIntensity: 1.2
     - _RimPower: 4
     m_Colors:
-    - _Color170_AccentLights: {r: 0, g: 181.01933, b: 66.342186, a: 0}
-    - _Color171_Thrusters: {r: 14.9074745, g: 106.481964, b: 135.58704, a: 0}
-    - _Color172_Cockpit: {r: 0.17924517, g: 1, b: 0.9743514, a: 0}
-    - _Color208_SecondaryAccents: {r: 0, g: 0.078431375, b: 0.16470589, a: 0}
+    - _Color170_AccentLights: {r: 3.7647061, g: 47.937244, b: 0, a: 0}
+    - _Color171_Thrusters: {r: 13.865445, g: 136.61832, b: 3.2221298, a: 0}
+    - _Color172_Cockpit: {r: 0, g: 2, b: 0, a: 0}
+    - _Color208_SecondaryAccents: {r: 0.27450982, g: 1, b: 0, a: 0}
     - _Color210_SecondaryBody: {r: 2, g: 2, b: 2, a: 0}
-    - _Color78_MainBody: {r: 0.069270164, g: 0.43331784, b: 0.78113204, a: 0}
-    - _Color94_MainBodyAccent: {r: 0, g: 0.078431375, b: 0.16470589, a: 0}
+    - _Color78_MainBody: {r: 0.019607844, g: 0.14901961, b: 0, a: 0}
+    - _Color94_MainBodyAccent: {r: 11.500992, g: 69.16305, b: 0.9787206, a: 0}
     - _RimColor: {r: 0, g: 0.35686275, b: 0.6117647, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

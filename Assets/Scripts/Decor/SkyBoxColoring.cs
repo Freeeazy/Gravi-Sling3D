@@ -115,6 +115,23 @@ public class SkyBoxColoring : MonoBehaviour
 
     public bool useRandomBetweenTwoTrailGradients = true;
 
+    [Header("Ship Material Rim Tinting")]
+    public bool tintShipMaterials = true;
+
+    [Tooltip("Shared ship materials that should only receive environment rim tinting.")]
+    public Material[] shipMaterials;
+
+    [Tooltip("Create runtime copies of ship materials so project assets are not overwritten.")]
+    public bool instanceShipMaterials = true;
+
+    [Range(0f, 3f)]
+    [Tooltip("Brightness multiplier for ship rim lighting color.")]
+    public float shipRimColorIntensity = 1.25f;
+
+    [Range(0f, 1f)]
+    [Tooltip("How strongly the environment color affects ship rim color.")]
+    public float shipRimTintStrength = 0.85f;
+
     private static readonly int SeedID = Shader.PropertyToID("_Seed");
     private static readonly int StarColor1ID = Shader.PropertyToID("_StarColor1");
     private static readonly int StarColor2ID = Shader.PropertyToID("_StarColor2");
@@ -127,11 +144,15 @@ public class SkyBoxColoring : MonoBehaviour
     private static readonly int Nebula2Color2ID = Shader.PropertyToID("_Nebular2Color2");
     private static readonly int AsteroidBaseColorID = Shader.PropertyToID("_BaseColor");
     private static readonly int AsteroidRimNearColorID = Shader.PropertyToID("_RimNearColor");
+    private static readonly int ShipRimColorID = Shader.PropertyToID("_RimColor");
 
     private Material _runtimeSkyboxMaterial;
     private Material[] _runtimeAsteroidMaterials;
     private Color[] _originalAsteroidBaseColors;
     private Color[] _originalAsteroidRimColors;
+
+    private Material[] _runtimeShipMaterials;
+    private Color[] _originalShipRimColors;
 
     private void Reset()
     {
@@ -158,6 +179,17 @@ public class SkyBoxColoring : MonoBehaviour
 
             _runtimeAsteroidMaterials = null;
         }
+
+        if (_runtimeShipMaterials != null)
+        {
+            for (int i = 0; i < _runtimeShipMaterials.Length; i++)
+            {
+                if (_runtimeShipMaterials[i] != null)
+                    Destroy(_runtimeShipMaterials[i]);
+            }
+
+            _runtimeShipMaterials = null;
+        }
     }
 
     private void Awake()
@@ -179,6 +211,7 @@ public class SkyBoxColoring : MonoBehaviour
 
         EnsureGradientsExist();
         SetupAsteroidMaterialInstances();
+        SetupShipMaterialInstances();
 
         ApplyColorState(1f); // force starting values immediately
     }
@@ -526,6 +559,11 @@ public class SkyBoxColoring : MonoBehaviour
             UpdateAsteroidMaterials(asteroidEnvironmentColor, samplePos, t);
         }
 
+        if (tintShipMaterials)
+        {
+            UpdateShipMaterials(asteroidEnvironmentColor, t);
+        }
+
         if (animateSeed)
         {
             float combinedAxisValue =
@@ -564,5 +602,73 @@ public class SkyBoxColoring : MonoBehaviour
 
         result.a = 1f;
         return result;
+    }
+    private void SetupShipMaterialInstances()
+    {
+        if (!tintShipMaterials || shipMaterials == null || shipMaterials.Length == 0)
+            return;
+
+        _originalShipRimColors = new Color[shipMaterials.Length];
+
+        if (instanceShipMaterials)
+            _runtimeShipMaterials = new Material[shipMaterials.Length];
+
+        for (int i = 0; i < shipMaterials.Length; i++)
+        {
+            Material mat = shipMaterials[i];
+            if (!mat)
+                continue;
+
+            if (instanceShipMaterials)
+            {
+                Material runtimeMat = new Material(mat);
+                runtimeMat.name = mat.name + " (Runtime Instance)";
+
+                _runtimeShipMaterials[i] = runtimeMat;
+                shipMaterials[i] = runtimeMat;
+                mat = runtimeMat;
+            }
+
+            _originalShipRimColors[i] = mat.HasProperty(ShipRimColorID)
+                ? mat.GetColor(ShipRimColorID)
+                : Color.white;
+        }
+    }
+
+    private void UpdateShipMaterials(Color environmentColor, float t)
+    {
+        if (shipMaterials == null || shipMaterials.Length == 0)
+            return;
+
+        Color rimTarget = environmentColor * shipRimColorIntensity;
+        rimTarget.a = 1f;
+
+        for (int i = 0; i < shipMaterials.Length; i++)
+        {
+            Material mat = shipMaterials[i];
+            if (!mat)
+                continue;
+
+            if (!mat.HasProperty(ShipRimColorID))
+                continue;
+
+            Color originalRim = GetOriginalShipRimColor(i);
+
+            Color targetRim = Color.Lerp(originalRim, rimTarget, shipRimTintStrength);
+            targetRim.a = originalRim.a;
+
+            mat.SetColor(
+                ShipRimColorID,
+                Color.Lerp(mat.GetColor(ShipRimColorID), targetRim, t)
+            );
+        }
+    }
+
+    private Color GetOriginalShipRimColor(int index)
+    {
+        if (_originalShipRimColors == null || index < 0 || index >= _originalShipRimColors.Length)
+            return Color.white;
+
+        return _originalShipRimColors[index];
     }
 }

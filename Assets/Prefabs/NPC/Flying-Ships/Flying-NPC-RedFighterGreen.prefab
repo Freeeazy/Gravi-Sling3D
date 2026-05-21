@@ -14510,7 +14510,6 @@ GameObject:
   - component: {fileID: 5650298187015850943}
   - component: {fileID: 7761884291109435203}
   - component: {fileID: 8541514387630400393}
-  - component: {fileID: 8358220355254977842}
   m_Layer: 0
   m_Name: Flying-NPC-RedFighterGreen
   m_TagString: NPC
@@ -14582,27 +14581,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!65 &8358220355254977842
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8130252673287729796}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 7.2, y: 1.6, z: 7.6}
-  m_Center: {x: 0, y: -0.1, z: 0.95}
 --- !u!1 &8349055947662142035
 GameObject:
   m_ObjectHideFlags: 0

@@ -25844,7 +25844,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
@@ -32351,7 +32351,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
@@ -35587,7 +35587,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1317036058
 Transform:
   m_ObjectHideFlags: 0
@@ -35615,13 +35615,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21380cd59bb35a419eb5922702e0cad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stationPrefab: {fileID: 5881774255416267546, guid: bdda7522b0fa7c74fa65683b767fc075, type: 3}
+  stationPrefab: {fileID: 9091265268040652343, guid: c7d79d177e45f8d4cb680e8b5707fc04, type: 3}
   posManager: {fileID: 2048073271}
   renderCamera: {fileID: 330585545}
   shadowCasting: 1
   receiveShadows: 1
   renderLayer: 0
-  stationScale: 2
+  stationScale: 20
   onlyRenderInPlayMode: 0
 --- !u!1 &1318480883
 GameObject:
@@ -41992,7 +41992,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
@@ -44447,7 +44447,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1616803244}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de826fd2737d4e8418e1f49e9adf34e2, type: 3}
   m_Name: 
@@ -46998,7 +46998,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0
@@ -54795,7 +54795,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1977218265
 RectTransform:
   m_ObjectHideFlags: 0
@@ -56164,7 +56164,7 @@ MeshCollider:
     m_Bits: 0
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
-  m_ProvidesContacts: 0
+  m_ProvidesContacts: 1
   m_Enabled: 1
   serializedVersion: 5
   m_Convex: 0

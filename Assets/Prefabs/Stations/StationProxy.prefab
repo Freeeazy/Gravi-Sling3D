@@ -1,5 +1,101 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1369565329380886101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3740712177926902487}
+  - component: {fileID: 194525404623121214}
+  - component: {fileID: 6098372456137374745}
+  m_Layer: 0
+  m_Name: endurancespaceship
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3740712177926902487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369565329380886101}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5551375006432599013}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &194525404623121214
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369565329380886101}
+  m_Mesh: {fileID: -2432090755550338912, guid: 207a9d9abda3f734ba6c783887753d3a, type: 3}
+--- !u!23 &6098372456137374745
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1369565329380886101}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: caebb8c3f6011da4d9165d62a2cf9779, type: 2}
+  - {fileID: 2100000, guid: 9fa2ef7c804d1a744a2d12c51811bf5d, type: 2}
+  - {fileID: 2100000, guid: 5f75f5313265a8443934249e3d352d9d, type: 2}
+  - {fileID: 2100000, guid: 8c416105e8a41174db833bbabb289e83, type: 2}
+  - {fileID: 2100000, guid: fd0301fabf7a6ac4b86ad99cd7abb83a, type: 2}
+  - {fileID: 2100000, guid: 329bf133ee1b097439e38979c19bf93a, type: 2}
+  - {fileID: 2100000, guid: d4a2b5fc21157f84eac7fc0c9e20443c, type: 2}
+  - {fileID: 2100000, guid: 69ee6dda6f13a5d4ca0f4116ef7a02db, type: 2}
+  - {fileID: 2100000, guid: 5d24f64a2292c9746aa2cf7f4e7602fc, type: 2}
+  - {fileID: 2100000, guid: 2427c3010d2249e4a808a90e795dbbb2, type: 2}
+  - {fileID: 2100000, guid: 493a7786f8ceeb543bc2f655b946b7d7, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &1858667739632006358
 GameObject:
   m_ObjectHideFlags: 0
@@ -255,6 +351,7 @@ Transform:
   - {fileID: 1444200937835951795}
   - {fileID: 796393544276249280}
   - {fileID: 1539301908774126659}
+  - {fileID: 3740712177926902487}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4893908126153709187
@@ -441,6 +538,18 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 748fcb5cea418e548b731b3067f35887, type: 2}
   - {fileID: 2100000, guid: 1f394a6b61d90fb428104dba79d8df47, type: 2}
   - {fileID: 2100000, guid: d03e778d09eeaf841914f2e83afb89af, type: 2}
+  stationRenderer: {fileID: 6098372456137374745}
+  sharedStationLightMaterial: {fileID: 2100000, guid: 94b944007fb3eb24fb37036a66368a93, type: 2}
+  lightMaterialNameKeywords:
+  - light
+  bubbleBorderColorProperty: _BorderColor
+  stationLightColorProperty: _EmissionColor
+  useRandomColorIfMissing: 1
+  randomSaturation: 0.25
+  randomValue: 0.9
+  hdrIntensity: 5.4
+  stationLightIntensityMultiplier: 0.5
+  useStationLightIntensityMultiplier: 1
 --- !u!1 &5486429507069381597
 GameObject:
   m_ObjectHideFlags: 0

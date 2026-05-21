@@ -17,6 +17,7 @@ public class PackageDurabilityManager : MonoBehaviour
         public NPCQuestManager.ActiveQuest quest;
         public string deliveryItem;
         public float integrity;
+        public float timeRemaining;
         public ActiveContractCardUI card;
     }
 
@@ -51,6 +52,13 @@ public class PackageDurabilityManager : MonoBehaviour
     [Tooltip("Severity value considered a heavy smash. Usually around 0.35.")]
     public float heavySeverity = 0.35f;
 
+    [Header("Delivery Timer")]
+    [Tooltip("Base time given per delivery in seconds.")]
+    public float baseDeliveryTime = 30f;
+
+    [Tooltip("Extra seconds given per 1000 units of delivery distance.")]
+    public float secondsPer1000Units = 10f;
+
     [Header("UI Updates")]
     public float distanceUpdateInterval = 0.25f;
 
@@ -78,12 +86,24 @@ public class PackageDurabilityManager : MonoBehaviour
 
     private void Update()
     {
+        TickPackageTimers();
+
         _distanceUpdateTimer += Time.deltaTime;
 
         if (_distanceUpdateTimer >= distanceUpdateInterval)
         {
             _distanceUpdateTimer = 0f;
             RefreshAllCards();
+        }
+    }
+    private void TickPackageTimers()
+    {
+        if (_packagesByQuestId.Count == 0)
+            return;
+
+        foreach (var pair in _packagesByQuestId)
+        {
+            pair.Value.timeRemaining -= Time.deltaTime;
         }
     }
 
@@ -100,11 +120,16 @@ public class PackageDurabilityManager : MonoBehaviour
 
         ActiveContractCardUI card = Instantiate(contractCardPrefab, contractCardParent);
 
+        float startingTime =
+            baseDeliveryTime +
+            ((quest.distanceAtAccept / 1000f) * secondsPer1000Units);
+
         var package = new TrackedPackage
         {
             quest = quest,
             deliveryItem = PickDeliveryItemName(quest),
             integrity = startingIntegrity,
+            timeRemaining = startingTime,
             card = card
         };
 
@@ -237,7 +262,7 @@ public class PackageDurabilityManager : MonoBehaviour
             destinationName,
             distance,
             package.integrity,
-            "--:--"
+            FormatPackageTimer(package.timeRemaining)
         );
     }
 
@@ -295,5 +320,32 @@ public class PackageDurabilityManager : MonoBehaviour
             return $"{Mathf.RoundToInt(roundedToOneDecimal)}%";
 
         return $"{roundedToOneDecimal:0.#}%";
+    }
+    private string FormatPackageTimer(float seconds)
+    {
+        bool isLate = seconds < 0f;
+        float absSeconds = Mathf.Abs(seconds);
+
+        int minutes = Mathf.FloorToInt(absSeconds / 60f);
+        int secs = Mathf.FloorToInt(absSeconds % 60f);
+
+        string formatted = $"{minutes:00}:{secs:00}";
+
+        return isLate ? $"<color=#FF3D3D>-{formatted}</color>" : formatted;
+    }
+    public bool TryGetPackageTimer(int questId, out float timeRemaining)
+    {
+        timeRemaining = 0f;
+
+        if (!_packagesByQuestId.TryGetValue(questId, out var package))
+            return false;
+
+        timeRemaining = package.timeRemaining;
+        return true;
+    }
+
+    public bool IsPackageLate(int questId)
+    {
+        return TryGetPackageTimer(questId, out float timeRemaining) && timeRemaining <= 0f;
     }
 }

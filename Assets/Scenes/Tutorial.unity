@@ -84194,7 +84194,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfxPrefab: {fileID: 2633214162274065907, guid: 81a0a1bc4dbad4e44bd3e33cefb2249e, type: 3}
-  mutedVfxPrefab: {fileID: 0}
+  mutedVfxPrefab: {fileID: 2633214162274065907, guid: 053ef1620dac3ba4babe482116b0895e, type: 3}
   prewarmCount: 5
   maxPoolSize: 10
   allowExpand: 1

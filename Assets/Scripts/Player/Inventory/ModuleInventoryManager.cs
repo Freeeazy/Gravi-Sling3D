@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-
+using System.Collections;
+ 
 public class ModuleInventoryManager : MonoBehaviour
 {
     public static ModuleInventoryManager Instance { get; private set; }
@@ -24,6 +25,10 @@ public class ModuleInventoryManager : MonoBehaviour
     public float credits = 0f;
     public TMP_Text creditsText;
 
+    [Header("Currency Animation")]
+    public float creditTickDelay = 0.02f;
+    public float creditAnimationDuration = 0.75f;
+
     [Header("Inventory Counter")]
     public TMP_Text inventoryCounterText;
 
@@ -36,6 +41,9 @@ public class ModuleInventoryManager : MonoBehaviour
     public Camera uiCamera;
 
     private readonly Dictionary<ModuleData, int> ownedModules = new Dictionary<ModuleData, int>();
+    private float _displayedCredits = 0f;
+    private float _pendingCreditGain = 0f;
+    private Coroutine _creditsRoutine;
 
     private void Awake()
     {
@@ -45,6 +53,8 @@ public class ModuleInventoryManager : MonoBehaviour
             moduleListParent = transform;
 
         RefreshInventoryUI();
+
+        _displayedCredits = credits;
         UpdateCreditsText();
     }
     private void OnDestroy()
@@ -225,8 +235,12 @@ public class ModuleInventoryManager : MonoBehaviour
             return;
 
         credits += creditsToGive;
+        _pendingCreditGain += creditsToGive;
 
-        UpdateCreditsText();
+        if (_creditsRoutine != null)
+            StopCoroutine(_creditsRoutine);
+
+        _creditsRoutine = StartCoroutine(AnimateCreditsText());
 
         Debug.Log($"[Inventory] Credits added: {creditsToGive}. Total credits: {credits}");
     }
@@ -235,6 +249,42 @@ public class ModuleInventoryManager : MonoBehaviour
         if (creditsText == null)
             return;
 
-        creditsText.text = $"{credits:0} credits";
+        int shownCredits = Mathf.RoundToInt(_displayedCredits);
+        int shownPending = Mathf.RoundToInt(_pendingCreditGain);
+
+        if (shownPending > 0)
+            creditsText.text = $"<color=#4DFF88>{shownPending}</color> + {shownCredits} credits";
+        else
+            creditsText.text = $"{shownCredits} credits";
+    }
+    private IEnumerator AnimateCreditsText()
+    {
+        float startCredits = _displayedCredits;
+        float targetCredits = credits;
+
+        float startPending = _pendingCreditGain;
+
+        float elapsed = 0f;
+
+        while (elapsed < creditAnimationDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsed / creditAnimationDuration);
+
+            _displayedCredits = Mathf.Lerp(startCredits, targetCredits, t);
+            _pendingCreditGain = Mathf.Lerp(startPending, 0f, t);
+
+            UpdateCreditsText();
+
+            yield return null;
+        }
+
+        _displayedCredits = targetCredits;
+        _pendingCreditGain = 0f;
+
+        UpdateCreditsText();
+
+        _creditsRoutine = null;
     }
 }

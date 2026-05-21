@@ -1,0 +1,24 @@
+# Blender 3.5.1 MTL File: 'bridges.blend'
+# www.blender.org
+
+newmtl PIllar_4k
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd D:/Blender_projects/Bridges/Ready_models/Pillar/Tetures_4k/4k_pillar_diffuse.png
+map_Ns D:/Blender_projects/Bridges/Ready_models/Pillar/Tetures_4k/4k_pillar_roughness.png
+map_Bump -bm 2.000000 D:/Blender_projects/Bridges/Ready_models/Pillar/Tetures_4k/4k_pillar_normal_tangent.png
+
+newmtl Platform_4k
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ni 1.450000
+illum 2
+map_Kd D:/Blender_projects/Bridges/Ready_models/Platform/Textures_4k/4k_platform_diffuse.png
+map_Ns D:/Blender_projects/Bridges/Ready_models/Platform/Textures_4k/4k_platform_roughness.png
+map_Ke D:/Blender_projects/Bridges/Ready_models/Platform/Textures_4k/4k_platform_emission.png
+map_d D:/Blender_projects/Bridges/Ready_models/Platform/Textures_4k/4k_platform_diffuse.png
+map_Bump -bm 2.000000 D:/Blender_projects/Bridges/Ready_models/Platform/Textures_4k/4k_platform_normal_tangent.png

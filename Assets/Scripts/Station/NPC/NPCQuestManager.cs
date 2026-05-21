@@ -27,6 +27,9 @@ public class NPCQuestManager : MonoBehaviour
     public float baseCreditReward = 100f;
     public float rewardPerDifficulty = 50f;
 
+    [Tooltip("Credits gained per world unit traveled. 0.10 = 100 credits per 1000 units.")]
+    public float distanceCreditRate = 0.10f;
+
     [Serializable]
     public struct QuestOffer
     {
@@ -444,18 +447,25 @@ public class NPCQuestManager : MonoBehaviour
             PackageDurabilityManager.Instance.TryGetPackageIntegrity(quest.questId, out integrity);
         }
 
+        bool isLate = PackageDurabilityManager.Instance != null && PackageDurabilityManager.Instance.IsPackageLate(quest.questId);
+
         PackageDurabilityManager.DeliveryQuality quality =
-            PackageDurabilityManager.Instance != null
-                ? PackageDurabilityManager.Instance.GetDeliveryQuality(integrity)
-                : PackageDurabilityManager.DeliveryQuality.Good;
+            isLate
+                ? PackageDurabilityManager.DeliveryQuality.Failed
+                : PackageDurabilityManager.Instance != null
+                    ? PackageDurabilityManager.Instance.GetDeliveryQuality(integrity)
+                    : PackageDurabilityManager.DeliveryQuality.Good;
 
         float multiplier =
             PackageDurabilityManager.Instance != null
                 ? PackageDurabilityManager.Instance.GetRewardMultiplier(quality)
                 : 1f;
 
-        float rawCredits = baseCreditReward + (quest.difficulty * rewardPerDifficulty);
-        float finalCredits = rawCredits * multiplier;
+        float distanceBonus = quest.distanceAtAccept * distanceCreditRate;
+
+        float rawCredits = baseCreditReward + (quest.difficulty * rewardPerDifficulty) + distanceBonus;
+
+        float finalCredits = Mathf.Round(rawCredits * multiplier);
 
         if (finalCredits > 0f)
             inv.GiveXCredits(finalCredits);
@@ -478,9 +488,16 @@ public class NPCQuestManager : MonoBehaviour
             );
         }
 
+        if (FamilyReputationManager.Instance != null)
+        {
+            FamilyReputationManager.Instance.AddReputation(
+                GetFamilyReputationChange(quality)
+            );
+        }
+
         Debug.Log(
             $"[NPCQuestManager] Delivery complete. " +
-            $"Quality={quality}, Integrity={integrity:0}%, " +
+            $"Quality={quality}, Late={isLate}, Integrity={integrity:0}%, " +
             $"Credits={finalCredits:0}, ModuleGiven={gaveModule}"
         );
 
@@ -544,6 +561,29 @@ public class NPCQuestManager : MonoBehaviour
 
             default:
                 return "<color=#FFFFFF>Delivery Complete</color>";
+        }
+    }
+    private int GetFamilyReputationChange(PackageDurabilityManager.DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case PackageDurabilityManager.DeliveryQuality.Perfect:
+                return 5;
+
+            case PackageDurabilityManager.DeliveryQuality.Good:
+                return 3;
+
+            case PackageDurabilityManager.DeliveryQuality.Damaged:
+                return 1;
+
+            case PackageDurabilityManager.DeliveryQuality.BarelyDelivered:
+                return 0;
+
+            case PackageDurabilityManager.DeliveryQuality.Failed:
+                return -5;
+
+            default:
+                return 0;
         }
     }
 }

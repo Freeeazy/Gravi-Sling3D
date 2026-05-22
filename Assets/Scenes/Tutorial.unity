@@ -7559,7 +7559,7 @@ MonoBehaviour:
   useTypewriterEffect: 1
   stages:
   - title: Welcome
-    message: Welcome to Flight School Maggot!@2\nToday you'll learn the basics of
+    message: Welcome to Flight School Maggot!@1\nToday you'll learn the basics of
       maneuvering your ship!
     ringsRequired: 0
     autoAdvance: 1
@@ -7611,10 +7611,11 @@ MonoBehaviour:
     message: Now that you're orbiting a station let me explain how Gravity Slings
       work.@2\nThese stations use special Gravity Bubbles to help protect them from
       ships and debris.@2\nWhile orbiting you can hold <b>Left-Click</b> to begin
-      charging, this will build up your speed until you're ready to launch.@2\nUse
-      this speed to carry yourself through space from station to station.@2\nNow
-      try launching yourself towards another station. Remember it's <b>Left-Click</b>
-      to charge in case you already forgot.
+      charging, this will build up your speed until you're ready to launch.@2\nThis
+      will also recharge your boost battery over time.@2\nUse this speed to carry
+      yourself through space from station to station.@2\nNow try launching yourself
+      towards another station. Remember it's <b>Left-Click</b> to charge in case
+      you already forgot.
     ringsRequired: 1
     autoAdvance: 0
     autoAdvanceDelay: 2

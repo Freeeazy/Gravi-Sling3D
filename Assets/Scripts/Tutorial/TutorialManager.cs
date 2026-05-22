@@ -34,6 +34,21 @@ public class TutorialManager : MonoBehaviour
         public GameObject[] objectsToDisable;
     }
 
+    [System.Serializable]
+    public class ProgressCheck
+    {
+        [Header("Manual Stage Sync")]
+        public int afterStageIndex = 0;
+
+        [Header("Timing")]
+        public float goodTimeUnder = 8f;
+        public float badTimeOver = 20f;
+        public float messageHoldTime = 2.5f;
+
+        [Header("Text")]
+        public string title = "FLIGHT INSTRUCTOR";
+    }
+
     [Header("UI")]
     [SerializeField] private TMP_Text tutorialText;
     [SerializeField] private GameObject tutorialPanel;
@@ -46,6 +61,20 @@ public class TutorialManager : MonoBehaviour
     [Header("Stages")]
     [SerializeField] private TutorialStage[] stages;
 
+    [Header("Progress Checks")]
+    [SerializeField] private bool useProgressChecks = true;
+    [SerializeField] private ProgressCheck[] progressChecks;
+
+    [Header("Global Progress Check Messages")]
+    [TextArea(2, 5)]
+    [SerializeField] private string[] goodProgressMessages;
+
+    [TextArea(2, 5)]
+    [SerializeField] private string[] okayProgressMessages;
+
+    [TextArea(2, 5)]
+    [SerializeField] private string[] badProgressMessages;
+
     [Header("Scene Flow")]
     [SerializeField] private string sceneToLoadAfterTutorial = "MainGame";
     [SerializeField] private bool allowEnterToExitAfterFinished = true;
@@ -55,6 +84,19 @@ public class TutorialManager : MonoBehaviour
     private bool tutorialFinished = false;
     private Coroutine stageTextRoutine;
     private string currentVisibleBody = "";
+    private int stageToken = 0;
+
+    private float stageStartTime = 0f;
+    private bool showingProgressCheck = false;
+
+    private int[] goodMessageBag;
+    private int[] okayMessageBag;
+    private int[] badMessageBag;
+
+    private int goodMessageBagPosition = 0;
+    private int okayMessageBagPosition = 0;
+    private int badMessageBagPosition = 0;
+
     private void Start()
     {
         if (exitPromptObject != null)
@@ -84,11 +126,16 @@ public class TutorialManager : MonoBehaviour
 
     public void GoToStage(int stageIndex)
     {
+        stageToken++;
+        showingProgressCheck = false;
+
         if (stageTextRoutine != null)
         {
             StopCoroutine(stageTextRoutine);
             stageTextRoutine = null;
         }
+
+        currentVisibleBody = "";
 
         if (stageIndex < 0 || stageIndex >= stages.Length)
         {
@@ -98,6 +145,7 @@ public class TutorialManager : MonoBehaviour
 
         currentStageIndex = stageIndex;
         currentRingCount = 0;
+        stageStartTime = Time.time;
 
         TutorialStage stage = stages[currentStageIndex];
 
@@ -106,12 +154,21 @@ public class TutorialManager : MonoBehaviour
         if (tutorialPanel != null)
             tutorialPanel.SetActive(true);
 
-        stageTextRoutine = StartCoroutine(ShowStageRoutine(stage));
+        stageTextRoutine = StartCoroutine(ShowStageRoutine(stage, stageToken));
     }
 
     public void NextStage()
     {
-        GoToStage(currentStageIndex + 1);
+        if (showingProgressCheck)
+            return;
+
+        int completedStageIndex = currentStageIndex;
+        int nextStageIndex = currentStageIndex + 1;
+
+        if (TryStartProgressCheck(completedStageIndex, nextStageIndex))
+            return;
+
+        GoToStage(nextStageIndex);
     }
 
     public void RegisterRingHit()
@@ -144,9 +201,12 @@ public class TutorialManager : MonoBehaviour
         SceneManager.LoadScene(sceneToLoadAfterTutorial);
     }
 
-    private IEnumerator ShowStageRoutine(TutorialStage stage)
+    private IEnumerator ShowStageRoutine(TutorialStage stage, int token)
     {
         if (tutorialText == null)
+            yield break;
+
+        if (token != stageToken)
             yield break;
 
         if (!useTypewriterEffect)
@@ -155,23 +215,33 @@ public class TutorialManager : MonoBehaviour
         }
         else
         {
-            yield return StartCoroutine(TypeStageText(stage));
+            yield return TypeStageText(stage, token);
         }
+
+        if (token != stageToken)
+            yield break;
 
         if (stage.autoAdvance && stage.ringsRequired <= 0)
         {
             yield return new WaitForSeconds(stage.autoAdvanceDelay);
+
+            if (token != stageToken)
+                yield break;
+
             NextStage();
         }
     }
 
-    private IEnumerator TypeStageText(TutorialStage stage)
+    private IEnumerator TypeStageText(TutorialStage stage, int token)
     {
         string fullMessage = stage.message;
         currentVisibleBody = "";
 
         for (int i = 0; i < fullMessage.Length; i++)
         {
+            if (token != stageToken)
+                yield break;
+
             // Pause command: @2, @1.5, etc.
             if (fullMessage[i] == '@')
             {
@@ -187,6 +257,10 @@ public class TutorialManager : MonoBehaviour
                 if (end > start && float.TryParse(fullMessage.Substring(start, end - start), out float pauseTime))
                 {
                     yield return new WaitForSeconds(pauseTime);
+
+                    if (token != stageToken)
+                        yield break;
+
                     i = end - 1;
                     continue;
                 }
@@ -221,12 +295,24 @@ public class TutorialManager : MonoBehaviour
             yield return new WaitForSeconds(1f / Mathf.Max(1f, charactersPerSecond));
         }
 
+        if (token != stageToken)
+            yield break;
+
         UpdateTutorialText(stage, currentVisibleBody);
     }
 
     private void FinishTutorial()
     {
+        stageToken++;
+
+        if (stageTextRoutine != null)
+        {
+            StopCoroutine(stageTextRoutine);
+            stageTextRoutine = null;
+        }
+
         tutorialFinished = true;
+        currentVisibleBody = "";
 
         if (tutorialText != null)
         {
@@ -283,7 +369,12 @@ public class TutorialManager : MonoBehaviour
         if (tutorialText == null)
             return;
 
-        string header = $"<size=85%><color=#7FF9FF><b>{stage.title}</b></color></size>\n";
+        string header = "";
+
+        if (!string.IsNullOrWhiteSpace(stage.title))
+        {
+            header = $"<size=85%><color=#7FF9FF><b>{stage.title}</b></color></size>\n";
+        }
 
         string body = bodyText;
 
@@ -293,5 +384,121 @@ public class TutorialManager : MonoBehaviour
         }
 
         tutorialText.text = header + body;
+    }
+    private bool TryStartProgressCheck(int completedStageIndex, int nextStageIndex)
+    {
+        if (!useProgressChecks || progressChecks == null || progressChecks.Length == 0)
+            return false;
+
+        ProgressCheck check = GetProgressCheckForStage(completedStageIndex);
+
+        if (check == null)
+            return false;
+
+        float stageTime = Time.time - stageStartTime;
+
+        string message = GetProgressCheckMessage(check, stageTime);
+
+        if (string.IsNullOrWhiteSpace(message))
+            return false;
+
+        stageToken++;
+
+        if (stageTextRoutine != null)
+        {
+            StopCoroutine(stageTextRoutine);
+            stageTextRoutine = null;
+        }
+
+        stageTextRoutine = StartCoroutine(ShowProgressCheckRoutine(check, message, nextStageIndex, stageToken));
+        return true;
+    }
+
+    private ProgressCheck GetProgressCheckForStage(int completedStageIndex)
+    {
+        foreach (ProgressCheck check in progressChecks)
+        {
+            if (check != null && check.afterStageIndex == completedStageIndex)
+                return check;
+        }
+
+        return null;
+    }
+
+    private string GetProgressCheckMessage(ProgressCheck check, float stageTime)
+    {
+        if (stageTime <= check.goodTimeUnder)
+            return GetNextBagMessage(goodProgressMessages, ref goodMessageBag, ref goodMessageBagPosition);
+
+        if (stageTime >= check.badTimeOver)
+            return GetNextBagMessage(badProgressMessages, ref badMessageBag, ref badMessageBagPosition);
+
+        return GetNextBagMessage(okayProgressMessages, ref okayMessageBag, ref okayMessageBagPosition);
+    }
+    private string GetNextBagMessage(string[] messages, ref int[] bag, ref int bagPosition)
+    {
+        if (messages == null || messages.Length == 0)
+            return "";
+
+        if (bag == null || bag.Length != messages.Length || bagPosition >= bag.Length)
+        {
+            bag = BuildShuffledBag(messages.Length);
+            bagPosition = 0;
+        }
+
+        int messageIndex = bag[bagPosition];
+        bagPosition++;
+
+        return messages[messageIndex];
+    }
+
+    private int[] BuildShuffledBag(int count)
+    {
+        int[] bag = new int[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            bag[i] = i;
+        }
+
+        for (int i = 0; i < bag.Length; i++)
+        {
+            int randomIndex = Random.Range(i, bag.Length);
+
+            int temp = bag[i];
+            bag[i] = bag[randomIndex];
+            bag[randomIndex] = temp;
+        }
+
+        return bag;
+    }
+
+    private IEnumerator ShowProgressCheckRoutine(ProgressCheck check, string message, int nextStageIndex, int token)
+    {
+        showingProgressCheck = true;
+        currentVisibleBody = "";
+
+        if (tutorialPanel != null)
+            tutorialPanel.SetActive(true);
+
+        if (tutorialText != null)
+        {
+            string header = "";
+
+            if (!string.IsNullOrWhiteSpace(check.title))
+            {
+                header = $"<size=85%><color=#7FF9FF><b>{check.title}</b></color></size>\n";
+            }
+
+            tutorialText.text = header + message;
+        }
+
+        yield return new WaitForSeconds(check.messageHoldTime);
+
+        if (token != stageToken)
+            yield break;
+
+        showingProgressCheck = false;
+        GoToStage(nextStageIndex);
     }
 }

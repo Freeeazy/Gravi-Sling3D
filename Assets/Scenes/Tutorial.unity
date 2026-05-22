@@ -7570,7 +7570,9 @@ MonoBehaviour:
     objectsToDisable: []
   - title: Basic Movement
     message: Use WASD to steer, SPACE to rise, and CTRL to descend.@0.2 Fly through
-      the training rings.
+      the training rings.@30\nDo I need to draw the orbit in crayon, or are we flying
+      today?@5\nUse WASD to MOVE, SPACE to MOVE, and CTRL to MOVE.@0.2 MOVE through
+      the training rings
     ringsRequired: 10
     autoAdvance: 0
     autoAdvanceDelay: 2
@@ -7595,8 +7597,8 @@ MonoBehaviour:
     objectsToDisable:
     - {fileID: 1497073103}
   - title: Low Boost
-    message: Well Done Maggot!@1.5\nYou may have noticed you're low on boost.@1\nHead
-      on over to one of those stations and I'll explain the next step!
+    message: You may have noticed you're low on boost.@1\nHead on over to one of
+      those stations and I'll explain the next step!
     ringsRequired: 1
     autoAdvance: 0
     autoAdvanceDelay: 2
@@ -7623,6 +7625,28 @@ MonoBehaviour:
     scriptsToDisable: []
     objectsToEnable: []
     objectsToDisable: []
+  useProgressChecks: 1
+  progressChecks:
+  - afterStageIndex: 1
+    goodTimeUnder: 15
+    badTimeOver: 30
+    messageHoldTime: 2.5
+    title: 
+  goodProgressMessages:
+  - "Not bad, cadet. Maybe the license printer won\u2019t jam after all."
+  - Look at that. You found the controls before retirement age.
+  - Fast enough to be dangerous. Try not to make that literal.
+  - "Good pace. Don\u2019t let it evolve into confidence."
+  okayProgressMessages:
+  - Acceptable. Painfully average, but acceptable.
+  - You moved. You aimed. You survived. That is technically progress.
+  - "Could be worse. I\u2019ve seen pilots lose a race against stationary debris."
+  - Fine. Not impressive, not embarrassing. A rare middle ground.
+  badProgressMessages:
+  - Do I need to draw the orbit in crayon, or are we flying today?
+  - MOVE MOVE MOVE. The rings are glowing for a reason.
+  - I have seen frozen cargo with better reaction time.
+  - At this pace, the package will expire before your career starts.
   sceneToLoadAfterTutorial: MainGame
   allowEnterToExitAfterFinished: 1
 --- !u!114 &192475094
@@ -23074,6 +23098,81 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &351282570
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 351282571}
+  - component: {fileID: 351282573}
+  - component: {fileID: 351282572}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &351282571
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351282570}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1543099281}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &351282572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351282570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 2100000, guid: 840cc7ca60dc5934b8cadf1b7a566d29, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &351282573
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 351282570}
+  m_CullTransparentMesh: 1
 --- !u!1 &353256250
 GameObject:
   m_ObjectHideFlags: 0
@@ -49212,7 +49311,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fieldData: {fileID: 0}
-  simpleMove: {fileID: 0}
+  simpleMove: {fileID: 1616803245}
   playerRb: {fileID: 1616803247}
   playerBox: {fileID: 1616803248}
   cellSize: 20
@@ -162487,6 +162586,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 263182689}
+  - {fileID: 351282571}
   m_Father: {fileID: 655224015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -162551,7 +162651,7 @@ MonoBehaviour:
   m_text: This is a Dialogue Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 63c96e678ec7071458461f22e2ba55ce, type: 2}
-  m_sharedMaterial: {fileID: -6518121590025742155, guid: 63c96e678ec7071458461f22e2ba55ce, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: f5bff91579c149d4da82fe4a38bd84a6, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

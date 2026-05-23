@@ -120,9 +120,10 @@ public class ModuleGenerator : MonoBehaviour
         module.moduleType = typeConfig.moduleType;
         module.moduleTier = tierConfig.tier;
         module.icon = typeConfig.icon;
-        module.moduleName = GenerateModuleName(typeConfig.moduleType, tierConfig.tier);
 
-        RollStats(module, typeConfig, tierConfig);
+        string statSignature = RollStats(module, typeConfig, tierConfig);
+
+        module.moduleName = GenerateModuleName(typeConfig.moduleType, tierConfig.tier, statSignature);
 
 #if UNITY_EDITOR
         if (saveAssetInEditor)
@@ -147,18 +148,19 @@ public class ModuleGenerator : MonoBehaviour
         return generatedModules;
     }
 
-    private void RollStats(ModuleData module, ModuleTypeConfig typeConfig, TierConfig tierConfig)
+    private string RollStats(ModuleData module, ModuleTypeConfig typeConfig, TierConfig tierConfig)
     {
         if (typeConfig.possibleStats == null || typeConfig.possibleStats.Count == 0)
         {
             Debug.LogWarning($"[ModuleGenerator] Module type {typeConfig.moduleType} has no possible stats.");
-            return;
+            return "Empty";
         }
 
         int statCount = Random.Range(tierConfig.minStats, tierConfig.maxStats + 1);
         statCount = Mathf.Clamp(statCount, 1, typeConfig.possibleStats.Count);
 
         List<StatRollRange> availableStats = new List<StatRollRange>(typeConfig.possibleStats);
+        List<string> statSignatureParts = new List<string>();
 
         for (int i = 0; i < statCount; i++)
         {
@@ -177,7 +179,13 @@ public class ModuleGenerator : MonoBehaviour
             {
                 float percentValue = Random.Range(chosenStat.percentRange.x, chosenStat.percentRange.y);
                 percentValue *= tierConfig.percentMultiplier;
+
+                // Optional: keeps percent naming more consistent/readable.
+                percentValue = Mathf.Round(percentValue * 100f) / 100f;
+
                 ApplyStat(module, chosenStat.statName, percentValue, true);
+
+                statSignatureParts.Add($"{chosenStat.statName}_{Mathf.RoundToInt(percentValue * 100f)}P");
             }
             else if (chosenStat.canRollFlat)
             {
@@ -188,8 +196,14 @@ public class ModuleGenerator : MonoBehaviour
                 flatValue = Mathf.Round(flatValue);
 
                 ApplyStat(module, chosenStat.statName, flatValue, false);
+
+                statSignatureParts.Add($"{chosenStat.statName}_{Mathf.RoundToInt(flatValue)}F");
             }
         }
+
+        statSignatureParts.Sort();
+
+        return string.Join("_", statSignatureParts);
     }
 
     private void ApplyStat(ModuleData module, string statName, float value, bool isPercent)
@@ -247,10 +261,19 @@ public class ModuleGenerator : MonoBehaviour
         }
     }
 
-    private string GenerateModuleName(string moduleType, int tier)
+    private string GenerateModuleName(string moduleType, int tier, string statSignature)
     {
-        string prefix = prefixes.Length > 0 ? prefixes[Random.Range(0, prefixes.Length)] : "Generated";
-        string suffix = suffixes.Length > 0 ? suffixes[Random.Range(0, suffixes.Length)] : "Module";
+        int seed = $"{moduleType}_T{tier}_{statSignature}".GetHashCode();
+
+        System.Random seededRandom = new System.Random(seed);
+
+        string prefix = prefixes.Length > 0
+            ? prefixes[seededRandom.Next(0, prefixes.Length)]
+            : "Generated";
+
+        string suffix = suffixes.Length > 0
+            ? suffixes[seededRandom.Next(0, suffixes.Length)]
+            : "Module";
 
         return $"{prefix} {moduleType} {suffix}";
     }

@@ -64,16 +64,48 @@ public class MainGameTutorialManager : MonoBehaviour
     [Header("Stages")]
     [SerializeField] private TutorialStage[] stages;
 
+    [Header("Skip Tutorial")]
+    [SerializeField] private bool allowSkipTutorial = true;
+    [SerializeField] private KeyCode skipKey = KeyCode.F;
+    [SerializeField] private float skipHoldDuration = 2f;
+    [SerializeField] private MonoBehaviour simpleMove;
+
     private int currentStageIndex = -1;
     private int currentRingCount = 0;
     private bool tutorialFinished = false;
     private Coroutine stageTextRoutine;
     private string currentVisibleBody = "";
     private Coroutine npcTalkRoutine;
+    private float skipHoldTimer = 0f;
 
     private void Start()
     {
         StartTutorial();
+    }
+    private void Update()
+    {
+        HandleSkipInput();
+    }
+    private void HandleSkipInput()
+    {
+        if (!allowSkipTutorial || tutorialFinished)
+            return;
+
+        if (Input.GetKey(skipKey))
+        {
+            skipHoldTimer += Time.unscaledDeltaTime;
+
+            if (skipHoldTimer >= skipHoldDuration)
+            {
+                FinishTutorial();
+
+                simpleMove.enabled = true;
+            }
+        }
+        else
+        {
+            skipHoldTimer = 0f;
+        }
     }
 
     public void StartTutorial()

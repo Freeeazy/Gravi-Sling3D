@@ -3,7 +3,13 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
+public class ModuleButtonUI : MonoBehaviour,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler,
+    IPointerClickHandler,
+    IPointerEnterHandler,
+    IPointerExitHandler
 {
     public ModuleData moduleData;
     public DraggedModuleUI draggedModulePrefab;
@@ -24,9 +30,26 @@ public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
         if (amountText != null)
             amountText.text = amount > 1 ? amount.ToString() : "";
     }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (moduleData == null)
+            return;
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.ShowDelayed(moduleData);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+    }
     public void OnBeginDrag(PointerEventData eventData)
     {
         Debug.Log($"BeginDrag on: {name}");
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
 
         if (moduleData == null || draggedModulePrefab == null || dragCanvas == null)
         {
@@ -63,6 +86,9 @@ public class ModuleButtonUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
     }
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+
         if (eventData.button != PointerEventData.InputButton.Right)
             return;
 

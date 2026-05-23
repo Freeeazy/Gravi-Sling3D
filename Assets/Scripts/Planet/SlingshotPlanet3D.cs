@@ -140,6 +140,11 @@ public class SlingshotPlanet3D : MonoBehaviour
         else
             chargeRate = 80f;
 
+        if (StatManager.Instance)
+            baseLaunchSpeed = StatManager.Instance.GetBaseLaunchSpeed();
+        else
+            baseLaunchSpeed = 80f;
+
         Bubble.gameObject.SetActive(false);
 
         orbitStartTime = Time.time;
@@ -262,7 +267,7 @@ public class SlingshotPlanet3D : MonoBehaviour
 
                     orbitTangentialSpeed += chargeRate * dt;
 
-                    launchSpeed = Mathf.Max(baseLaunchSpeed, orbitTangentialSpeed);
+                    launchSpeed = orbitTangentialSpeed + baseLaunchSpeed;
 
                     chargeTimer += dt;
                     if (chargeTimer >= maxChargeTime || currentRadius <= planetRadius)

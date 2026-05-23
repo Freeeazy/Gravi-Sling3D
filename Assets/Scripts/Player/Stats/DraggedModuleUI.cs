@@ -20,7 +20,10 @@ public class DraggedModuleUI : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
 
         if (iconImage != null && data != null)
+        {
             iconImage.sprite = data.icon;
+            iconImage.color = ModuleInventoryManager.Instance.GetTierColor(moduleData.moduleTier);
+        }
 
         Debug.Log($"DraggedModuleUI Initialize: {data.moduleName}");
     }

@@ -12,14 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9454409acc1d074d8e8954d33b574f0, type: 3}
   m_Name: BoostCapacity-Tier2
   m_EditorClassIdentifier: 
-  moduleName: Capacity++
-  moduleTier: Tier 2
-  icon: {fileID: 21300000, guid: ff8bcf15abd0b004fbc9d26250f83b48, type: 3}
+  moduleName: lithium battery
+  moduleType: Capacity
+  moduleTier: 1
+  icon: {fileID: 21300000, guid: 2496bc538b5b28945a42d6d953e19dcf, type: 3}
   chargeRateBonus: 0
+  chargeRateBonus_Percent: 0
+  baseLaunchSpeedBonus: 0
+  baseLaunchSpeedBonus_Percent: 0
   maxSpeedBonus: 0
+  maxSpeedBonus_Percent: 0
   accelerationBonus: 0
+  accelerationBonus_Percent: 0
   boostAccelAddBonus: 0
+  boostAccelAddBonus_Percent: 0
   boostMaxBonus: 0
+  boostMaxBonus_Percent: 0
   capacityBonus: 100
+  capacityBonus_Percent: 0
   drainPerSecondBonus: 0
+  drainPerSecondBonus_Percent: 0
   regenPerSecondBonus: 0
+  regenPerSecondBonus_Percent: 0

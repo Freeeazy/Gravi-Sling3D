@@ -703,7 +703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moduleData: {fileID: 11400000, guid: c3c8e6c8ac4d2ae4aa459709a38a0a5c, type: 2}
-  draggedModulePrefab: {fileID: 858292027542123401, guid: 8eaa47efe6ef6c246a73c3078e24c217, type: 3}
+  draggedModulePrefab: {fileID: 858292027542123401, guid: 0c1ed842a0993f546a20d0a92e0bab8c, type: 3}
   dragCanvas: {fileID: 0}
   parentScrollRect: {fileID: 0}
   uiCamera: {fileID: 0}

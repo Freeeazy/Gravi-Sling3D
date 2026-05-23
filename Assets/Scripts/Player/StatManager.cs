@@ -17,6 +17,8 @@ public class StatManager : MonoBehaviour
     [Header("Internal / Global Stats")]
     [SerializeField] private float orbitChargeRate = 60.0f;
     public TMP_Text orbitChargeRateText;
+    [SerializeField] private float baseLaunchSpeed = 80.0f;
+    public TMP_Text baseLaunchSpeedText;
 
     [SerializeField] private float maxSpeed = 400f;
     [SerializeField] private float acceleration = 100f;
@@ -34,6 +36,8 @@ public class StatManager : MonoBehaviour
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
     public void SetOrbitChargeRate(float value) => orbitChargeRate = value;
+    public void SetBaseLaunchSpeed(float value) => baseLaunchSpeed = value;
+
 
     public void SetMaxSpeed(float value) => maxSpeed = value;
     public void SetAcceleration(float value) => acceleration = value;
@@ -47,6 +51,8 @@ public class StatManager : MonoBehaviour
 
 
     public float GetOrbitChargeRate() => orbitChargeRate;
+    public float GetBaseLaunchSpeed() => baseLaunchSpeed;
+
 
     public float GetMaxSpeed() => maxSpeed;
     public float GetAcceleration() => acceleration;
@@ -101,6 +107,8 @@ public class StatManager : MonoBehaviour
         }
         if (orbitChargeRateText)
             orbitChargeRateText.text = orbitChargeRate.ToString();
+        if (baseLaunchSpeedText)
+            baseLaunchSpeedText.text = baseLaunchSpeed.ToString();
     }
 
     public void ApplyTargetByName(string targetName)
@@ -350,6 +358,177 @@ public class StatManager : MonoBehaviour
             }
         }
         orbitChargeRateText.text = orbitChargeRate.ToString();
+        baseLaunchSpeedText.text = baseLaunchSpeed.ToString();
+    }
+    public void ShowModuleHoverPreview(ModuleData module)
+    {
+        if (module == null)
+            return;
+
+        // Start from clean/current values first.
+        RefreshAllStatDisplays();
+
+        // Manual stat text hookups
+        SetPreviewText(
+            orbitChargeRateText,
+            orbitChargeRate,
+            module.chargeRateBonus,
+            module.chargeRateBonus_Percent,
+            0,
+            false
+        );
+
+        SetPreviewText(
+            baseLaunchSpeedText,
+            baseLaunchSpeed,
+            module.baseLaunchSpeedBonus,
+            module.baseLaunchSpeedBonus_Percent,
+            0,
+            false
+        );
+
+        // StatEntry / valueText hookups
+        SetPreviewForField(
+            "maxSpeed",
+            maxSpeed,
+            module.maxSpeedBonus,
+            module.maxSpeedBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "acceleration",
+            acceleration,
+            module.accelerationBonus,
+            module.accelerationBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "boostAccelAdd",
+            boostAccelAdd,
+            module.boostAccelAddBonus,
+            module.boostAccelAddBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "boostMaxSpeed",
+            boostMaxSpeed,
+            module.boostMaxBonus,
+            module.boostMaxBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "capacity",
+            capacity,
+            module.capacityBonus,
+            module.capacityBonus_Percent,
+            false
+        );
+
+        // Lower drain is good, so color logic is inverted here.
+        SetPreviewForField(
+            "drainPerSecond",
+            drainPerSecond,
+            module.drainPerSecondBonus,
+            module.drainPerSecondBonus_Percent,
+            true
+        );
+
+        SetPreviewForField(
+            "regenPerSecond",
+            regenPerSecond,
+            module.regenPerSecondBonus,
+            module.regenPerSecondBonus_Percent,
+            false
+        );
+    }
+
+    public void HideModuleHoverPreview()
+    {
+        RefreshAllStatDisplays();
+    }
+
+    private void SetPreviewForField(string fieldName, float currentValue, float flatBonus, float percentBonus, bool lowerIsBetter)
+    {
+        for (int i = 0; i < targets.Count; i++)
+        {
+            ScriptStatTarget target = targets[i];
+
+            if (target == null)
+                continue;
+
+            for (int j = 0; j < target.stats.Count; j++)
+            {
+                StatEntry entry = target.stats[j];
+
+                if (entry == null || entry.valueText == null)
+                    continue;
+
+                if (entry.fieldName != fieldName)
+                    continue;
+
+                SetPreviewText(
+                    entry.valueText,
+                    currentValue,
+                    flatBonus,
+                    percentBonus,
+                    entry.decimalPlaces,
+                    lowerIsBetter
+                );
+            }
+        }
+    }
+
+    private void SetPreviewText(TMP_Text text, float currentValue, float flatBonus, float percentBonus, int decimalPlaces, bool lowerIsBetter)
+    {
+        if (text == null)
+            return;
+
+        bool hasFlat = !Mathf.Approximately(flatBonus, 0f);
+        bool hasPercent = !Mathf.Approximately(percentBonus, 0f);
+
+        if (!hasFlat && !hasPercent)
+            return;
+
+        string currentText = currentValue.ToString($"F{decimalPlaces}", CultureInfo.InvariantCulture);
+        string previewPrefix = BuildPreviewPrefix(flatBonus, percentBonus, lowerIsBetter);
+
+        text.text = $"{previewPrefix} {currentText}";
+    }
+
+    private string BuildPreviewPrefix(float flatBonus, float percentBonus, bool lowerIsBetter)
+    {
+        List<string> parts = new List<string>();
+
+        if (!Mathf.Approximately(flatBonus, 0f))
+            parts.Add(ColorizeModifier(FormatSignedFlat(flatBonus), flatBonus, lowerIsBetter));
+
+        if (!Mathf.Approximately(percentBonus, 0f))
+            parts.Add(ColorizeModifier(FormatSignedPercent(percentBonus), percentBonus, lowerIsBetter));
+
+        return string.Join(" ", parts);
+    }
+
+    private string FormatSignedFlat(float value)
+    {
+        return $"{value:+0.#;-0.#;0}";
+    }
+
+    private string FormatSignedPercent(float value)
+    {
+        return $"{value * 100f:+0.#;-0.#;0}%";
+    }
+
+    private string ColorizeModifier(string text, float rawValue, bool lowerIsBetter)
+    {
+        bool isGood = lowerIsBetter ? rawValue < 0f : rawValue > 0f;
+
+        string color = isGood ? "#4DFF88" : "#FF5A5A";
+
+        return $"<color={color}>{text}</color>";
     }
 }
 

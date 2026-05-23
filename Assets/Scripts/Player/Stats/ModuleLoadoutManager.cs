@@ -9,6 +9,7 @@ public class ModuleLoadoutManager : MonoBehaviour
 
     [Header("Station Stats")]
     public float baseChargeRate = 60f;
+    public float baseLaunchSpeed = 80f;
 
     [Header("Player Movement Stats")]
     public float baseMaxSpeed = 200f;
@@ -28,51 +29,86 @@ public class ModuleLoadoutManager : MonoBehaviour
 
     public void RecalculateStats()
     {
+        // Flat bonuses
         float chargeBonus = 0f;
+        float launchBonus = 0f;
 
         float speedBonus = 0f;
         float accelBonus = 0f;
         float boostAccelAddBonus = 0f;
 
         float boostMaxSpeedBonus = 0f;
-        float capBonus = 0f;
+        float capacityBonus = 0f;
         float drainPerSecBonus = 0f;
         float regenPerSecBonus = 0f;
+
+        // Percent bonuses
+        float chargeBonus_Percent = 0f;
+        float launchBonus_Percent = 0f;
+
+        float speedBonus_Percent = 0f;
+        float accelBonus_Percent = 0f;
+        float boostAccelAddBonus_Percent = 0f;
+
+        float boostMaxSpeedBonus_Percent = 0f;
+        float capacityBonus_Percent = 0f;
+        float drainPerSecBonus_Percent = 0f;
+        float regenPerSecBonus_Percent = 0f;
 
         foreach (var slot in slots)
         {
             if (slot == null || slot.EquippedModule == null)
                 continue;
 
-            chargeBonus += slot.EquippedModule.chargeRateBonus;
+            ModuleData module = slot.EquippedModule;
 
-            speedBonus += slot.EquippedModule.maxSpeedBonus;
-            accelBonus += slot.EquippedModule.accelerationBonus;
-            boostAccelAddBonus += slot.EquippedModule.boostAccelAddBonus;
+            // Flat bonuses
+            chargeBonus += module.chargeRateBonus;
+            launchBonus += module.baseLaunchSpeedBonus;
 
-            boostMaxSpeedBonus += slot.EquippedModule.boostMaxBonus;
-            capBonus += slot.EquippedModule.capacityBonus;
-            drainPerSecBonus += slot.EquippedModule.drainPerSecondBonus;
-            regenPerSecBonus += slot.EquippedModule.regenPerSecondBonus;
+            speedBonus += module.maxSpeedBonus;
+            accelBonus += module.accelerationBonus;
+            boostAccelAddBonus += module.boostAccelAddBonus;
+
+            boostMaxSpeedBonus += module.boostMaxBonus;
+            capacityBonus += module.capacityBonus;
+            drainPerSecBonus += module.drainPerSecondBonus;
+            regenPerSecBonus += module.regenPerSecondBonus;
+
+            // Percent bonuses
+            chargeBonus_Percent += module.chargeRateBonus_Percent;
+            launchBonus_Percent += module.baseLaunchSpeedBonus_Percent;
+
+            speedBonus_Percent += module.maxSpeedBonus_Percent;
+            accelBonus_Percent += module.accelerationBonus_Percent;
+            boostAccelAddBonus_Percent += module.boostAccelAddBonus_Percent;
+
+            boostMaxSpeedBonus_Percent += module.boostMaxBonus_Percent;
+            capacityBonus_Percent += module.capacityBonus_Percent;
+            drainPerSecBonus_Percent += module.drainPerSecondBonus_Percent;
+            regenPerSecBonus_Percent += module.regenPerSecondBonus_Percent;
         }
 
-        //  Orbit
-        float finalChargeRate = baseChargeRate + chargeBonus;
+        // Station stats
+        float finalChargeRate = ApplyFlatAndPercent(baseChargeRate, chargeBonus, chargeBonus_Percent);
+        float finalLaunchSpeed = ApplyFlatAndPercent(baseLaunchSpeed, launchBonus, launchBonus_Percent);
 
-        //  Player Movement
-        float finalMaxSpeed = baseMaxSpeed + speedBonus;
-        float finalAcceleration = baseAcceleration + accelBonus;
-        float finalBoostAccelAdd = baseBoostAccelAdd + boostAccelAddBonus;
+        // Player movement stats
+        float finalMaxSpeed = ApplyFlatAndPercent(baseMaxSpeed, speedBonus, speedBonus_Percent);
+        float finalAcceleration = ApplyFlatAndPercent(baseAcceleration, accelBonus, accelBonus_Percent);
+        float finalBoostAccelAdd = ApplyFlatAndPercent(baseBoostAccelAdd, boostAccelAddBonus, boostAccelAddBonus_Percent);
 
-        //  Boosting
-        float finalBoostMaxSpeed = baseBoostMaxSpeed + boostMaxSpeedBonus;
-        float finalCapacity = baseCapacity + capBonus;
-        float finalDrainPerSecond = baseDrainPerSecond + drainPerSecBonus;
-        float finalRegenPerSecond = baseRegenPerSecond + regenPerSecBonus;
+        // Boosting stats
+        float finalBoostMaxSpeed = ApplyFlatAndPercent(baseBoostMaxSpeed, boostMaxSpeedBonus, boostMaxSpeedBonus_Percent);
+        float finalCapacity = ApplyFlatAndPercent(baseCapacity, capacityBonus, capacityBonus_Percent);
+        float finalDrainPerSecond = ApplyFlatAndPercent(baseDrainPerSecond, drainPerSecBonus, drainPerSecBonus_Percent);
+        float finalRegenPerSecond = ApplyFlatAndPercent(baseRegenPerSecond, regenPerSecBonus, regenPerSecBonus_Percent);
+
 
         if (StatManager.Instance != null)
         {
             StatManager.Instance.SetOrbitChargeRate(finalChargeRate);
+            StatManager.Instance.SetBaseLaunchSpeed(finalLaunchSpeed);
 
             StatManager.Instance.SetMaxSpeed(finalMaxSpeed);
             StatManager.Instance.SetAcceleration(finalAcceleration);
@@ -85,6 +121,10 @@ public class ModuleLoadoutManager : MonoBehaviour
 
             StatManager.Instance.ApplyRuntimeStats();
         }
+    }
+    private float ApplyFlatAndPercent(float baseValue, float flatBonus, float percentBonus)
+    {
+        return (baseValue + flatBonus) * (1f + percentBonus);
     }
     public bool TryEquipToFirstEmptySlot(ModuleData moduleData)
     {

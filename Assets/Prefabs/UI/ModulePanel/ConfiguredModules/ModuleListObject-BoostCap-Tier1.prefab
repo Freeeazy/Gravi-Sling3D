@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moduleData: {fileID: 11400000, guid: e99f9a355d91b5347acba9ae08543068, type: 2}
-  draggedModulePrefab: {fileID: 858292027542123401, guid: 84b5e8c18c7345d4c9536f353fc95544, type: 3}
+  draggedModulePrefab: {fileID: 858292027542123401, guid: 0c1ed842a0993f546a20d0a92e0bab8c, type: 3}
   dragCanvas: {fileID: 0}
   parentScrollRect: {fileID: 0}
   uiCamera: {fileID: 0}
@@ -952,6 +952,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5926544189542055631, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5926544189542055631, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6382252111876391382, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
       propertyPath: m_Name
       value: Proto-Upgrade
@@ -960,10 +968,30 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 7089d19703030274caef959b106a6640, type: 3}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.7058824
+      objectReference: {fileID: 0}
+    - target: {fileID: 7632521019111707859, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.7058824
+      objectReference: {fileID: 0}
     - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 1dfa2b845c12de04e989f7e842148a36, type: 3}
+    - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7775274101138976470, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 8112772148698109657, guid: 0d6555150f3ea34438fce8e81892dd8a, type: 3}

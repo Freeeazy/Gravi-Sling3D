@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
 {
+    [Header("UI References")]
     public Image iconImage;
 
     public ModuleData EquippedModule { get; private set; }
@@ -20,6 +21,7 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
         if (iconImage != null)
         {
             iconImage.sprite = data.icon;
+            iconImage.color = GetModuleTierColor(data);
             iconImage.enabled = true;
 
             Debug.Log($"Assigned sprite to iconImage on {name}");
@@ -39,6 +41,7 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
         if (iconImage != null)
         {
             iconImage.sprite = null;
+            iconImage.color = Color.white;
             iconImage.enabled = false;
         }
 
@@ -47,6 +50,16 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
 
         if (ModuleLoadoutManager.Instance != null)
             ModuleLoadoutManager.Instance.RecalculateStats();
+    }
+    private Color GetModuleTierColor(ModuleData data)
+    {
+        if (data == null)
+            return Color.white;
+
+        if (ModuleInventoryManager.Instance == null)
+            return Color.white;
+
+        return ModuleInventoryManager.Instance.GetTierColor(data.moduleTier);
     }
 
     public void OnPointerClick(PointerEventData eventData)

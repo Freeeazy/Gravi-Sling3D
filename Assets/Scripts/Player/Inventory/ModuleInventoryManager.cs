@@ -40,6 +40,15 @@ public class ModuleInventoryManager : MonoBehaviour
     public ScrollRect parentScrollRect;
     public Camera uiCamera;
 
+    [Header("Module Tier Colors")]
+    public Color tier0Color = new Color(0.45f, 0.45f, 0.45f, 1f); // Gray
+    public Color tier1Color = Color.white;                        // White
+    public Color tier2Color = new Color(0.3f, 1f, 0.3f, 1f);       // Green
+    public Color tier3Color = new Color(0.3f, 0.6f, 1f, 1f);       // Blue
+    public Color tier4Color = new Color(1f, 0.75f, 0.15f, 1f);     // Orange / Yellow
+    public Color tier5Color = new Color(1f, 0.2f, 0.2f, 1f);       // Red
+    public Color tier6Color = new Color(0.75f, 0.3f, 1f, 1f);      // Purple
+
     private readonly Dictionary<ModuleData, int> ownedModules = new Dictionary<ModuleData, int>();
     private float _displayedCredits = 0f;
     private float _pendingCreditGain = 0f;
@@ -286,5 +295,27 @@ public class ModuleInventoryManager : MonoBehaviour
         UpdateCreditsText();
 
         _creditsRoutine = null;
+    }
+    public Color GetTierColor(int tier)
+    {
+        switch (tier)
+        {
+            case 0:
+                return tier0Color;
+            case 1:
+                return tier1Color;
+            case 2:
+                return tier2Color;
+            case 3:
+                return tier3Color;
+            case 4:
+                return tier4Color;
+            case 5:
+                return tier5Color;
+            case 6:
+                return tier6Color;
+            default:
+                return tier0Color;
+        }
     }
 }

@@ -106,9 +106,10 @@ public class StatManager : MonoBehaviour
             ApplyTarget(targets[i]);
         }
         if (orbitChargeRateText)
-            orbitChargeRateText.text = orbitChargeRate.ToString();
+            orbitChargeRateText.text = FormatWholeStat(orbitChargeRate);
+
         if (baseLaunchSpeedText)
-            baseLaunchSpeedText.text = baseLaunchSpeed.ToString();
+            baseLaunchSpeedText.text = FormatWholeStat(baseLaunchSpeed);
     }
 
     public void ApplyTargetByName(string targetName)
@@ -357,8 +358,11 @@ public class StatManager : MonoBehaviour
                 UpdateStatDisplay(entry, liveValue);
             }
         }
-        orbitChargeRateText.text = orbitChargeRate.ToString();
-        baseLaunchSpeedText.text = baseLaunchSpeed.ToString();
+        if (orbitChargeRateText)
+            orbitChargeRateText.text = FormatWholeStat(orbitChargeRate);
+
+        if (baseLaunchSpeedText)
+            baseLaunchSpeedText.text = FormatWholeStat(baseLaunchSpeed);
     }
     public void ShowModuleHoverPreview(ModuleData module)
     {
@@ -529,6 +533,10 @@ public class StatManager : MonoBehaviour
         string color = isGood ? "#4DFF88" : "#FF5A5A";
 
         return $"<color={color}>{text}</color>";
+    }
+    private string FormatWholeStat(float value)
+    {
+        return Mathf.RoundToInt(value).ToString(CultureInfo.InvariantCulture);
     }
 }
 

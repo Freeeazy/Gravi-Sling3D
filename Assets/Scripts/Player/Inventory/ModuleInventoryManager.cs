@@ -8,18 +8,22 @@ public class ModuleInventoryManager : MonoBehaviour
 {
     public static ModuleInventoryManager Instance { get; private set; }
 
-    [System.Serializable]
-    public class ModulePrefabEntry
-    {
-        public string displayName;
-        public ModuleData moduleData;
-        public GameObject prefab;
-    }
-
     [Header("Inventory Setup")]
-    public List<ModulePrefabEntry> modulePrefabs = new List<ModulePrefabEntry>();
+    public GameObject blankSlotPrefab;
     public GameObject emptySlotPrefab;
     public int totalSlots = 30;
+
+    [Header("Random Module Debug")]
+    public string[] debugModuleTypes =
+{
+        "Engine",
+        "Battery",
+        "Orbit"
+    };
+
+    public int minDebugTier = 0;
+    public int maxDebugTier = 6;
+    public bool saveGeneratedDebugAssetsInEditor = true;
 
     [Header("Currency")]
     public float credits = 0f;
@@ -50,6 +54,7 @@ public class ModuleInventoryManager : MonoBehaviour
     public Color tier6Color = new Color(0.75f, 0.3f, 1f, 1f);      // Purple
 
     private readonly Dictionary<ModuleData, int> ownedModules = new Dictionary<ModuleData, int>();
+
     private float _displayedCredits = 0f;
     private float _pendingCreditGain = 0f;
     private Coroutine _creditsRoutine;
@@ -74,27 +79,41 @@ public class ModuleInventoryManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Keypad1)) TrySpawnModule(0);
-        if (Input.GetKeyDown(KeyCode.Keypad2)) TrySpawnModule(1);
-        if (Input.GetKeyDown(KeyCode.Keypad3)) TrySpawnModule(2);
-        if (Input.GetKeyDown(KeyCode.Keypad4)) TrySpawnModule(3);
-        if (Input.GetKeyDown(KeyCode.Keypad5)) TrySpawnModule(4);
-        if (Input.GetKeyDown(KeyCode.Keypad6)) TrySpawnModule(5);
-        if (Input.GetKeyDown(KeyCode.Keypad7)) TrySpawnModule(6);
-        if (Input.GetKeyDown(KeyCode.Keypad8)) TrySpawnModule(7);
-        if (Input.GetKeyDown(KeyCode.Keypad9)) TrySpawnModule(8);
+        if (Input.GetKeyDown(KeyCode.Keypad0))
+            GenerateRandomDebugModule();
     }
-    private void TrySpawnModule(int index)
+    private void GenerateRandomDebugModule()
     {
-        if (modulePrefabs.Count > index && modulePrefabs[index].moduleData != null)
+        if (ModuleGenerator.Instance == null)
         {
-            AddModule(modulePrefabs[index].moduleData, 1);
-            Debug.Log($"[DEBUG] Added module: {modulePrefabs[index].displayName}");
+            Debug.LogWarning("[Inventory] Cannot generate module. ModuleGenerator.Instance is null.");
+            return;
         }
-        else
+
+        if (debugModuleTypes == null || debugModuleTypes.Length == 0)
         {
-            Debug.LogWarning($"[DEBUG] ModulePrefab index {index} is missing.");
+            Debug.LogWarning("[Inventory] Cannot generate module. No debug module types assigned.");
+            return;
         }
+
+        string randomType = debugModuleTypes[Random.Range(0, debugModuleTypes.Length)];
+        int randomTier = Random.Range(minDebugTier, maxDebugTier + 1);
+
+        ModuleData generatedModule = ModuleGenerator.Instance.GenerateModule(
+            randomType,
+            randomTier,
+            saveGeneratedDebugAssetsInEditor
+        );
+
+        if (generatedModule == null)
+        {
+            Debug.LogWarning($"[Inventory] Module generation failed. Type: {randomType}, Tier: {randomTier}");
+            return;
+        }
+
+        AddModule(generatedModule, 1);
+
+        Debug.Log($"[Inventory] Generated random module: {generatedModule.moduleName} | Type: {generatedModule.moduleType} | Tier: {generatedModule.moduleTier}");
     }
 
     public void AddModule(ModuleData moduleData, int amount = 1)
@@ -145,24 +164,22 @@ public class ModuleInventoryManager : MonoBehaviour
             ModuleData data = pair.Key;
             int amount = pair.Value;
 
-            if (amount <= 0)
+            if (data == null || amount <= 0)
                 continue;
 
-            ModulePrefabEntry entry = GetPrefabEntry(data);
-
-            if (entry == null || entry.prefab == null)
+            if (blankSlotPrefab == null)
             {
-                Debug.LogWarning($"No prefab entry found for module: {data.moduleName}");
+                Debug.LogWarning("[Inventory] blankSlotPrefab is missing.");
                 continue;
             }
 
-            GameObject newSlotObject = Instantiate(entry.prefab, moduleListParent);
+            GameObject newSlotObject = Instantiate(blankSlotPrefab, moduleListParent);
 
             ModuleButtonUI newSlot = newSlotObject.GetComponent<ModuleButtonUI>();
 
             if (newSlot == null)
             {
-                Debug.LogWarning($"Spawned prefab for {data.moduleName} does not have a ModuleButtonUI component.");
+                Debug.LogWarning($"[Inventory] blankSlotPrefab does not have a ModuleButtonUI component.");
                 continue;
             }
 
@@ -186,17 +203,6 @@ public class ModuleInventoryManager : MonoBehaviour
         }
     }
 
-    private ModulePrefabEntry GetPrefabEntry(ModuleData moduleData)
-    {
-        for (int i = 0; i < modulePrefabs.Count; i++)
-        {
-            if (modulePrefabs[i].moduleData == moduleData)
-                return modulePrefabs[i];
-        }
-
-        return null;
-    }
-
     private void ClearCurrentSlots()
     {
         for (int i = moduleListParent.childCount - 1; i >= 0; i--)
@@ -211,31 +217,6 @@ public class ModuleInventoryManager : MonoBehaviour
 
         int uniqueCount = ownedModules.Count;
         inventoryCounterText.text = $"{uniqueCount}/{totalSlots}";
-    }
-    public bool TryGiveModuleByIndex(int index, int amount = 1)
-    {
-        if (index < 0 || index >= modulePrefabs.Count)
-        {
-            Debug.LogWarning($"[Inventory] Invalid module reward index: {index}");
-            return false;
-        }
-
-        ModulePrefabEntry entry = modulePrefabs[index];
-
-        if (entry == null || entry.moduleData == null)
-        {
-            Debug.LogWarning($"[Inventory] Module reward index {index} is missing ModuleData.");
-            return false;
-        }
-
-        AddModule(entry.moduleData, amount);
-
-        Debug.Log($"[Inventory] Reward added: {entry.displayName} x{amount}");
-
-        //if (RewardPopupUI.Instance != null)
-        //    RewardPopupUI.Instance.ShowModuleReward(entry.displayName);
-
-        return true;
     }
 
     public void GiveXCredits(float creditsToGive)

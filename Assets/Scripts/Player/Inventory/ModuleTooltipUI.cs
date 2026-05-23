@@ -15,6 +15,7 @@ public class ModuleTooltipUI : MonoBehaviour
     public RectTransform canvasRect;
     public Camera uiCamera;
     public RectTransform tooltipRect;
+    public RectTransform textRect;
 
     [Header("Timing")]
     public float showDelay = 0.75f;
@@ -29,6 +30,7 @@ public class ModuleTooltipUI : MonoBehaviour
 
     private Coroutine showRoutine;
     private ModuleData currentModule;
+    private bool pivotLocked;
 
     private void Awake()
     {
@@ -93,8 +95,12 @@ public class ModuleTooltipUI : MonoBehaviour
         if (tooltipRoot != null)
             tooltipRoot.SetActive(true);
 
+        pivotLocked = false;
+
         if (followMouse)
             UpdateTooltipPosition();
+
+        pivotLocked = true;
 
         if (StatManager.Instance != null)
             StatManager.Instance.ShowModuleHoverPreview(moduleData);
@@ -103,6 +109,7 @@ public class ModuleTooltipUI : MonoBehaviour
     public void Hide()
     {
         currentModule = null;
+        pivotLocked = false;
 
         if (showRoutine != null)
         {
@@ -136,30 +143,15 @@ public class ModuleTooltipUI : MonoBehaviour
             out localPoint
         );
 
+        if (!pivotLocked)
+            UpdateVerticalPivot(localPoint);
+
         Vector2 desiredPosition = localPoint + screenOffset;
 
         if (keepOnScreen)
-            desiredPosition = ClampTooltipToCanvas(desiredPosition);
+            desiredPosition = ClampTooltipHorizontally(desiredPosition);
 
         tooltipRect.anchoredPosition = desiredPosition;
-    }
-    private Vector2 ClampTooltipToCanvas(Vector2 desiredPosition)
-    {
-        Vector2 canvasSize = canvasRect.rect.size;
-        Vector2 tooltipSize = tooltipRect.rect.size;
-
-        Vector2 pivot = tooltipRect.pivot;
-
-        float minX = -canvasSize.x * 0.5f + screenPadding.x + tooltipSize.x * pivot.x;
-        float maxX = canvasSize.x * 0.5f - screenPadding.x - tooltipSize.x * (1f - pivot.x);
-
-        float minY = -canvasSize.y * 0.5f + screenPadding.y + tooltipSize.y * pivot.y;
-        float maxY = canvasSize.y * 0.5f - screenPadding.y - tooltipSize.y * (1f - pivot.y);
-
-        desiredPosition.x = Mathf.Clamp(desiredPosition.x, minX, maxX);
-        desiredPosition.y = Mathf.Clamp(desiredPosition.y, minY, maxY);
-
-        return desiredPosition;
     }
 
     private string BuildTooltipText(ModuleData data)
@@ -224,5 +216,34 @@ public class ModuleTooltipUI : MonoBehaviour
     private string FormatPercent(float value)
     {
         return $"{value * 100f:+0.#;-0.#;0}%";
+    }
+    private void UpdateVerticalPivot(Vector2 localPoint)
+    {
+        if (textRect == null)
+            return;
+
+        bool mouseIsAboveCenter = localPoint.y >= 0f;
+
+        Vector2 pivot = textRect.pivot;
+        pivot.y = mouseIsAboveCenter ? 1f : 0f;
+        textRect.pivot = pivot;
+    }
+
+    private Vector2 ClampTooltipHorizontally(Vector2 desiredPosition)
+    {
+        Vector2 canvasSize = canvasRect.rect.size;
+
+        float tooltipWidth = textRect != null
+            ? textRect.rect.width
+            : tooltipRect.rect.width;
+
+        Vector2 pivot = tooltipRect.pivot;
+
+        float minX = -canvasSize.x * 0.5f + screenPadding.x + tooltipWidth * pivot.x;
+        float maxX = canvasSize.x * 0.5f - screenPadding.x - tooltipWidth * (1f - pivot.x);
+
+        desiredPosition.x = Mathf.Clamp(desiredPosition.x, minX, maxX);
+
+        return desiredPosition;
     }
 }

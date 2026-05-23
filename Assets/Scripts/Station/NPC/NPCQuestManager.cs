@@ -423,12 +423,7 @@ public class NPCQuestManager : MonoBehaviour
     }
     private int PickRewardModuleIndex(System.Random rng)
     {
-        ModuleInventoryManager inv = inventoryManager ? inventoryManager : ModuleInventoryManager.Instance;
-
-        if (inv == null || inv.modulePrefabs == null || inv.modulePrefabs.Count == 0)
-            return -1;
-
-        return rng.Next(0, inv.modulePrefabs.Count);
+        return -1;  // temp while we work on ModuleGenerator
     }
     private int GiveQuestReward(ActiveQuest quest)
     {
@@ -475,17 +470,17 @@ public class NPCQuestManager : MonoBehaviour
 
         bool gaveModule = false;
 
-        if (shouldGiveModule)
-            gaveModule = inv.TryGiveModuleByIndex(quest.rewardModuleIndex, 1);
+        //if (shouldGiveModule)
+        //    gaveModule = inv.TryGiveRandomGeneratedModule(1);
 
         if (RewardPopupUI.Instance != null)
         {
-            RewardPopupUI.Instance.ShowDeliveryReward(
-                FormatDeliveryQuality(quality),
-                finalCredits,
-                gaveModule,
-                gaveModule ? inv.modulePrefabs[quest.rewardModuleIndex].displayName : ""
-            );
+            //RewardPopupUI.Instance.ShowDeliveryReward(
+            //    FormatDeliveryQuality(quality),
+            //    finalCredits,
+            //    gaveModule,
+            //    gaveModule ? inv.modulePrefabs[quest.rewardModuleIndex].displayName : ""
+            //);
         }
 
         if (FamilyReputationManager.Instance != null)

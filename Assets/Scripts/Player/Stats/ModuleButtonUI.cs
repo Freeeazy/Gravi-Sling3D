@@ -18,10 +18,16 @@ public class ModuleButtonUI : MonoBehaviour,
     public Camera uiCamera;
 
     [Header("Inventory Display")]
+    public Image iconImage;
     public TMP_Text amountText;
 
     private int currentAmount;
     private DraggedModuleUI currentDragged;
+
+    private void Start()
+    {
+        RefreshDisplay();
+    }
 
     public void SetAmount(int amount)
     {
@@ -29,6 +35,33 @@ public class ModuleButtonUI : MonoBehaviour,
 
         if (amountText != null)
             amountText.text = amount > 1 ? amount.ToString() : "";
+        
+        RefreshDisplay();
+    }
+    private void RefreshDisplay()
+    {
+        if (moduleData == null)
+        {
+            if (iconImage != null)
+            {
+                iconImage.sprite = null;
+                iconImage.color = Color.white;
+                iconImage.enabled = false;
+            }
+
+            return;
+        }
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = moduleData.icon;
+            iconImage.enabled = moduleData.icon != null;
+
+            if (ModuleInventoryManager.Instance != null)
+                iconImage.color = ModuleInventoryManager.Instance.GetTierColor(moduleData.moduleTier);
+            else
+                iconImage.color = Color.white;
+        }
     }
     public void OnPointerEnter(PointerEventData eventData)
     {

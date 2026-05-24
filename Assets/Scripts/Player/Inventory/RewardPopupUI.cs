@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -30,6 +31,20 @@ public class RewardPopupUI : MonoBehaviour
             Instance = null;
     }
 
+    public void ShowModuleReward(ModuleData rewardModule)
+    {
+        if (!rewardText || rewardModule == null)
+            return;
+
+        string tierHex = GetTierHexColor(rewardModule.moduleTier);
+
+        string message =
+            $"<color=#{tierHex}>Tier {rewardModule.moduleTier} {rewardModule.moduleType} Module</color>" +
+            $"\n<color=#{tierHex}>{rewardModule.moduleName} Received</color>";
+
+        ShowMessage(message);
+    }
+
     public void ShowModuleReward(string rewardName)
     {
         if (!rewardText)
@@ -48,17 +63,32 @@ public class RewardPopupUI : MonoBehaviour
         ShowMessage(message);
     }
 
-    public void ShowDeliveryReward(string deliveryQuality, float creditsReceived, bool gotModule, string moduleName = "")
+    public void ShowDeliveryReward(string deliveryQuality, float creditsReceived, ModuleData rewardModule)
     {
         if (!rewardText)
             return;
 
         string message = $"{deliveryQuality}\n+{creditsReceived:0} Credits";
 
-        if (gotModule && !string.IsNullOrEmpty(moduleName))
-            message += $"\n{moduleName} Received";
+        if (rewardModule != null)
+        {
+            string tierHex = GetTierHexColor(rewardModule.moduleTier);
+
+            message +=
+                $"\n<color=#{tierHex}>Tier {rewardModule.moduleTier} {rewardModule.moduleType} Module</color>";
+        }
 
         ShowMessage(message);
+    }
+
+    private string GetTierHexColor(int tier)
+    {
+        Color tierColor = Color.white;
+
+        if (ModuleInventoryManager.Instance != null)
+            tierColor = ModuleInventoryManager.Instance.GetTierColor(tier);
+
+        return ColorUtility.ToHtmlStringRGB(tierColor);
     }
 
     private void ShowMessage(string message)
@@ -68,13 +98,13 @@ public class RewardPopupUI : MonoBehaviour
 
         _popupRoutine = StartCoroutine(PlayPopup(message));
     }
+
     private IEnumerator PlayPopup(string message)
     {
         int visibleCharacters = CountVisibleCharacters(message);
 
         rewardText.text = "";
 
-        // Type in
         for (int i = 0; i <= visibleCharacters; i++)
         {
             rewardText.text = GetRichTextSubstring(message, i);
@@ -83,7 +113,6 @@ public class RewardPopupUI : MonoBehaviour
 
         yield return new WaitForSeconds(visibleTime);
 
-        // Delete out
         for (int i = visibleCharacters; i >= 0; i--)
         {
             rewardText.text = GetRichTextSubstring(message, i);
@@ -93,6 +122,7 @@ public class RewardPopupUI : MonoBehaviour
         rewardText.text = "";
         _popupRoutine = null;
     }
+
     private int CountVisibleCharacters(string text)
     {
         int count = 0;
@@ -123,6 +153,7 @@ public class RewardPopupUI : MonoBehaviour
     {
         int visibleCount = 0;
         System.Text.StringBuilder result = new System.Text.StringBuilder();
+        Stack<string> openTags = new Stack<string>();
 
         for (int i = 0; i < text.Length; i++)
         {
@@ -133,8 +164,11 @@ public class RewardPopupUI : MonoBehaviour
                 if (closingBracketIndex == -1)
                     break;
 
-                // Copy the whole TMP tag instantly.
-                result.Append(text.Substring(i, closingBracketIndex - i + 1));
+                string tag = text.Substring(i, closingBracketIndex - i + 1);
+                result.Append(tag);
+
+                TrackRichTextTag(tag, openTags);
+
                 i = closingBracketIndex;
                 continue;
             }
@@ -146,6 +180,42 @@ public class RewardPopupUI : MonoBehaviour
             visibleCount++;
         }
 
+        while (openTags.Count > 0)
+        {
+            result.Append(openTags.Pop());
+        }
+
         return result.ToString();
+    }
+
+    private void TrackRichTextTag(string tag, Stack<string> openTags)
+    {
+        if (string.IsNullOrEmpty(tag))
+            return;
+
+        if (tag.StartsWith("</"))
+        {
+            if (openTags.Count > 0)
+                openTags.Pop();
+
+            return;
+        }
+
+        if (tag.StartsWith("<color"))
+        {
+            openTags.Push("</color>");
+        }
+        else if (tag.StartsWith("<b>"))
+        {
+            openTags.Push("</b>");
+        }
+        else if (tag.StartsWith("<i>"))
+        {
+            openTags.Push("</i>");
+        }
+        else if (tag.StartsWith("<u>"))
+        {
+            openTags.Push("</u>");
+        }
     }
 }

@@ -13,21 +13,20 @@ public class ModuleInventoryManager : MonoBehaviour
     public GameObject emptySlotPrefab;
     public int totalSlots = 30;
 
-    [Header("Random Module Debug")]
-    public string[] debugModuleTypes =
+    [Header("Random Module Reward")]
+    public string[] rewardModuleTypes =
 {
         "Engine",
         "Battery",
         "Orbit"
     };
 
-    public int minDebugTier = 0;
-    public int maxDebugTier = 6;
-    public bool saveGeneratedDebugAssetsInEditor = true;
+    public bool saveGeneratedRewardAssetsInEditor = true;
 
     [Header("Currency")]
     public float credits = 0f;
     public TMP_Text creditsText;
+    public TMP_Text[] extraCreditsTexts;
 
     [Header("Currency Animation")]
     public float creditTickDelay = 0.02f;
@@ -94,42 +93,147 @@ public class ModuleInventoryManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Alpha0))
-            GenerateRandomDebugModule();
+            GiveModuleRewardFromCurrentReputation();
     }
-    private void GenerateRandomDebugModule()
+    public ModuleData GiveModuleRewardFromCurrentReputation()
+    {
+        if (FamilyReputationManager.Instance == null)
+        {
+            Debug.LogWarning("[Inventory] Cannot give module reward. FamilyReputationManager.Instance is null.");
+            return null;
+        }
+
+        int currentRankIndex = FamilyReputationManager.Instance.GetCurrentRankIndex();
+
+        ModuleData rewardModule = GenerateModuleRewardFromRank(currentRankIndex);
+
+        if (rewardModule == null)
+            return null;
+
+        AddModule(rewardModule, 1);
+
+        Debug.Log($"[Inventory] Gave reputation reward module: {rewardModule.moduleName} | Rank Index: {currentRankIndex}");
+
+        return rewardModule;
+    }
+    public ModuleData GiveModuleRewardFromCurrentReputationAndType(string forcedModuleType)
+    {
+        if (FamilyReputationManager.Instance == null)
+        {
+            Debug.LogWarning("[Inventory] Cannot give typed module reward. FamilyReputationManager.Instance is null.");
+            return null;
+        }
+
+        int currentRankIndex = FamilyReputationManager.Instance.GetCurrentRankIndex();
+
+        ModuleData rewardModule = GenerateModuleRewardFromRankAndType(currentRankIndex, forcedModuleType);
+
+        if (rewardModule == null)
+            return null;
+
+        AddModule(rewardModule, 1);
+
+        Debug.Log($"[Inventory] Gave typed reputation reward module: {rewardModule.moduleName} | Type: {forcedModuleType} | Rank Index: {currentRankIndex}");
+
+        return rewardModule;
+    }
+    public ModuleData GenerateModuleRewardFromRankAndType(int rankIndex, string forcedModuleType)
     {
         if (ModuleGenerator.Instance == null)
         {
-            Debug.LogWarning("[Inventory] Cannot generate module. ModuleGenerator.Instance is null.");
-            return;
+            Debug.LogWarning("[Inventory] Cannot generate typed reward module. ModuleGenerator.Instance is null.");
+            return null;
         }
 
-        if (debugModuleTypes == null || debugModuleTypes.Length == 0)
+        if (string.IsNullOrWhiteSpace(forcedModuleType))
         {
-            Debug.LogWarning("[Inventory] Cannot generate module. No debug module types assigned.");
-            return;
+            Debug.LogWarning("[Inventory] Cannot generate typed reward module. forcedModuleType is empty.");
+            return null;
         }
 
-        string randomType = debugModuleTypes[Random.Range(0, debugModuleTypes.Length)];
-        int randomTier = Random.Range(minDebugTier, maxDebugTier + 1);
+        int rolledTier = RollModuleTierFromRank(rankIndex);
 
         ModuleData generatedModule = ModuleGenerator.Instance.GenerateModule(
-            randomType,
-            randomTier,
-            saveGeneratedDebugAssetsInEditor
+            forcedModuleType,
+            rolledTier,
+            saveGeneratedRewardAssetsInEditor
         );
 
         if (generatedModule == null)
         {
-            Debug.LogWarning($"[Inventory] Module generation failed. Type: {randomType}, Tier: {randomTier}");
-            return;
+            Debug.LogWarning($"[Inventory] Typed reward module generation failed. Type: {forcedModuleType}, Tier: {rolledTier}");
+            return null;
         }
 
-        AddModule(generatedModule, 1);
+        Debug.Log($"[Inventory] Generated typed reward module: {generatedModule.moduleName} | Type: {generatedModule.moduleType} | Tier: {generatedModule.moduleTier}");
 
-        Debug.Log($"[Inventory] Generated random module: {generatedModule.moduleName} | Type: {generatedModule.moduleType} | Tier: {generatedModule.moduleTier}");
+        return generatedModule;
     }
+    public ModuleData GenerateModuleRewardFromRank(int rankIndex)
+    {
+        if (ModuleGenerator.Instance == null)
+        {
+            Debug.LogWarning("[Inventory] Cannot generate reward module. ModuleGenerator.Instance is null.");
+            return null;
+        }
 
+        if (rewardModuleTypes == null || rewardModuleTypes.Length == 0)
+        {
+            Debug.LogWarning("[Inventory] Cannot generate reward module. No reward module types assigned.");
+            return null;
+        }
+
+        int rolledTier = RollModuleTierFromRank(rankIndex);
+        string randomType = rewardModuleTypes[Random.Range(0, rewardModuleTypes.Length)];
+
+        ModuleData generatedModule = ModuleGenerator.Instance.GenerateModule(
+            randomType,
+            rolledTier,
+            saveGeneratedRewardAssetsInEditor
+        );
+
+        if (generatedModule == null)
+        {
+            Debug.LogWarning($"[Inventory] Reward module generation failed. Type: {randomType}, Tier: {rolledTier}");
+            return null;
+        }
+
+        Debug.Log($"[Inventory] Generated reward module: {generatedModule.moduleName} | Type: {generatedModule.moduleType} | Tier: {generatedModule.moduleTier}");
+
+        return generatedModule;
+    }
+    public ModuleData GenerateModuleByTypeAndTier(string moduleType, int tier)
+    {
+        if (ModuleGenerator.Instance == null)
+        {
+            Debug.LogWarning("[Inventory] Cannot generate module. ModuleGenerator.Instance is null.");
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(moduleType))
+        {
+            Debug.LogWarning("[Inventory] Cannot generate module. moduleType is empty.");
+            return null;
+        }
+
+        tier = Mathf.Clamp(tier, 0, 6);
+
+        ModuleData generatedModule = ModuleGenerator.Instance.GenerateModule(
+            moduleType,
+            tier,
+            saveGeneratedRewardAssetsInEditor
+        );
+
+        if (generatedModule == null)
+        {
+            Debug.LogWarning($"[Inventory] Exact module generation failed. Type: {moduleType}, Tier: {tier}");
+            return null;
+        }
+
+        Debug.Log($"[Inventory] Generated exact module: {generatedModule.moduleName} | Type: {generatedModule.moduleType} | Tier: {generatedModule.moduleTier}");
+
+        return generatedModule;
+    }
     public void AddModule(ModuleData moduleData, int amount = 1)
     {
         if (moduleData == null || amount <= 0)
@@ -258,16 +362,87 @@ public class ModuleInventoryManager : MonoBehaviour
     }
     private void UpdateCreditsText()
     {
-        if (creditsText == null)
-            return;
-
         int shownCredits = Mathf.RoundToInt(_displayedCredits);
         int shownPending = Mathf.RoundToInt(_pendingCreditGain);
 
+        string creditsMessage;
+
         if (shownPending > 0)
-            creditsText.text = $"<color=#4DFF88>{shownPending}</color> + {shownCredits} credits";
+            creditsMessage = $"<color=#4DFF88>{shownPending}</color> + {shownCredits} credits";
         else
-            creditsText.text = $"{shownCredits} credits";
+            creditsMessage = $"{shownCredits} credits";
+
+        SetCreditsText(creditsText, creditsMessage);
+
+        if (extraCreditsTexts == null)
+            return;
+
+        for (int i = 0; i < extraCreditsTexts.Length; i++)
+        {
+            SetCreditsText(extraCreditsTexts[i], creditsMessage);
+        }
+    }
+    public bool CanAfford(float cost)
+    {
+        return credits >= cost;
+    }
+
+    public bool TrySpendCredits(float cost)
+    {
+        if (cost <= 0f)
+            return true;
+
+        if (credits < cost)
+        {
+            Debug.Log($"[Inventory] Not enough credits. Cost: {cost}, Current: {credits}");
+            return false;
+        }
+
+        credits -= cost;
+
+        // Keep displayed credits from drifting weirdly after a purchase.
+        _displayedCredits = credits;
+        _pendingCreditGain = 0f;
+
+        if (_creditsRoutine != null)
+        {
+            StopCoroutine(_creditsRoutine);
+            _creditsRoutine = null;
+        }
+
+        UpdateCreditsText();
+
+        Debug.Log($"[Inventory] Spent {cost} credits. Remaining: {credits}");
+        return true;
+    }
+    public ModuleData TryBuyModuleFromShop(float cost, bool useRandomType, string forcedModuleType = "")
+    {
+        if (!TrySpendCredits(cost))
+            return null;
+
+        ModuleData boughtModule = null;
+
+        if (useRandomType)
+        {
+            boughtModule = GiveModuleRewardFromCurrentReputation();
+        }
+        else
+        {
+            boughtModule = GiveModuleRewardFromCurrentReputationAndType(forcedModuleType);
+        }
+
+        if (boughtModule == null)
+        {
+            // Refund if generation failed.
+            GiveXCredits(cost);
+            Debug.LogWarning("[Inventory] Module shop purchase failed during generation. Refunded credits.");
+            return null;
+        }
+
+        if (RewardPopupUI.Instance != null)
+            RewardPopupUI.Instance.ShowModuleReward(boughtModule);
+
+        return boughtModule;
     }
     private IEnumerator AnimateCreditsText()
     {
@@ -414,7 +589,10 @@ public class ModuleInventoryManager : MonoBehaviour
     }
     private int CompareByType(KeyValuePair<ModuleData, int> a, KeyValuePair<ModuleData, int> b)
     {
-        int typeCompare = GetModuleStatSortRank(a.Key).CompareTo(GetModuleStatSortRank(b.Key));
+        string aType = a.Key != null ? a.Key.moduleType : "";
+        string bType = b.Key != null ? b.Key.moduleType : "";
+
+        int typeCompare = string.Compare(aType, bType, System.StringComparison.Ordinal);
 
         if (typeCompare != 0)
             return typeCompare;
@@ -434,7 +612,10 @@ public class ModuleInventoryManager : MonoBehaviour
         if (tierCompare != 0)
             return tierCompare;
 
-        int typeCompare = GetModuleStatSortRank(a.Key).CompareTo(GetModuleStatSortRank(b.Key));
+        string aType = a.Key != null ? a.Key.moduleType : "";
+        string bType = b.Key != null ? b.Key.moduleType : "";
+
+        int typeCompare = string.Compare(aType, bType, System.StringComparison.Ordinal);
 
         if (typeCompare != 0)
             return typeCompare;
@@ -460,7 +641,10 @@ public class ModuleInventoryManager : MonoBehaviour
             if (amountCompare != 0)
                 return amountCompare;
 
-            int typeCompare = GetModuleStatSortRank(a.Key).CompareTo(GetModuleStatSortRank(b.Key));
+            string aType = a.Key != null ? a.Key.moduleType : "";
+            string bType = b.Key != null ? b.Key.moduleType : "";
+
+            int typeCompare = string.Compare(aType, bType, System.StringComparison.Ordinal);
 
             if (typeCompare != 0)
                 return typeCompare;
@@ -471,52 +655,51 @@ public class ModuleInventoryManager : MonoBehaviour
         // Both are amount 1, so keep them mostly in the normal Type order.
         return CompareByType(a, b);
     }
-    private int GetModuleStatSortRank(ModuleData module)
+    private int RollModuleTierFromRank(int rankIndex)
     {
-        if (module == null)
-            return 999;
+        rankIndex = Mathf.Clamp(rankIndex, 0, 4);
 
-        // 0 - Max Speed
-        if (!Mathf.Approximately(module.maxSpeedBonus, 0f) ||
-            !Mathf.Approximately(module.maxSpeedBonus_Percent, 0f))
-            return 0;
+        float roll = Random.value * 100f;
 
-        // 1 - Acceleration
-        if (!Mathf.Approximately(module.accelerationBonus, 0f) ||
-            !Mathf.Approximately(module.accelerationBonus_Percent, 0f))
-            return 1;
+        switch (rankIndex)
+        {
+            // Rookie
+            // 70% Tier 0, 30% Tier 1
+            case 0:
+                if (roll < 70f) return 0;
+                return 1;
 
-        // 2 - Boost Acceleration
-        if (!Mathf.Approximately(module.boostAccelAddBonus, 0f) ||
-            !Mathf.Approximately(module.boostAccelAddBonus_Percent, 0f))
-            return 2;
+            // Runner
+            // 15% Tier 0, 55% Tier 1, 30% Tier 2
+            case 1:
+                if (roll < 15f) return 0;
+                if (roll < 70f) return 1;
+                return 2;
 
-        // 3 - Boost Max Speed
-        if (!Mathf.Approximately(module.boostMaxBonus, 0f) ||
-            !Mathf.Approximately(module.boostMaxBonus_Percent, 0f))
-            return 3;
+            // Trusted
+            // 20% Tier 1, 50% Tier 2, 30% Tier 3
+            case 2:
+                if (roll < 20f) return 1;
+                if (roll < 70f) return 2;
+                return 3;
 
-        // 4 - Boost Capacity
-        if (!Mathf.Approximately(module.capacityBonus, 0f) ||
-            !Mathf.Approximately(module.capacityBonus_Percent, 0f))
-            return 4;
+            // Made Courier
+            // 20% Tier 2, 50% Tier 3, 30% Tier 4
+            case 3:
+                if (roll < 20f) return 2;
+                if (roll < 70f) return 3;
+                return 4;
 
-        // 5 - Boost Drain
-        if (!Mathf.Approximately(module.drainPerSecondBonus, 0f) ||
-            !Mathf.Approximately(module.drainPerSecondBonus_Percent, 0f))
-            return 5;
+            // Family Legend
+            // 20% Tier 3, 50% Tier 4, 30% Tier 5
+            case 4:
+                if (roll < 20f) return 3;
+                if (roll < 70f) return 4;
+                return 5;
 
-        // 6 - Charge Rate
-        if (!Mathf.Approximately(module.chargeRateBonus, 0f) ||
-            !Mathf.Approximately(module.chargeRateBonus_Percent, 0f))
-            return 6;
-
-        // 7 - Launch Speed
-        if (!Mathf.Approximately(module.baseLaunchSpeedBonus, 0f) ||
-            !Mathf.Approximately(module.baseLaunchSpeedBonus_Percent, 0f))
-            return 7;
-
-        return 999;
+            default:
+                return 0;
+        }
     }
     public Color GetTierColor(int tier)
     {
@@ -539,5 +722,12 @@ public class ModuleInventoryManager : MonoBehaviour
             default:
                 return tier0Color;
         }
+    }
+    private void SetCreditsText(TMP_Text text, string message)
+    {
+        if (text == null)
+            return;
+
+        text.text = message;
     }
 }

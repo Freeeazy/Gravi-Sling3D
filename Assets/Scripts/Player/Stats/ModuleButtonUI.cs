@@ -128,7 +128,27 @@ public class ModuleButtonUI : MonoBehaviour,
         if (moduleData == null)
             return;
 
-        if (ModuleLoadoutManager.Instance == null)
+        // If research panel/mode is active, right-click goes into research slots.
+        if (ResearchManager.Instance != null &&
+            ResearchManager.Instance.isActiveAndEnabled &&
+            ResearchManager.Instance.acceptRightClickModules)
+        {
+            bool assignedToResearch = ResearchManager.Instance.TryAssignToFirstEmptyResearchSlot(moduleData);
+
+            if (assignedToResearch)
+            {
+                Debug.Log($"Assigned {moduleData.name} to first empty research slot.");
+            }
+            else
+            {
+                Debug.Log("No empty research slot available.");
+            }
+
+            return;
+        }
+
+        // Otherwise, normal quick-equip behavior.
+        if (ModuleLoadoutManager.Instance == null || !ModuleLoadoutManager.Instance.isActiveAndEnabled)
             return;
 
         bool equipped = ModuleLoadoutManager.Instance.TryEquipToFirstEmptySlot(moduleData);

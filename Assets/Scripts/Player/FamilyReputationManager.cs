@@ -34,6 +34,10 @@ public class FamilyReputationManager : MonoBehaviour
     [Header("Animation")]
     public float tickDelay = 0.08f;
 
+    [Header("Debug")]
+    public bool enableDebugRankKeys = true;
+    public int debugReputationStep = 25;
+
     private int _pendingChange;
     private Coroutine _animateRoutine;
 
@@ -48,7 +52,21 @@ public class FamilyReputationManager : MonoBehaviour
         if (Instance == this)
             Instance = null;
     }
+    private void Update()
+    {
+        if (!enableDebugRankKeys)
+            return;
 
+        if (Input.GetKeyDown(KeyCode.Minus))
+        {
+            AddReputation(-debugReputationStep);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Equals))
+        {
+            AddReputation(debugReputationStep);
+        }
+    }
     public void AddReputation(int amount)
     {
         if (amount == 0)
@@ -151,5 +169,13 @@ public class FamilyReputationManager : MonoBehaviour
 
         rankIndex = Mathf.Clamp(rankIndex, 0, rankNames.Length - 1);
         return rankNames[rankIndex];
+    }
+    public int GetCurrentRankIndex()
+    {
+        if (rankNames == null || rankNames.Length == 0)
+            return 0;
+
+        rankIndex = Mathf.Clamp(rankIndex, 0, rankNames.Length - 1);
+        return rankIndex;
     }
 }

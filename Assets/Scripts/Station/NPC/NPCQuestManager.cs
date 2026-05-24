@@ -468,19 +468,20 @@ public class NPCQuestManager : MonoBehaviour
         float moduleRewardChance = GetModuleRewardChance(quality);
         bool shouldGiveModule = UnityEngine.Random.value <= moduleRewardChance;
 
-        bool gaveModule = false;
+        ModuleData rewardModule = null;
 
-        //if (shouldGiveModule)
-        //    gaveModule = inv.TryGiveRandomGeneratedModule(1);
+        if (shouldGiveModule)
+            rewardModule = inv.GiveModuleRewardFromCurrentReputation();
+
+        bool gaveModule = rewardModule != null;
 
         if (RewardPopupUI.Instance != null)
         {
-            //RewardPopupUI.Instance.ShowDeliveryReward(
-            //    FormatDeliveryQuality(quality),
-            //    finalCredits,
-            //    gaveModule,
-            //    gaveModule ? inv.modulePrefabs[quest.rewardModuleIndex].displayName : ""
-            //);
+            RewardPopupUI.Instance.ShowDeliveryReward(
+                FormatDeliveryQuality(quality),
+                finalCredits,
+                rewardModule
+            );
         }
 
         if (FamilyReputationManager.Instance != null)

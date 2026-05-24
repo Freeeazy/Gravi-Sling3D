@@ -158,8 +158,8 @@ public class ModuleTooltipUI : MonoBehaviour
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.AppendLine($"Tier {data.moduleTier} {data.moduleType} Module");
-        sb.AppendLine(data.moduleName);
+        string tierHex = GetTierHexColor(data.moduleTier);
+        sb.AppendLine($"<color=#{tierHex}>Tier {data.moduleTier} {data.moduleType} Module - {data.moduleName}</color>");
         sb.AppendLine();
 
         AppendStatLine(sb, data.chargeRateBonus, "Charge Rate", false);
@@ -245,5 +245,14 @@ public class ModuleTooltipUI : MonoBehaviour
         desiredPosition.x = Mathf.Clamp(desiredPosition.x, minX, maxX);
 
         return desiredPosition;
+    }
+    private string GetTierHexColor(int tier)
+    {
+        Color tierColor = Color.white;
+
+        if (ModuleInventoryManager.Instance != null)
+            tierColor = ModuleInventoryManager.Instance.GetTierColor(tier);
+
+        return ColorUtility.ToHtmlStringRGB(tierColor);
     }
 }

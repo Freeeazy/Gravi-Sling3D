@@ -170,6 +170,7 @@ public class SimpleMove : MonoBehaviour
     {
         if (enableSlip)
             slipFactor = slipStart;
+        ObjectToggleManager.Instance.DisableObjects();
     }
 
     private void OnDisable()
@@ -179,6 +180,7 @@ public class SimpleMove : MonoBehaviour
         isAutoStabilizingRoll = false;
         UpdateAutoStabilizeUI(force: true);
         _rollIdleTimer = 0f;
+        ObjectToggleManager.Instance.EnableObjects();
     }
     private void Update()
     {

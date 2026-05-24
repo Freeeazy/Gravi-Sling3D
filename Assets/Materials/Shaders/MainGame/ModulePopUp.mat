@@ -41,15 +41,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Alpha: 0.75
+    - _Alpha: 0.9
     - _ColorMask: 15
     - _DistortionFrequency: 35
     - _DistortionSpeed: 4
     - _DistortionStrength: 0.005
     - _FlickerSpeed: 12
-    - _FlickerStrength: 0.08
-    - _ScanlineFrequency: 60
-    - _ScanlineSpeed: 0.25
+    - _FlickerStrength: 0
+    - _ScanlineFrequency: 50
+    - _ScanlineSpeed: 0.15
     - _ScanlineStrength: 0.25
     - _Stencil: 0
     - _StencilComp: 8
@@ -60,6 +60,6 @@ Material:
     - _UIMaskSoftnessY: 1
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _HologramColor: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 0}
+    - _HologramColor: {r: 0.1764706, g: 0.1764706, b: 0.1764706, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

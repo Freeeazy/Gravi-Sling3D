@@ -2,7 +2,10 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
+public class ModuleSlotUI : MonoBehaviour,
+    IPointerClickHandler,
+    IPointerEnterHandler,
+    IPointerExitHandler
 {
     [Header("UI References")]
     public Image iconImage;
@@ -13,72 +16,85 @@ public class ModuleSlotUI : MonoBehaviour, IPointerClickHandler
 
     public void SetModule(ModuleData data)
     {
+        if (data == null)
+            return;
+
         EquippedModule = data;
 
-        Debug.Log($"Slot {name} received module: {data.moduleName}");
-        Debug.Log($"Icon is null? {data.icon == null}");
+        RefreshDisplay();
 
-        if (iconImage != null)
-        {
-            iconImage.sprite = data.icon;
-            iconImage.color = GetModuleTierColor(data);
-            iconImage.enabled = true;
-
-            Debug.Log($"Assigned sprite to iconImage on {name}");
-        }
-        else
-        {
-            Debug.LogWarning($"iconImage is NULL on {name}");
-        }
+        if (ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
+            ModuleLoadoutManager.Instance.RecalculateStats();
     }
 
     public void ClearModule()
     {
-        ModuleData removedModule = EquippedModule;
+        ClearModule(true);
+    }
 
+    public void ClearModule(bool returnToInventory)
+    {
+        if (IsEmpty)
+            return;
+
+        ModuleData removedModule = EquippedModule;
         EquippedModule = null;
 
-        if (iconImage != null)
+        RefreshDisplay();
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+
+        if (returnToInventory && ModuleInventoryManager.Instance != null && removedModule != null)
+            ModuleInventoryManager.Instance.AddModule(removedModule, 1);
+
+        if (ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
+            ModuleLoadoutManager.Instance.RecalculateStats();
+    }
+
+    private void RefreshDisplay()
+    {
+        if (iconImage == null)
+            return;
+
+        if (EquippedModule == null)
         {
             iconImage.sprite = null;
             iconImage.color = Color.white;
             iconImage.enabled = false;
+            return;
         }
 
-        if (ModuleInventoryManager.Instance != null && removedModule != null)
-            ModuleInventoryManager.Instance.AddModule(removedModule, 1);
+        iconImage.sprite = EquippedModule.icon;
+        iconImage.enabled = EquippedModule.icon != null;
 
-        if (ModuleLoadoutManager.Instance != null)
-            ModuleLoadoutManager.Instance.RecalculateStats();
+        if (ModuleInventoryManager.Instance != null)
+            iconImage.color = ModuleInventoryManager.Instance.GetTierColor(EquippedModule.moduleTier);
+        else
+            iconImage.color = Color.white;
     }
-    private Color GetModuleTierColor(ModuleData data)
+
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        if (data == null)
-            return Color.white;
+        if (EquippedModule == null)
+            return;
 
-        if (ModuleInventoryManager.Instance == null)
-            return Color.white;
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.ShowDelayed(EquippedModule);
+    }
 
-        return ModuleInventoryManager.Instance.GetTierColor(data.moduleTier);
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"CLICK DETECTED on {name} | Button: {eventData.button}");
+        if (eventData.button != PointerEventData.InputButton.Right)
+            return;
 
-        if (eventData.button == PointerEventData.InputButton.Right)
-        {
-            Debug.Log("RIGHT CLICK CONFIRMED");
-
-            if (!IsEmpty)
-            {
-                Debug.Log("SLOT NOT EMPTY -> CLEARING");
-                ClearModule();
-            }
-            else
-            {
-                Debug.Log("SLOT EMPTY -> NOTHING TO CLEAR");
-            }
-        }
+        if (!IsEmpty)
+            ClearModule();
     }
 }

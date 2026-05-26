@@ -143,12 +143,15 @@ public class TutorialBoundsManager : MonoBehaviour
         if (playerRb)
         {
             float normalizedTimeSpentOutside = 1f - (countdownTimer / countdownDuration);
+            float targetDamping = IsMovingTowardSafeZone()
+                ? 0f
+                : Mathf.Lerp(
+                    minOutsideDamping,
+                    maxOutsideDamping,
+                    normalizedTimeSpentOutside
+                );
 
-            playerRb.linearDamping = Mathf.Lerp(
-                minOutsideDamping,
-                maxOutsideDamping,
-                normalizedTimeSpentOutside
-            );
+            playerRb.linearDamping = targetDamping;
         }
 
         int secondsLeft = Mathf.CeilToInt(Mathf.Max(0f, countdownTimer));
@@ -178,7 +181,50 @@ public class TutorialBoundsManager : MonoBehaviour
         if (countdownText)
             countdownText.text = $"{Mathf.CeilToInt(countdownDuration)}s";
     }
+    private bool IsMovingTowardSafeZone()
+    {
+        if (!playerRb)
+            return false;
 
+        Collider closestZone = GetClosestActiveSafeZone();
+
+        if (!closestZone)
+            return false;
+
+        Vector3 closestPoint = closestZone.ClosestPoint(player.position);
+        Vector3 directionToSafeZone = closestPoint - player.position;
+
+        if (directionToSafeZone.sqrMagnitude < 0.001f)
+            directionToSafeZone = closestZone.bounds.center - player.position;
+
+        if (directionToSafeZone.sqrMagnitude < 0.001f || playerRb.linearVelocity.sqrMagnitude < 0.001f)
+            return false;
+
+        return Vector3.Dot(playerRb.linearVelocity.normalized, directionToSafeZone.normalized) > 0f;
+    }
+
+    private Collider GetClosestActiveSafeZone()
+    {
+        Collider closestZone = null;
+        float closestDistanceSqr = float.MaxValue;
+
+        foreach (Collider zone in safeZones)
+        {
+            if (zone == null || !zone.gameObject.activeInHierarchy || !zone.enabled)
+                continue;
+
+            Vector3 closestPoint = zone.ClosestPoint(player.position);
+            float distanceSqr = (closestPoint - player.position).sqrMagnitude;
+
+            if (distanceSqr < closestDistanceSqr)
+            {
+                closestDistanceSqr = distanceSqr;
+                closestZone = zone;
+            }
+        }
+
+        return closestZone;
+    }
     private void StartLeviathanSearch()
     {
         SpawnLeviathanHead();

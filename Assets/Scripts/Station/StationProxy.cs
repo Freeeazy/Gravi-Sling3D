@@ -109,6 +109,21 @@ public class StationProxy : MonoBehaviour
 
         ApplyRandomBubbleAndStationLights();
     }
+    public void AssignAtCurrentPose(Vector3Int coord, StationFieldData data)
+    {
+        if (!data)
+        {
+            Coord = coord;
+            RandomizeBubbleAndStationLights();
+            return;
+        }
+
+        Assign(coord, transform.position, transform.rotation, data);
+    }
+    public void RandomizeBubbleAndStationLights()
+    {
+        ApplyRandomBubbleAndStationLights();
+    }
     private void ApplyRandomBubbleAndStationLights()
     {
         Material chosenBubbleMaterial = null;

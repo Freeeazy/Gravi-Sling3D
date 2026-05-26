@@ -5,7 +5,8 @@ using UnityEngine;
 /// Manages a fixed-count "dust asteroid" set in an oriented recyclic box shell:
 /// - Outer box defines the keep-in-bounds volume.
 /// - Inner box defines a hollow hole around the player.
-/// - Wrap happens primarily along the forward axis (velocity dir), but we also wrap X/Y to keep drift contained.
+/// - Wrap uses a fixed world-space orientation, centered on the player.
+/// - Player rotation does not affect dust placement or recycling.
 /// - Stores world-space positions + rotations and updates them with optional drift.
 /// Rendering is handled later (instanced or pooled), using Positions/Rotations/Scales.
 /// </summary>
@@ -13,7 +14,6 @@ public class AsteroidDustPosManager : MonoBehaviour
 {
     [Header("Refs")]
     public Transform player;
-    public Rigidbody shipRb; // optional: for forward axis from velocity
 
     [Header("Counts / Seed")]
     [Min(1)] public int count = 450;
@@ -25,9 +25,9 @@ public class AsteroidDustPosManager : MonoBehaviour
     public Vector3 innerHalfExtents = new Vector3(80f, 80f, 80f);
     [Min(0f)] public float surfaceEpsilon = 0.5f; // pushes wraps slightly beyond a face to avoid instant re-trigger
 
-    [Header("Forward Axis")]
-    [Tooltip("If ship speed is below this, use player forward instead of velocity.")]
-    public float minSpeedForVelocityAxis = 0.25f;
+    [Header("Wrap Box Orientation")]
+    public bool lockWrapBoxToWorld = true;
+    public Vector3 lockedWorldForward = Vector3.forward;
 
     [Tooltip("Smooth the axis to prevent hard direction flips causing mass wraps.")]
     [Range(0f, 30f)] public float axisSmoothing = 8f;
@@ -59,7 +59,7 @@ public class AsteroidDustPosManager : MonoBehaviour
     private int[] _hideFrames;         // countdown frames to hide after wrap (renderer can consult)
 
     // Smoothed axis
-    private Vector3 _axisFwd = Vector3.forward;
+    private Vector3 _wrapFwd = Vector3.forward;
 
     // RNG
     private System.Random _rng;
@@ -90,7 +90,7 @@ public class AsteroidDustPosManager : MonoBehaviour
         _hideFrames = new int[count];
 
         // Initialize axis
-        _axisFwd = GetTargetAxis();
+        _wrapFwd = GetLockedWorldForward();
 
         for (int i = 0; i < count; i++)
         {
@@ -98,7 +98,7 @@ public class AsteroidDustPosManager : MonoBehaviour
             Vector3 local = SamplePointInHollowBox(_rng, outerHalfExtents, innerHalfExtents);
 
             // Convert from axis-space -> world-space
-            OrientedBasis basis = BuildBasis(_axisFwd);
+            OrientedBasis basis = BuildBasis(_wrapFwd);
             Vector3 worldPos = player.position + basis.ToWorld(local);
 
             Positions[i] = worldPos;
@@ -122,7 +122,7 @@ public class AsteroidDustPosManager : MonoBehaviour
 
             // Position drift
             _driftVel[i] = enablePositionDrift
-                ? RandomDriftVelocity(_rng, _axisFwd, driftSpeedRange, driftDirectionalBias)
+                ? RandomDriftVelocity(_rng, _wrapFwd, driftSpeedRange, driftDirectionalBias)
                 : Vector3.zero;
 
             _hideFrames[i] = 0;
@@ -137,12 +137,8 @@ public class AsteroidDustPosManager : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        // Smooth axis to prevent mass wrap spikes on direction changes
-        Vector3 targetAxis = GetTargetAxis();
-        _axisFwd = Vector3.Slerp(_axisFwd, targetAxis, 1f - Mathf.Exp(-axisSmoothing * dt));
-        if (_axisFwd.sqrMagnitude < 1e-6f) _axisFwd = player.forward;
-
-        OrientedBasis basis = BuildBasis(_axisFwd);
+        _wrapFwd = GetLockedWorldForward();
+        OrientedBasis basis = BuildBasis(_wrapFwd);
 
         Vector3 outer = outerHalfExtents;
         Vector3 inner = innerHalfExtents;
@@ -225,16 +221,11 @@ public class AsteroidDustPosManager : MonoBehaviour
     public bool IsHidden(int index) => _hideFrames != null && (uint)index < (uint)_hideFrames.Length && _hideFrames[index] > 0;
 
     // ----------------- Axis + Basis -----------------
-
-    private Vector3 GetTargetAxis()
+    private Vector3 GetLockedWorldForward()
     {
-        if (shipRb)
-        {
-            Vector3 v = shipRb.linearVelocity;
-            if (v.sqrMagnitude >= minSpeedForVelocityAxis * minSpeedForVelocityAxis)
-                return v.normalized;
-        }
-        return player.forward.sqrMagnitude > 1e-6f ? player.forward.normalized : Vector3.forward;
+        return lockedWorldForward.sqrMagnitude > 1e-6f
+            ? lockedWorldForward.normalized
+            : Vector3.forward;
     }
 
     private struct OrientedBasis

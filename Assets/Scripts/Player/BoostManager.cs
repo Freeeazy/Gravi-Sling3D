@@ -75,10 +75,10 @@ public class BoostManager : MonoBehaviour
     public float Boost01 => _boost01;
     public void SetCapacity(float value)
     {
-        float temp;
-        temp = capacity;
-        capacity = value;
-        _energy += capacity - temp;
+        float oldCapacity = capacity;
+        capacity = Mathf.Max(0f, value);
+        _energy = Mathf.Clamp(_energy + capacity - oldCapacity, 0f, capacity);
+        ApplyPegMats(force: true);
     }
 
     public float GetCapacity() => capacity;

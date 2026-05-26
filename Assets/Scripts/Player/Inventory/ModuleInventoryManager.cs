@@ -60,6 +60,8 @@ public class ModuleInventoryManager : MonoBehaviour
     private float _displayedCredits = 0f;
     private float _pendingCreditGain = 0f;
     private Coroutine _creditsRoutine;
+    private bool _refreshInventoryQueued;
+    private readonly List<KeyValuePair<ModuleData, int>> _sortedModules = new List<KeyValuePair<ModuleData, int>>(64);
 
     private enum InventorySortMode
     {
@@ -89,7 +91,10 @@ public class ModuleInventoryManager : MonoBehaviour
         if (Instance == this)
             Instance = null;
     }
-
+    private void OnDisable()
+    {
+        _refreshInventoryQueued = false;
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Keypad0) || Input.GetKeyDown(KeyCode.Alpha0))
@@ -250,7 +255,7 @@ public class ModuleInventoryManager : MonoBehaviour
             ownedModules.Add(moduleData, amount);
         }
 
-        RefreshInventoryUI();
+        RequestInventoryRefresh();
     }
 
     public void RemoveModule(ModuleData moduleData, int amount = 1)
@@ -266,7 +271,7 @@ public class ModuleInventoryManager : MonoBehaviour
         if (ownedModules[moduleData] <= 0)
             ownedModules.Remove(moduleData);
 
-        RefreshInventoryUI();
+        RequestInventoryRefresh();
     }
 
     public int GetAmount(ModuleData moduleData)
@@ -279,13 +284,15 @@ public class ModuleInventoryManager : MonoBehaviour
 
     public void RefreshInventoryUI()
     {
+        _refreshInventoryQueued = false;
+
         ClearCurrentSlots();
 
         int usedSlots = 0;
 
-        List<KeyValuePair<ModuleData, int>> sortedModules = GetSortedOwnedModules();
+        GetSortedOwnedModules(_sortedModules);
 
-        foreach (var pair in sortedModules)
+        foreach (var pair in _sortedModules)
         {
             ModuleData data = pair.Key;
             int amount = pair.Value;
@@ -328,7 +335,27 @@ public class ModuleInventoryManager : MonoBehaviour
                 Instantiate(emptySlotPrefab, moduleListParent);
         }
     }
+    private void RequestInventoryRefresh()
+    {
+        if (!isActiveAndEnabled)
+        {
+            RefreshInventoryUI();
+            return;
+        }
 
+        if (_refreshInventoryQueued)
+            return;
+
+        _refreshInventoryQueued = true;
+        StartCoroutine(RefreshInventoryNextFrame());
+    }
+
+    private IEnumerator RefreshInventoryNextFrame()
+    {
+        yield return null;
+
+        RefreshInventoryUI();
+    }
     private void ClearCurrentSlots()
     {
         for (int i = moduleListParent.childCount - 1; i >= 0; i--)
@@ -564,11 +591,14 @@ public class ModuleInventoryManager : MonoBehaviour
                 break;
         }
 
-        RefreshInventoryUI();
+        RequestInventoryRefresh();
     }
-    private List<KeyValuePair<ModuleData, int>> GetSortedOwnedModules()
+    private void GetSortedOwnedModules(List<KeyValuePair<ModuleData, int>> modules)
     {
-        List<KeyValuePair<ModuleData, int>> modules = new List<KeyValuePair<ModuleData, int>>(ownedModules);
+        modules.Clear();
+
+        foreach (var pair in ownedModules)
+            modules.Add(pair);
 
         switch (currentSortMode)
         {
@@ -584,8 +614,6 @@ public class ModuleInventoryManager : MonoBehaviour
                 modules.Sort(CompareByAmount);
                 break;
         }
-
-        return modules;
     }
     private int CompareByType(KeyValuePair<ModuleData, int> a, KeyValuePair<ModuleData, int> b)
     {

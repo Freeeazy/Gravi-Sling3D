@@ -6,11 +6,13 @@ using UnityEngine.UI;
 public class DraggedModuleUI : MonoBehaviour
 {
     public Image iconImage;
+    public bool logDropDebug = false;
 
     private ModuleData moduleData;
     private RectTransform rectTransform;
     private RectTransform canvasRect;
     private Camera canvasCamera;
+    private static readonly List<RaycastResult> RaycastResults = new List<RaycastResult>(16);
 
     public void Initialize(ModuleData data, RectTransform parentCanvas, Camera cam)
     {
@@ -25,7 +27,8 @@ public class DraggedModuleUI : MonoBehaviour
             iconImage.color = ModuleInventoryManager.Instance.GetTierColor(moduleData.moduleTier);
         }
 
-        Debug.Log($"DraggedModuleUI Initialize: {data.moduleName}");
+        if (logDropDebug && data != null)
+            Debug.Log($"DraggedModuleUI Initialize: {data.moduleName}");
     }
 
     public void SetPosition(Vector2 screenPosition)
@@ -46,19 +49,28 @@ public class DraggedModuleUI : MonoBehaviour
 
     public void TryDrop(PointerEventData eventData)
     {
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-
-        Debug.Log($"TryDrop hit count: {results.Count}");
-
-        foreach (var result in results)
+        if (EventSystem.current == null)
         {
-            Debug.Log($"Raycast hit: {result.gameObject.name}");
+            Destroy(gameObject);
+            return;
+        }
+
+        RaycastResults.Clear();
+        EventSystem.current.RaycastAll(eventData, RaycastResults);
+
+        if (logDropDebug)
+            Debug.Log($"TryDrop hit count: {RaycastResults.Count}");
+
+        foreach (var result in RaycastResults)
+        {
+            if (logDropDebug)
+                Debug.Log($"Raycast hit: {result.gameObject.name}");
 
             ModuleSlotUI slot = result.gameObject.GetComponentInParent<ModuleSlotUI>();
             if (slot != null)
             {
-                Debug.Log($"Found slot: {slot.name}, IsEmpty: {slot.IsEmpty}");
+                if (logDropDebug)
+                    Debug.Log($"Found slot: {slot.name}, IsEmpty: {slot.IsEmpty}");
 
                 if (slot.IsEmpty)
                 {
@@ -76,7 +88,9 @@ public class DraggedModuleUI : MonoBehaviour
             }
         }
 
-        Debug.Log("No valid slot found. Destroying dragged module.");
+        if (logDropDebug)
+            Debug.Log("No valid slot found. Destroying dragged module.");
+
         Destroy(gameObject);
     }
 }

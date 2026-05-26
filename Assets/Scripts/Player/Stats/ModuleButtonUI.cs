@@ -21,6 +21,9 @@ public class ModuleButtonUI : MonoBehaviour,
     public Image iconImage;
     public TMP_Text amountText;
 
+    [Header("Debug")]
+    public bool logInputDebug = false;
+
     private int currentAmount;
     private DraggedModuleUI currentDragged;
 
@@ -79,7 +82,8 @@ public class ModuleButtonUI : MonoBehaviour,
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log($"BeginDrag on: {name}");
+        if (logInputDebug)
+            Debug.Log($"BeginDrag on: {name}");
 
         if (ModuleTooltipUI.Instance != null)
             ModuleTooltipUI.Instance.Hide();
@@ -106,7 +110,8 @@ public class ModuleButtonUI : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log($"EndDrag on: {name}");
+        if (logInputDebug)
+            Debug.Log($"EndDrag on: {name}");
 
         if (parentScrollRect != null)
             parentScrollRect.enabled = true;
@@ -137,11 +142,13 @@ public class ModuleButtonUI : MonoBehaviour,
 
             if (assignedToResearch)
             {
-                Debug.Log($"Assigned {moduleData.name} to first empty research slot.");
+                if (logInputDebug)
+                    Debug.Log($"Assigned {moduleData.name} to first empty research slot.");
             }
             else
             {
-                Debug.Log("No empty research slot available.");
+                if (logInputDebug)
+                    Debug.Log("No empty research slot available.");
             }
 
             return;
@@ -155,11 +162,13 @@ public class ModuleButtonUI : MonoBehaviour,
 
         if (equipped)
         {
-            Debug.Log($"Equipped {moduleData.name} to first empty slot.");
+            if (logInputDebug)
+                Debug.Log($"Equipped {moduleData.name} to first empty slot.");
         }
         else
         {
-            Debug.Log("No empty module slot available.");
+            if (logInputDebug)
+                Debug.Log("No empty module slot available.");
         }
     }
 }

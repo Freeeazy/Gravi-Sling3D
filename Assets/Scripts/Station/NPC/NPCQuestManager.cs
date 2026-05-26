@@ -42,7 +42,6 @@ public class NPCQuestManager : MonoBehaviour
 
         public float distance; // from station -> target (world distance)
         public int difficulty; // 1..5
-        public int rewardModuleIndex;
         public bool valid;
     }
 
@@ -55,7 +54,6 @@ public class NPCQuestManager : MonoBehaviour
         public Vector3 toWorldPos;
         public float distanceAtAccept;
         public int difficulty;
-        public int rewardModuleIndex;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -149,8 +147,7 @@ public class NPCQuestManager : MonoBehaviour
             toCoord = offer.toCoord,
             toWorldPos = offer.toWorldPos,
             distanceAtAccept = offer.distance,
-            difficulty = offer.difficulty,
-            rewardModuleIndex = offer.rewardModuleIndex
+            difficulty = offer.difficulty
         };
 
         _active.Add(q);
@@ -223,9 +220,6 @@ public class NPCQuestManager : MonoBehaviour
         // Pick difficulty (random for now, deterministic due to seed)
         int difficulty = PickDifficulty1to5(rng);
         offer.difficulty = difficulty;
-
-        int rewardIndex = PickRewardModuleIndex(rng);
-        offer.rewardModuleIndex = rewardIndex;
 
         // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
         float tMin01, tMax01;
@@ -420,10 +414,6 @@ public class NPCQuestManager : MonoBehaviour
 
         ClosestQuest = _active[bestIndex];
         HasClosestQuest = true;
-    }
-    private int PickRewardModuleIndex(System.Random rng)
-    {
-        return -1;  // temp while we work on ModuleGenerator
     }
     private int GiveQuestReward(ActiveQuest quest)
     {

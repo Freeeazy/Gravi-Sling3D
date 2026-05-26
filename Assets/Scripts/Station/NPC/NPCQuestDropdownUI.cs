@@ -39,13 +39,17 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
         if (questManager && !questManager.HasActiveQuestFromNpc(npcId))
         {
-            acceptButton.enabled = true;
-            acceptText.text = "Accept";
+            if (acceptButton)
+                acceptButton.enabled = true;
+            if (acceptText)
+                acceptText.text = "Accept";
         }
         else
         {
-            acceptButton.enabled = false;
-            acceptText.text = "Accepted";
+            if (acceptButton)
+                acceptButton.enabled = false;
+            if (acceptText)
+                acceptText.text = "Accepted";
         }
     }
 
@@ -71,8 +75,10 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
         if (ok)
         {
-            acceptButton.enabled = false;
-            acceptText.text = "Accepted";
+            if (acceptButton)
+                acceptButton.enabled = false;
+            if (acceptText)
+                acceptText.text = "Accepted";
         }
     }
 

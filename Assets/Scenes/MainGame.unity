@@ -4073,15 +4073,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1616803246}
-  shipRb: {fileID: 1616803247}
   count: 2000
   seed: 1234567
   regenerateOnStart: 1
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
-  axisSmoothing: 30
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
+  axisSmoothing: 6
   uniformScaleRange: {x: 3, y: 5}
   randomRotation: 1
   angularSpeedRangeDeg: {x: 0, y: 35}
@@ -8890,15 +8890,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1616803246}
-  shipRb: {fileID: 1616803247}
   count: 2000
   seed: 123456
   regenerateOnStart: 1
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
-  axisSmoothing: 30
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
+  axisSmoothing: 6
   uniformScaleRange: {x: 1, y: 2}
   randomRotation: 1
   angularSpeedRangeDeg: {x: 0, y: 35}
@@ -28554,7 +28554,7 @@ MonoBehaviour:
   baseMaxSpeed: 200
   baseAcceleration: 100
   baseBoostAccelAdd: 50
-  baseBoostMaxSpeed: 900
+  baseBoostMaxSpeed: 500
   baseCapacity: 100
   baseDrainPerSecond: 20
   baseRegenPerSecond: 5
@@ -31632,15 +31632,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1616803246}
-  shipRb: {fileID: 1616803247}
   count: 600
   seed: 1234
   regenerateOnStart: 1
   outerHalfExtents: {x: 1300, y: 1300, z: 1300}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
-  axisSmoothing: 30
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
+  axisSmoothing: 6
   uniformScaleRange: {x: 200, y: 300}
   randomRotation: 0
   angularSpeedRangeDeg: {x: -5, y: 5}
@@ -35317,7 +35317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.00010681152}
+  m_AnchoredPosition: {x: 0, y: 0.00007247925}
   m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1158176808
@@ -49678,7 +49678,7 @@ MonoBehaviour:
   acceleration: 100
   damping: 1
   normalizeInput: 1
-  boostMaxSpeed: 900
+  boostMaxSpeed: 500
   boostRampUp: 1.2
   boostRampDown: 1
   boostAccelAdd: 50
@@ -49713,6 +49713,7 @@ MonoBehaviour:
   autoStabilizeOnMat: {fileID: 2100000, guid: fa00bf468d12e90429fa0dcb34fbdfc8, type: 2}
   autoStabilizeOffMat: {fileID: 2100000, guid: 5f7e89a91aec87f459f319099810d498, type: 2}
   debugVelocity: 1
+  debugCollisions: 0
   velocityText: {fileID: 1399342987}
   showMagnitudeOnly: 1
   velocityDecimals: 0
@@ -57458,7 +57459,7 @@ MonoBehaviour:
   maxSpeed: 200
   acceleration: 100
   boostAccelAdd: 50
-  boostMaxSpeed: 900
+  boostMaxSpeed: 500
   capacity: 100
   drainPerSecond: 20
   regenPerSecond: 5
@@ -57477,7 +57478,7 @@ MonoBehaviour:
       valueText: {fileID: 1794139727}
       decimalPlaces: 0
     - fieldName: boostMaxSpeed
-      value: 900
+      value: 500
       displayLabel: 
       valueText: {fileID: 452657901}
       decimalPlaces: 0
@@ -57505,12 +57506,12 @@ MonoBehaviour:
       valueText: {fileID: 1301330513}
       decimalPlaces: 0
     - fieldName: drainPerSecond
-      value: 18
+      value: 20
       displayLabel: 
       valueText: {fileID: 232755081}
       decimalPlaces: 0
     - fieldName: regenPerSecond
-      value: 10
+      value: 5
       displayLabel: 
       valueText: {fileID: 1009430526}
       decimalPlaces: 0

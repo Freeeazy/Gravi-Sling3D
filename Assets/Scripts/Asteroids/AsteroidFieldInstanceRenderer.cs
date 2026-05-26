@@ -139,8 +139,7 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
 
             Vector3 origin = posManager.ChunkCoordToWorldOrigin(coord);
 
-            var cache = GetOrInitCache(data);
-            cache.worldOrigin = origin;
+            var cache = GetOrInitCache(data, origin);
 
             // Update world bounds from local bounds
             cache.worldBounds = cache.localBounds;
@@ -176,7 +175,7 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             _cacheByData.Remove(d);
         ListPool<AsteroidFieldData>.Release(toRemove);
     }
-    private ChunkCache GetOrInitCache(AsteroidFieldData data)
+    private ChunkCache GetOrInitCache(AsteroidFieldData data, Vector3 worldOrigin)
     {
         if (!_cacheByData.TryGetValue(data, out var cache) || cache == null)
         {
@@ -184,8 +183,11 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
             _cacheByData[data] = cache;
         }
 
+        bool originChanged = cache.worldOrigin != worldOrigin;
+        cache.worldOrigin = worldOrigin;
+
         // Re-init if count changed (or never init)
-        if (!cache.initialized || cache.count != data.count)
+        if (!cache.initialized || cache.count != data.count || originChanged)
             InitCache(data, cache);
 
         return cache;

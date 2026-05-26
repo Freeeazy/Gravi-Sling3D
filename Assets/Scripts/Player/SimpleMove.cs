@@ -116,6 +116,7 @@ public class SimpleMove : MonoBehaviour
 
     [Header("Debug")]
     public bool debugVelocity = false;
+    public bool debugCollisions = false;
 
     [Tooltip("TMP text to show current Rigidbody velocity.")]
     public TMP_Text velocityText;
@@ -170,7 +171,8 @@ public class SimpleMove : MonoBehaviour
     {
         if (enableSlip)
             slipFactor = slipStart;
-        ObjectToggleManager.Instance.DisableObjects();
+        if (ObjectToggleManager.Instance != null)
+            ObjectToggleManager.Instance.DisableObjects();
     }
 
     private void OnDisable()
@@ -180,7 +182,8 @@ public class SimpleMove : MonoBehaviour
         isAutoStabilizingRoll = false;
         UpdateAutoStabilizeUI(force: true);
         _rollIdleTimer = 0f;
-        ObjectToggleManager.Instance.EnableObjects();
+        if (ObjectToggleManager.Instance != null)
+            ObjectToggleManager.Instance.EnableObjects();
     }
     private void Update()
     {
@@ -597,7 +600,8 @@ public class SimpleMove : MonoBehaviour
     }
     void OnCollisionStay(Collision c)
     {
-        Debug.Log("Colliding with: " + c.collider.name);
+        if (debugCollisions)
+            Debug.Log("Colliding with: " + c.collider.name);
     }
 
     public void SetPaused(bool paused)

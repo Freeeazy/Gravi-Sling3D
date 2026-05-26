@@ -123,6 +123,13 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (WormholeConeTether.Instance != null)
         {
             WormholeConeTether.Instance.SetTargets(transform, other.transform);
+
+            StationProxy proxy = GetComponent<StationProxy>();
+            if (proxy)
+            {
+                WormholeConeTether.Instance.SetTrailMaterial(proxy.CurrentBubbleMaterial);
+                WormholeConeTether.Instance.SetStartColor(proxy.CurrentBubbleLightColor);
+            }
         }
 
         StartCoroutine(OrbitAndCharge(rb, move));
@@ -487,6 +494,9 @@ public class SlingshotPlanet3D : MonoBehaviour
     }
     private void ForceLaunch(Rigidbody rb, Vector3 center)
     {
+        if (WormholeConeTether.Instance)
+            WormholeConeTether.Instance.StopTether();
+
         // Tangent direction = orbitAxis x radialDir (right-hand rule)
         Vector3 tangent = Vector3.Cross(orbitAxis, radialDir).normalized;
 

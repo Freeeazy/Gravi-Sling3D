@@ -142,6 +142,15 @@ public class BoostManager : MonoBehaviour
             }
         }
 
+        // Hardcoded idle orbit regen: 1% of max capacity per second
+        if (_mode == Mode.OrbitIdle && capacity > 0f)
+        {
+            _energy += capacity * 0.005f * dt;
+
+            if (_energy > capacity)
+                _energy = capacity;
+        }
+
         // Regen ONLY during orbit charging
         if (_mode == Mode.OrbitCharging && regenPerSecond > 0f)
         {

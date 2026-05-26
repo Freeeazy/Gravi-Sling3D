@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(ParticleSystem))]
 public class WormholeConeTether : MonoBehaviour
 {
     public static WormholeConeTether Instance { get; private set; }
@@ -27,9 +26,10 @@ public class WormholeConeTether : MonoBehaviour
     [Header("Endpoint Offset")]
     public float endBuffer = 1.5f; // distance away from player
 
-    private ParticleSystem ps;
+    public ParticleSystem ps;
     private ParticleSystem.MainModule main;
     private ParticleSystem.ShapeModule shape;
+    private ParticleSystemRenderer psRenderer;
 
     private void Awake()
     {
@@ -45,6 +45,7 @@ public class WormholeConeTether : MonoBehaviour
         ps = GetComponent<ParticleSystem>();
         main = ps.main;
         shape = ps.shape;
+        psRenderer = GetComponent<ParticleSystemRenderer>();
     }
 
     private void LateUpdate()
@@ -118,5 +119,16 @@ public class WormholeConeTether : MonoBehaviour
         ps.Stop();
         startPoint = null;
         endPoint = null;
+    }
+    public void SetTrailMaterial(Material mat)
+    {
+        if (!psRenderer || !mat)
+            return;
+
+        psRenderer.trailMaterial = mat;
+    }
+    public void SetStartColor(Color color)
+    {
+        main.startColor = color;
     }
 }

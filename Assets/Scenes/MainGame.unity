@@ -28556,8 +28556,8 @@ MonoBehaviour:
   baseBoostAccelAdd: 50
   baseBoostMaxSpeed: 900
   baseCapacity: 100
-  baseDrainPerSecond: 18
-  baseRegenPerSecond: 10
+  baseDrainPerSecond: 20
+  baseRegenPerSecond: 5
 --- !u!114 &874311839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -35317,7 +35317,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000030517578}
+  m_AnchoredPosition: {x: 0, y: -0.00010681152}
   m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1158176808
@@ -40057,58 +40057,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1310095058}
   m_CullTransparentMesh: 1
---- !u!1 &1317036057
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1317036058}
-  - component: {fileID: 1317036059}
-  m_Layer: 0
-  m_Name: StationPos-Renderer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1317036058
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317036057}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1317036059
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1317036057}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f21380cd59bb35a419eb5922702e0cad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stationPrefab: {fileID: 9091265268040652343, guid: c7d79d177e45f8d4cb680e8b5707fc04, type: 3}
-  posManager: {fileID: 2048073271}
-  renderCamera: {fileID: 330585545}
-  shadowCasting: 1
-  receiveShadows: 1
-  renderLayer: 0
-  stationScale: 20
-  onlyRenderInPlayMode: 0
 --- !u!1 &1318480883
 GameObject:
   m_ObjectHideFlags: 0
@@ -40778,9 +40726,9 @@ MonoBehaviour:
   capacity: 100
   startFull: 1
   startEnergy: 100
-  drainPerSecond: 18
+  drainPerSecond: 20
   dontDrain: 0
-  regenPerSecond: 10
+  regenPerSecond: 5
   boostRampUp: 1.2
   boostRampDown: 1
   pegsParent: {fileID: 1910070763}
@@ -57512,8 +57460,8 @@ MonoBehaviour:
   boostAccelAdd: 50
   boostMaxSpeed: 900
   capacity: 100
-  drainPerSecond: 18
-  regenPerSecond: 10
+  drainPerSecond: 20
+  regenPerSecond: 5
   targets:
   - targetName: SimpleMove
     targetScript: {fileID: 1616803245}
@@ -68720,6 +68668,71 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 1090166428111441976, guid: 729c58c04e36e5a41a24bb789dc5dfb8, type: 3}
   m_PrefabInstance: {fileID: 3605987577083450862}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &7162144249992105788
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 982814031088039814, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2402426853729572729, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: prewarm
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2402426853729572729, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5224497485363497454, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
+      propertyPath: m_Name
+      value: StationTetherParticle
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 7e1efeb9ac475e04c8512b4fdeaf90da, type: 3}
 --- !u!1001 &7534484746370914637
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69467,9 +69480,9 @@ SceneRoots:
   - {fileID: 821560724}
   - {fileID: 103438303}
   - {fileID: 1090598852}
-  - {fileID: 1317036058}
   - {fileID: 2048073272}
   - {fileID: 53806278}
+  - {fileID: 7162144249992105788}
   - {fileID: 134385067}
   - {fileID: 305733145}
   - {fileID: 1780358254}

@@ -17,6 +17,8 @@ public class StationProxy : MonoBehaviour
     [Header("Bubble Visuals")]
     public GameObject bubble;
     public Renderer bubbleRenderer;
+    public Material CurrentBubbleMaterial { get; private set; }
+    public Color CurrentBubbleLightColor { get; private set; }
 
     [Tooltip("Bubble materials that visually match the station material sets by index.")]
     public Material[] bubbleMaterials;
@@ -116,6 +118,9 @@ public class StationProxy : MonoBehaviour
         {
             int idx = Random.Range(0, bubbleMaterials.Length);
             chosenBubbleMaterial = bubbleMaterials[idx];
+
+            CurrentBubbleMaterial = chosenBubbleMaterial;
+
             bubbleRenderer.sharedMaterial = chosenBubbleMaterial;
         }
 
@@ -124,6 +129,7 @@ public class StationProxy : MonoBehaviour
 
         // Pull color from bubble BorderColor, or generate fallback
         Color lightColor = GetLightColorFromBubble(chosenBubbleMaterial);
+        CurrentBubbleLightColor = lightColor;
 
         // Apply per-station color without creating material instances
         ApplyStationLightColor(lightColor);

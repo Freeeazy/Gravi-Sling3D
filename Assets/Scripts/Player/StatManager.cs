@@ -29,6 +29,14 @@ public class StatManager : MonoBehaviour
     [SerializeField] private float drainPerSecond = 18f;
     [SerializeField] private float regenPerSecond = 10f;
 
+    [Header("Hidden / Unique Stats")]
+    [SerializeField] private float shieldCharge = 0;
+    private int currentShieldCharges;
+    public TMP_Text shieldChargeText;
+
+    public int MaxShieldCharges => Mathf.Max(0, Mathf.FloorToInt(shieldCharge));
+    public int CurrentShieldCharges => currentShieldCharges;
+
     [Header("Stat Targets")]
     [SerializeField] private List<ScriptStatTarget> targets = new List<ScriptStatTarget>();
 
@@ -63,6 +71,33 @@ public class StatManager : MonoBehaviour
     public float GetDrainPerSecond() => drainPerSecond;
     public float GetRegenPerSecond() => regenPerSecond;
 
+
+    // Unique Stats
+    public void SetShieldCharge(float value)
+    {
+        shieldCharge = value;
+        currentShieldCharges = Mathf.Clamp(currentShieldCharges, 0, MaxShieldCharges);
+        if (ShieldVisualHelper.Instance != null)
+            ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+    }
+
+    public bool TryConsumeShieldCharge()
+    {
+        if (currentShieldCharges <= 0)
+            return false;
+
+        currentShieldCharges--;
+        if (ShieldVisualHelper.Instance != null)
+            ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+        return true;
+    }
+
+    public void RefillShieldCharges()
+    {
+        currentShieldCharges = MaxShieldCharges;
+        if (ShieldVisualHelper.Instance != null)
+            ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+    }
 
     private void Awake()
     {
@@ -110,6 +145,9 @@ public class StatManager : MonoBehaviour
 
         if (baseLaunchSpeedText)
             baseLaunchSpeedText.text = FormatWholeStat(baseLaunchSpeed);
+
+        if (shieldChargeText)
+            shieldChargeText.text = FormatWholeStat(shieldCharge);
     }
 
     public void ApplyTargetByName(string targetName)
@@ -363,6 +401,9 @@ public class StatManager : MonoBehaviour
 
         if (baseLaunchSpeedText)
             baseLaunchSpeedText.text = FormatWholeStat(baseLaunchSpeed);
+
+        if (shieldChargeText)
+            shieldChargeText.text = FormatWholeStat(shieldCharge);
     }
     public void ShowModuleHoverPreview(ModuleData module)
     {
@@ -446,6 +487,15 @@ public class StatManager : MonoBehaviour
             regenPerSecond,
             module.regenPerSecondBonus,
             module.regenPerSecondBonus_Percent,
+            false
+        );
+
+        SetPreviewText(
+            shieldChargeText,
+            shieldCharge,
+            module.shieldChargeBonus,
+            0,
+            0,
             false
         );
     }
@@ -536,6 +586,15 @@ public class StatManager : MonoBehaviour
             regenPerSecond,
             incomingModule.regenPerSecondBonus - equippedModule.regenPerSecondBonus,
             incomingModule.regenPerSecondBonus_Percent - equippedModule.regenPerSecondBonus_Percent,
+            false
+        );
+
+        SetPreviewText(
+            shieldChargeText,
+            shieldCharge,
+            incomingModule.shieldChargeBonus - equippedModule.shieldChargeBonus,
+            0,
+            0,
             false
         );
     }

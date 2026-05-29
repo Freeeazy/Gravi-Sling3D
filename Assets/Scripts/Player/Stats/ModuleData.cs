@@ -32,4 +32,7 @@ public class ModuleData : ScriptableObject
     public float regenPerSecondBonus;
     public float regenPerSecondBonus_Percent;
 
+    // Unique
+    public float shieldChargeBonus;
+
 }

@@ -22,6 +22,9 @@ public class ModuleLoadoutManager : MonoBehaviour
     public float baseDrainPerSecond = 18f;
     public float baseRegenPerSecond = 10f;
 
+    [Header("Unique Stats")]
+    public float baseShieldCharge = 0;
+
     private void Awake()
     {
         Instance = this;
@@ -41,6 +44,8 @@ public class ModuleLoadoutManager : MonoBehaviour
         float capacityBonus = 0f;
         float drainPerSecBonus = 0f;
         float regenPerSecBonus = 0f;
+
+        float shieldChargeBonus = 0;
 
         // Percent bonuses
         float chargeBonus_Percent = 0f;
@@ -75,6 +80,8 @@ public class ModuleLoadoutManager : MonoBehaviour
             drainPerSecBonus += module.drainPerSecondBonus;
             regenPerSecBonus += module.regenPerSecondBonus;
 
+            shieldChargeBonus += module.shieldChargeBonus;
+
             // Percent bonuses
             chargeBonus_Percent += module.chargeRateBonus_Percent;
             launchBonus_Percent += module.baseLaunchSpeedBonus_Percent;
@@ -104,6 +111,7 @@ public class ModuleLoadoutManager : MonoBehaviour
         float finalDrainPerSecond = ApplyFlatAndPercent(baseDrainPerSecond, drainPerSecBonus, drainPerSecBonus_Percent);
         float finalRegenPerSecond = ApplyFlatAndPercent(baseRegenPerSecond, regenPerSecBonus, regenPerSecBonus_Percent);
 
+        float finalShieldCharge = baseShieldCharge + shieldChargeBonus;
 
         if (StatManager.Instance != null)
         {
@@ -118,6 +126,8 @@ public class ModuleLoadoutManager : MonoBehaviour
             StatManager.Instance.SetCapacity(finalCapacity);
             StatManager.Instance.SetDrainPerSecond(finalDrainPerSecond);
             StatManager.Instance.SetRegenPerSecond(finalRegenPerSecond);
+
+            StatManager.Instance.SetShieldCharge(finalShieldCharge);
 
             StatManager.Instance.ApplyRuntimeStats();
         }

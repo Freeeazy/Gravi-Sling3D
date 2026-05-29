@@ -427,4 +427,8 @@ public class PackageDurabilityManager : MonoBehaviour
     {
         return TryGetPackageTimer(questId, out float timeRemaining) && timeRemaining <= 0f;
     }
+    public bool HasActivePackage()
+    {
+        return _packagesByQuestId.Count > 0;
+    }
 }

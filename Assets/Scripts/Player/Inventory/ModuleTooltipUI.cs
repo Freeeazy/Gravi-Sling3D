@@ -189,6 +189,8 @@ public class ModuleTooltipUI : MonoBehaviour
         AppendStatLine(sb, data.regenPerSecondBonus, "Boost Regen", false);
         AppendStatLine(sb, data.regenPerSecondBonus_Percent, "Boost Regen", true);
 
+        AppendStatLine(sb, data.shieldChargeBonus, "Shield Charge", false);
+
         sb.AppendLine();
         sb.AppendLine("Right-click to equip");
         sb.AppendLine("Drag to slot");

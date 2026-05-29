@@ -132,6 +132,9 @@ public class SlingshotPlanet3D : MonoBehaviour
             }
         }
 
+        if (StatManager.Instance != null)
+            StatManager.Instance.RefillShieldCharges();
+
         StartCoroutine(OrbitAndCharge(rb, move));
     }
 

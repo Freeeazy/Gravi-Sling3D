@@ -546,7 +546,9 @@ public class ModuleInventoryManager : MonoBehaviour
             Mathf.Approximately(a.drainPerSecondBonus_Percent, b.drainPerSecondBonus_Percent) &&
 
             Mathf.Approximately(a.regenPerSecondBonus, b.regenPerSecondBonus) &&
-            Mathf.Approximately(a.regenPerSecondBonus_Percent, b.regenPerSecondBonus_Percent);
+            Mathf.Approximately(a.regenPerSecondBonus_Percent, b.regenPerSecondBonus_Percent) &&
+
+            Mathf.Approximately(a.shieldChargeBonus, b.shieldChargeBonus);
     }
     private void SetupSortDropdown()
     {

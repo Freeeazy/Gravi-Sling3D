@@ -293,6 +293,12 @@ public class ModuleGenerator : MonoBehaviour
                 else module.regenPerSecondBonus += value;
                 break;
 
+            case "ShieldCharge":
+                if (isPercent)
+                    Debug.LogWarning("[ModuleGenerator] ShieldCharge does not currently support percent rolls. Applying it as a flat bonus.");
+                module.shieldChargeBonus += value;
+                break;
+
             default:
                 Debug.LogWarning($"[ModuleGenerator] Unknown stat name: {statName}");
                 break;

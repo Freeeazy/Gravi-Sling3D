@@ -444,7 +444,19 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
                 float cargoSeverity = k;
 
                 if (simpleMove != null && simpleMove.enabled && PackageDurabilityManager.Instance != null)
-                    PackageDurabilityManager.Instance.ApplyImpactDamage(cargoSeverity);
+                {
+                    bool hasPackage = PackageDurabilityManager.Instance.HasActivePackage();
+
+                    if (hasPackage)
+                    {
+                        bool shieldBlocked =
+                            StatManager.Instance != null &&
+                            StatManager.Instance.TryConsumeShieldCharge();
+
+                        if (!shieldBlocked)
+                            PackageDurabilityManager.Instance.ApplyImpactDamage(cargoSeverity);
+                    }
+                }
 
                 // Kick direction: opposite the impact (pushNormal is asteroid -> player)
                 Vector3 kickDir = pushNormal;

@@ -199,6 +199,46 @@ public class NPCQuestManager : MonoBehaviour
 
         return qualityIndex;
     }
+    public bool FailQuest(int questId)
+    {
+        for (int i = _active.Count - 1; i >= 0; i--)
+        {
+            if (_active[i].questId == questId)
+            {
+                ActiveQuest failedQuest = _active[i];
+
+                _active.RemoveAt(i);
+                RefreshClosestQuest();
+
+                HandleFailedQuestPenalty(failedQuest);
+
+                Debug.Log($"[NPCQuestManager] Quest failed/expired. questId={questId}");
+
+                return true;
+            }
+        }
+
+        Debug.LogWarning($"[NPCQuestManager] Tried to fail quest, but no active quest matched questId={questId}");
+        return false;
+    }
+    private void HandleFailedQuestPenalty(ActiveQuest quest)
+    {
+        if (RewardPopupUI.Instance != null)
+        {
+            RewardPopupUI.Instance.ShowDeliveryReward(
+                "<color=#FF3D3D>Delivery Failed</color>",
+                0f,
+                null
+            );
+        }
+
+        if (FamilyReputationManager.Instance != null)
+        {
+            FamilyReputationManager.Instance.AddReputation(
+                GetFamilyReputationChange(PackageDurabilityManager.DeliveryQuality.Failed)
+            );
+        }
+    }
 
     private QuestOffer GenerateOfferForNpc(int npcId)
     {

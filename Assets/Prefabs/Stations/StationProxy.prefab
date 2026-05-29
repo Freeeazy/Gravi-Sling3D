@@ -367,7 +367,7 @@ MonoBehaviour:
   popupPrefab: {fileID: 6605906386198019864, guid: 6a1f08d05e23e9845aa558c8277c7325, type: 3}
   popupParent: {fileID: 2973395731717958267}
   typeSpeed: 0.025
-  visibleTime: 5
+  visibleTime: 3.5
   driftSpeed: 0.25
   localDriftDirection: {x: 0, y: 1, z: 0}
   failedLines:
@@ -527,7 +527,6 @@ MonoBehaviour:
   questHighlight: {fileID: 3329196204730148865}
   bubble: {fileID: 1858667739632006358}
   bubbleRenderer: {fileID: 3555375457191696723}
-  bubbleTrailParticleSystem: {fileID: 0}
   bubbleMaterials:
   - {fileID: 2100000, guid: 62073bb20623f5c46970441cc56faaae, type: 2}
   - {fileID: 2100000, guid: aa20d46c8bf33e14a8df6c6359e9d5b2, type: 2}

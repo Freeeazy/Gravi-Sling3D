@@ -198,7 +198,18 @@ public class TutorialManager : MonoBehaviour
 
     public void ExitTutorial()
     {
-        SceneManager.LoadScene(sceneToLoadAfterTutorial);
+        if (TutorialLoadManager.Instance != null)
+        {
+            TutorialLoadManager.Instance.SetTutorialCompleted(true);
+            TutorialLoadManager.Instance.LoadScene(sceneToLoadAfterTutorial);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("TutorialCompleted", 1);
+            PlayerPrefs.Save();
+
+            SceneManager.LoadScene(sceneToLoadAfterTutorial);
+        }
     }
 
     private IEnumerator ShowStageRoutine(TutorialStage stage, int token)

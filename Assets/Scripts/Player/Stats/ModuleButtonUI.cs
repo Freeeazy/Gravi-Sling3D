@@ -11,6 +11,8 @@ public class ModuleButtonUI : MonoBehaviour,
     IPointerEnterHandler,
     IPointerExitHandler
 {
+    public static DraggedModuleUI DefaultDraggedModulePrefab { get; private set; }
+
     public ModuleData moduleData;
     public DraggedModuleUI draggedModulePrefab;
     public RectTransform dragCanvas;
@@ -26,6 +28,12 @@ public class ModuleButtonUI : MonoBehaviour,
 
     private int currentAmount;
     private DraggedModuleUI currentDragged;
+
+    private void Awake()
+    {
+        if (draggedModulePrefab != null)
+            DefaultDraggedModulePrefab = draggedModulePrefab;
+    }
 
     private void Start()
     {
@@ -105,7 +113,10 @@ public class ModuleButtonUI : MonoBehaviour,
     public void OnDrag(PointerEventData eventData)
     {
         if (currentDragged != null)
+        {
             currentDragged.SetPosition(eventData.position);
+            currentDragged.UpdateHoverPreview(eventData);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)

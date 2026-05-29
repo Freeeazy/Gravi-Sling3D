@@ -5,14 +5,22 @@ using UnityEngine.UI;
 
 public class MainGameTutorialManager : MonoBehaviour
 {
+    private const string MainGameTutorialSeenKey = "MainGameTutorialSeen";
+
+    [Header("Tutorial Persistence")]
+    [SerializeField] private bool useTutorialSeenPlayerPref = true;
+    [SerializeField] private bool resetTutorialSeenOnStart = false;
+
     [Header("Starting Warning Stage")]
     [SerializeField] private bool useStartingWarningStage = true;
     [SerializeField] private GameObject startingWarningObject;
     [SerializeField] private string startingWarningTitle = "CONTROL OVERRIDE";
+
     [TextArea(2, 5)]
     [SerializeField]
     private string startingWarningMessage =
         "STANDBY FOR AUTOMATED MESSAGE FROM UNCLE DANTE";
+
     [SerializeField] private float startingWarningDuration = 3f;
     [SerializeField] private float startingWarningOnDuration = 0.75f;
     [SerializeField] private float startingWarningOffDuration = 0.15f; 
@@ -74,12 +82,24 @@ public class MainGameTutorialManager : MonoBehaviour
     private int currentRingCount = 0;
     private bool tutorialFinished = false;
     private Coroutine stageTextRoutine;
+    private Coroutine startingWarningRoutine;
     private string currentVisibleBody = "";
     private Coroutine npcTalkRoutine;
     private float skipHoldTimer = 0f;
 
     private void Start()
     {
+        if (resetTutorialSeenOnStart)
+        {
+            ResetMainGameTutorialSeen();
+        }
+
+        if (useTutorialSeenPlayerPref && HasSeenMainGameTutorial())
+        {
+            FinishTutorial(false);
+            return;
+        }
+
         StartTutorial();
     }
     private void Update()
@@ -97,7 +117,7 @@ public class MainGameTutorialManager : MonoBehaviour
 
             if (skipHoldTimer >= skipHoldDuration)
             {
-                FinishTutorial();
+                FinishTutorial(true);
 
                 simpleMove.enabled = true;
             }
@@ -112,13 +132,14 @@ public class MainGameTutorialManager : MonoBehaviour
     {
         if (stages == null || stages.Length == 0)
         {
-            Debug.LogWarning("TutorialManager has no stages assigned.");
+            Debug.LogWarning("MainGameTutorialManager has no stages assigned.");
+            FinishTutorial(true);
             return;
         }
 
         if (useStartingWarningStage)
         {
-            StartCoroutine(StartingWarningRoutine());
+            startingWarningRoutine = StartCoroutine(StartingWarningRoutine());
         }
         else
         {
@@ -137,7 +158,8 @@ public class MainGameTutorialManager : MonoBehaviour
             warningHeader = $"<size=85%><color=#FF5555><b>{startingWarningTitle}</b></color></size>\n";
         }
 
-        tutorialText.text = warningHeader + startingWarningMessage;
+        if (tutorialText != null)
+            tutorialText.text = warningHeader + startingWarningMessage;
 
         float elapsed = 0f;
 
@@ -162,6 +184,7 @@ public class MainGameTutorialManager : MonoBehaviour
         if (startingWarningObject != null)
             startingWarningObject.SetActive(!hideWarningObjectAfter);
 
+        startingWarningRoutine = null;
         GoToStage(0);
     }
     public void GoToStage(int stageIndex)
@@ -174,7 +197,7 @@ public class MainGameTutorialManager : MonoBehaviour
 
         if (stageIndex < 0 || stageIndex >= stages.Length)
         {
-            FinishTutorial();
+            FinishTutorial(true);
             return;
         }
 
@@ -190,9 +213,15 @@ public class MainGameTutorialManager : MonoBehaviour
 
         stageTextRoutine = StartCoroutine(ShowStageRoutine(stage));
     }
-    private void FinishTutorial()
+    private void FinishTutorial(bool markAsSeen)
     {
         tutorialFinished = true;
+        skipHoldTimer = 0f;
+
+        if (markAsSeen && useTutorialSeenPlayerPref)
+        {
+            SetMainGameTutorialSeen(true);
+        }
 
         if (stageTextRoutine != null)
         {
@@ -200,10 +229,22 @@ public class MainGameTutorialManager : MonoBehaviour
             stageTextRoutine = null;
         }
 
+        if (startingWarningRoutine != null)
+        {
+            StopCoroutine(startingWarningRoutine);
+            startingWarningRoutine = null;
+        }
+
         if (startingWarningObject != null)
             startingWarningObject.SetActive(false);
 
+        if (tutorialPanel != null)
+            tutorialPanel.SetActive(false);
+
         StopNpcTalkAnimation();
+
+        if (simpleMove != null)
+            simpleMove.enabled = true;
 
         gameObject.SetActive(false);
     }
@@ -420,5 +461,21 @@ public class MainGameTutorialManager : MonoBehaviour
 
             yield return null;
         }
+    }
+    public static bool HasSeenMainGameTutorial()
+    {
+        return PlayerPrefs.GetInt(MainGameTutorialSeenKey, 0) == 1;
+    }
+
+    public static void SetMainGameTutorialSeen(bool seen)
+    {
+        PlayerPrefs.SetInt(MainGameTutorialSeenKey, seen ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
+    public static void ResetMainGameTutorialSeen()
+    {
+        PlayerPrefs.DeleteKey(MainGameTutorialSeenKey);
+        PlayerPrefs.Save();
     }
 }

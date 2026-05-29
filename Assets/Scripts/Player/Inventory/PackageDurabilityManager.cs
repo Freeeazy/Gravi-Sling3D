@@ -4,6 +4,8 @@ using TMPro;
 
 public class PackageDurabilityManager : MonoBehaviour
 {
+    [Header("Quest Manager")]
+    public NPCQuestManager questManager;
     public static PackageDurabilityManager Instance { get; private set; }
 
     [System.Serializable]
@@ -59,6 +61,9 @@ public class PackageDurabilityManager : MonoBehaviour
     [Tooltip("Extra seconds given per 1000 units of delivery distance.")]
     public float secondsPer1000Units = 10f;
 
+    [Tooltip("How many seconds late a package can be before it expires. Example: 30 means it expires at -00:30.")]
+    public float maxLateSecondsBeforeExpire = 30f;
+
     [Header("UI Updates")]
     public float distanceUpdateInterval = 0.25f;
 
@@ -101,9 +106,28 @@ public class PackageDurabilityManager : MonoBehaviour
         if (_packagesByQuestId.Count == 0)
             return;
 
+        List<int> expiredQuestIds = null;
+
         foreach (var pair in _packagesByQuestId)
         {
-            pair.Value.timeRemaining -= Time.deltaTime;
+            TrackedPackage package = pair.Value;
+            package.timeRemaining -= Time.deltaTime;
+
+            if (package.timeRemaining <= -maxLateSecondsBeforeExpire)
+            {
+                if (expiredQuestIds == null)
+                    expiredQuestIds = new List<int>();
+
+                expiredQuestIds.Add(pair.Key);
+            }
+        }
+
+        if (expiredQuestIds == null)
+            return;
+
+        foreach (int questId in expiredQuestIds)
+        {
+            ExpirePackage(questId);
         }
     }
 
@@ -119,6 +143,11 @@ public class PackageDurabilityManager : MonoBehaviour
         }
 
         ActiveContractCardUI card = Instantiate(contractCardPrefab, contractCardParent);
+
+        if (ContractCardJitterManager.Instance != null)
+        {
+            ContractCardJitterManager.Instance.RegisterCard(card.transform as RectTransform);
+        }
 
         float startingTime =
             baseDeliveryTime +
@@ -144,12 +173,50 @@ public class PackageDurabilityManager : MonoBehaviour
 
         RecordCompletedDelivery(package.integrity);
 
+        if (ContractCardJitterManager.Instance != null && package.card != null)
+        {
+            ContractCardJitterManager.Instance.UnregisterCard(package.card.transform as RectTransform);
+        }
+
         if (package.card != null)
             Destroy(package.card.gameObject);
 
         _packagesByQuestId.Remove(questId);
     }
+    private void ExpirePackage(int questId)
+    {
+        if (!_packagesByQuestId.TryGetValue(questId, out var package))
+            return;
 
+        Debug.Log($"[PackageDurabilityManager] Package expired: {package.deliveryItem} for quest {questId}");
+
+        package.integrity = 0f;
+
+        RecordCompletedDelivery(package.integrity);
+
+        if (ContractCardJitterManager.Instance != null && package.card != null)
+        {
+            ContractCardJitterManager.Instance.UnregisterCard(package.card.transform as RectTransform);
+        }
+
+        if (package.card != null)
+            Destroy(package.card.gameObject);
+
+        _packagesByQuestId.Remove(questId);
+
+        NPCQuestManager manager = questManager != null
+            ? questManager
+            : FindFirstObjectByType<NPCQuestManager>();
+
+        if (manager != null)
+        {
+            manager.FailQuest(questId);
+        }
+        else
+        {
+            Debug.LogWarning("[PackageDurabilityManager] Could not find NPCQuestManager to fail expired quest.");
+        }
+    }
     public enum DeliveryQuality
     {
         Perfect,
@@ -228,10 +295,22 @@ public class PackageDurabilityManager : MonoBehaviour
         {
             TrackedPackage package = pair.Value;
 
+            float oldIntegrity = package.integrity;
+
             package.integrity -= damage;
             package.integrity = Mathf.Clamp(package.integrity, 0f, 100f);
 
+            float actualDamageTaken = oldIntegrity - package.integrity;
+
             RefreshCard(package);
+
+            if (package.card != null)
+                package.card.ShowIntegrityDamage(actualDamageTaken);
+        }
+
+        if (ContractCardJitterManager.Instance != null)
+        {
+            ContractCardJitterManager.Instance.JitterAllCards();
         }
 
         Debug.Log($"[PackageDurabilityManager] Package damage applied: -{damage:0}% from severity {impactSeverity:0.00}");

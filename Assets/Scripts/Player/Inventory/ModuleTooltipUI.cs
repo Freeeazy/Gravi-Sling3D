@@ -159,8 +159,8 @@ public class ModuleTooltipUI : MonoBehaviour
         StringBuilder sb = new StringBuilder();
 
         string tierHex = GetTierHexColor(data.moduleTier);
-        sb.AppendLine($"<color=#{tierHex}>Tier {data.moduleTier} {data.moduleType} Module - {data.moduleName}</color>");
-        sb.AppendLine();
+        sb.AppendLine($"<color=#{tierHex}>Tier {data.moduleTier} {data.moduleType} Module</color>");
+        sb.AppendLine($"<color=#{tierHex}>{data.moduleName}</color>");
 
         AppendStatLine(sb, data.chargeRateBonus, "Charge Rate", false);
         AppendStatLine(sb, data.chargeRateBonus_Percent, "Charge Rate", true);

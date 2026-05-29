@@ -5,16 +5,32 @@ using UnityEngine.UI;
 public class ModuleSlotUI : MonoBehaviour,
     IPointerClickHandler,
     IPointerEnterHandler,
-    IPointerExitHandler
+    IPointerExitHandler,
+    IBeginDragHandler,
+    IDragHandler,
+    IEndDragHandler
 {
     [Header("UI References")]
     public Image iconImage;
+
+    [Header("Drag")]
+    public DraggedModuleUI draggedModulePrefab;
+    public RectTransform dragCanvas;
+    public Camera uiCamera;
+    public bool logInputDebug = false;
 
     public ModuleData EquippedModule { get; private set; }
 
     public bool IsEmpty => EquippedModule == null;
 
+    private DraggedModuleUI currentDragged;
+
+
     public void SetModule(ModuleData data)
+    {
+        SetModule(data, true);
+    }
+    public void SetModule(ModuleData data, bool recalculateStats)
     {
         if (data == null)
             return;
@@ -23,8 +39,29 @@ public class ModuleSlotUI : MonoBehaviour,
 
         RefreshDisplay();
 
-        if (ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
+        if (recalculateStats && ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
             ModuleLoadoutManager.Instance.RecalculateStats();
+    }
+    public ModuleData ReplaceModule(ModuleData data, bool returnReplacedToInventory, bool recalculateStats = true)
+    {
+        if (data == null)
+            return null;
+
+        ModuleData replacedModule = EquippedModule;
+        EquippedModule = data;
+
+        RefreshDisplay();
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+
+        if (returnReplacedToInventory && replacedModule != null && ModuleInventoryManager.Instance != null)
+            ModuleInventoryManager.Instance.AddModule(replacedModule, 1);
+
+        if (recalculateStats && ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
+            ModuleLoadoutManager.Instance.RecalculateStats();
+
+        return replacedModule;
     }
 
     public void ClearModule()
@@ -76,6 +113,9 @@ public class ModuleSlotUI : MonoBehaviour,
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (DraggedModuleUI.IsDragging)
+            return;
+
         if (EquippedModule == null)
             return;
 
@@ -96,5 +136,57 @@ public class ModuleSlotUI : MonoBehaviour,
 
         if (!IsEmpty)
             ClearModule();
+    }
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (IsEmpty)
+            return;
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+
+        RectTransform targetCanvas = dragCanvas;
+        Camera targetCamera = uiCamera;
+
+        if (targetCanvas == null && ModuleInventoryManager.Instance != null)
+            targetCanvas = ModuleInventoryManager.Instance.dragCanvas;
+
+        if (targetCamera == null && ModuleInventoryManager.Instance != null)
+            targetCamera = ModuleInventoryManager.Instance.uiCamera;
+
+        DraggedModuleUI targetDraggedPrefab = draggedModulePrefab != null
+            ? draggedModulePrefab
+            : ModuleButtonUI.DefaultDraggedModulePrefab;
+
+        if (targetDraggedPrefab == null || targetCanvas == null)
+        {
+            Debug.LogWarning("ModuleSlotUI missing drag references.", this);
+            return;
+        }
+
+        currentDragged = Instantiate(targetDraggedPrefab, targetCanvas);
+        currentDragged.InitializeFromEquippedSlot(EquippedModule, this, targetCanvas, targetCamera);
+        currentDragged.SetPosition(eventData.position);
+        currentDragged.UpdateHoverPreview(eventData);
+
+        if (logInputDebug)
+            Debug.Log($"BeginDrag equipped module: {EquippedModule.moduleName}", this);
+    }
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (currentDragged == null)
+            return;
+
+        currentDragged.SetPosition(eventData.position);
+        currentDragged.UpdateHoverPreview(eventData);
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        if (currentDragged == null)
+            return;
+
+        currentDragged.TryDrop(eventData);
+        currentDragged = null;
     }
 }

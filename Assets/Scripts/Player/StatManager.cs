@@ -450,6 +450,95 @@ public class StatManager : MonoBehaviour
         );
     }
 
+    public void ShowModuleReplacementPreview(ModuleData incomingModule, ModuleData equippedModule)
+    {
+        if (incomingModule == null)
+            return;
+
+        if (equippedModule == null)
+        {
+            ShowModuleHoverPreview(incomingModule);
+            return;
+        }
+
+        // Start from clean/current values first.
+        RefreshAllStatDisplays();
+
+        SetPreviewText(
+            orbitChargeRateText,
+            orbitChargeRate,
+            incomingModule.chargeRateBonus - equippedModule.chargeRateBonus,
+            incomingModule.chargeRateBonus_Percent - equippedModule.chargeRateBonus_Percent,
+            0,
+            false
+        );
+
+        SetPreviewText(
+            baseLaunchSpeedText,
+            baseLaunchSpeed,
+            incomingModule.baseLaunchSpeedBonus - equippedModule.baseLaunchSpeedBonus,
+            incomingModule.baseLaunchSpeedBonus_Percent - equippedModule.baseLaunchSpeedBonus_Percent,
+            0,
+            false
+        );
+
+        SetPreviewForField(
+            "maxSpeed",
+            maxSpeed,
+            incomingModule.maxSpeedBonus - equippedModule.maxSpeedBonus,
+            incomingModule.maxSpeedBonus_Percent - equippedModule.maxSpeedBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "acceleration",
+            acceleration,
+            incomingModule.accelerationBonus - equippedModule.accelerationBonus,
+            incomingModule.accelerationBonus_Percent - equippedModule.accelerationBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "boostAccelAdd",
+            boostAccelAdd,
+            incomingModule.boostAccelAddBonus - equippedModule.boostAccelAddBonus,
+            incomingModule.boostAccelAddBonus_Percent - equippedModule.boostAccelAddBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "boostMaxSpeed",
+            boostMaxSpeed,
+            incomingModule.boostMaxBonus - equippedModule.boostMaxBonus,
+            incomingModule.boostMaxBonus_Percent - equippedModule.boostMaxBonus_Percent,
+            false
+        );
+
+        SetPreviewForField(
+            "capacity",
+            capacity,
+            incomingModule.capacityBonus - equippedModule.capacityBonus,
+            incomingModule.capacityBonus_Percent - equippedModule.capacityBonus_Percent,
+            false
+        );
+
+        // Lower drain is good, so color logic is inverted here.
+        SetPreviewForField(
+            "drainPerSecond",
+            drainPerSecond,
+            incomingModule.drainPerSecondBonus - equippedModule.drainPerSecondBonus,
+            incomingModule.drainPerSecondBonus_Percent - equippedModule.drainPerSecondBonus_Percent,
+            true
+        );
+
+        SetPreviewForField(
+            "regenPerSecond",
+            regenPerSecond,
+            incomingModule.regenPerSecondBonus - equippedModule.regenPerSecondBonus,
+            incomingModule.regenPerSecondBonus_Percent - equippedModule.regenPerSecondBonus_Percent,
+            false
+        );
+    }
     public void HideModuleHoverPreview()
     {
         RefreshAllStatDisplays();

@@ -39,8 +39,8 @@ public class RewardPopupUI : MonoBehaviour
         string tierHex = GetTierHexColor(rewardModule.moduleTier);
 
         string message =
-            $"<color=#{tierHex}>Tier {rewardModule.moduleTier} {rewardModule.moduleType} Module</color>" +
-            $"\n<color=#{tierHex}>{rewardModule.moduleName} Received</color>";
+            $"<color=#{tierHex}>Tier {rewardModule.moduleTier} {rewardModule.moduleType}</color>" +
+            $"\n<color=#{tierHex}>Module Received</color>";
 
         ShowMessage(message);
     }

@@ -680,14 +680,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 330585546}
-  shipRb: {fileID: 1616803247}
   count: 2000
   seed: 1234
   regenerateOnStart: 1
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
   axisSmoothing: 30
   uniformScaleRange: {x: 3, y: 5}
   randomRotation: 1
@@ -1893,14 +1893,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 330585546}
-  shipRb: {fileID: 1616803247}
   count: 2000
   seed: 123
   regenerateOnStart: 1
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
   axisSmoothing: 30
   uniformScaleRange: {x: 1, y: 2}
   randomRotation: 1
@@ -3403,7 +3403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63245cb44553694fbef091d8fc13772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: Tutorial
+  mainSceneName: Tutorial
   delay: 0.1
 --- !u!114 &589808866
 MonoBehaviour:
@@ -4832,14 +4832,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 330585546}
-  shipRb: {fileID: 1616803247}
   count: 600
   seed: 12345
   regenerateOnStart: 1
   outerHalfExtents: {x: 1300, y: 1300, z: 1300}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
-  minSpeedForVelocityAxis: -1
+  lockWrapBoxToWorld: 1
+  lockedWorldForward: {x: 0, y: 0, z: 1}
   axisSmoothing: 30
   uniformScaleRange: {x: 200, y: 300}
   randomRotation: 0
@@ -6660,7 +6660,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63245cb44553694fbef091d8fc13772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: MainGame
+  mainSceneName: MainGame
   delay: 0.1
 --- !u!114 &1321174018
 MonoBehaviour:
@@ -8326,6 +8326,7 @@ MonoBehaviour:
   autoStabilizeOnMat: {fileID: 2100000, guid: fa00bf468d12e90429fa0dcb34fbdfc8, type: 2}
   autoStabilizeOffMat: {fileID: 2100000, guid: 5f7e89a91aec87f459f319099810d498, type: 2}
   debugVelocity: 1
+  debugCollisions: 0
   velocityText: {fileID: 0}
   showMagnitudeOnly: 1
   velocityDecimals: 0
@@ -9740,6 +9741,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1114822825}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2008224045
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2008224047}
+  - component: {fileID: 2008224046}
+  m_Layer: 0
+  m_Name: TutorialLoadManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2008224046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008224045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c531f7a48beb745aedfef2411447b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tutorialSceneName: Tutorial
+  defaultMainSceneName: MainGame
+  defaultDelay: 1
+--- !u!4 &2008224047
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2008224045}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2017626052
 GameObject:
   m_ObjectHideFlags: 0
@@ -11142,3 +11190,4 @@ SceneRoots:
   - {fileID: 833889916}
   - {fileID: 349441486}
   - {fileID: 207668694}
+  - {fileID: 2008224047}

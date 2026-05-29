@@ -135095,7 +135095,7 @@ MonoBehaviour:
   _mode: 0
   capacity: 100
   startFull: 0
-  startEnergy: 70
+  startEnergy: 50
   drainPerSecond: 18
   dontDrain: 0
   regenPerSecond: 10
@@ -163801,7 +163801,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63245cb44553694fbef091d8fc13772, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneName: TitleScreen
+  mainSceneName: MainGame
   delay: 0.1
 --- !u!114 &1580738767
 MonoBehaviour:

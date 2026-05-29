@@ -133,6 +133,44 @@ public class ModuleGenerator : MonoBehaviour
         return module;
     }
 
+    public ModuleData GenerateRandomModuleByTier(int tier, bool saveAssetInEditor = true)
+    {
+        if (moduleTypes == null || moduleTypes.Count == 0)
+        {
+            Debug.LogWarning("[ModuleGenerator] Cannot generate random module. No module types configured.");
+            return null;
+        }
+
+        TierConfig tierConfig = GetTierConfig(tier);
+
+        if (tierConfig == null)
+        {
+            Debug.LogWarning($"[ModuleGenerator] No TierConfig found for tier: {tier}");
+            return null;
+        }
+
+        List<ModuleTypeConfig> validTypes = new List<ModuleTypeConfig>();
+
+        for (int i = 0; i < moduleTypes.Count; i++)
+        {
+            ModuleTypeConfig typeConfig = moduleTypes[i];
+
+            if (typeConfig == null || string.IsNullOrWhiteSpace(typeConfig.moduleType))
+                continue;
+
+            validTypes.Add(typeConfig);
+        }
+
+        if (validTypes.Count == 0)
+        {
+            Debug.LogWarning("[ModuleGenerator] Cannot generate random module. No valid module types configured.");
+            return null;
+        }
+
+        ModuleTypeConfig randomType = validTypes[Random.Range(0, validTypes.Count)];
+        return GenerateModule(randomType.moduleType, tierConfig.tier, saveAssetInEditor);
+    }
+
     public List<ModuleData> GenerateModules(string moduleType, int tier, int amount, bool saveAssetInEditor = true)
     {
         List<ModuleData> generatedModules = new List<ModuleData>();

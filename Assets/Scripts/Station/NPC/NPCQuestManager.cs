@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class NPCQuestManager : MonoBehaviour
 {
+    private const int DefaultMaxQuestDifficulty = 7;
+    private const int MinQuestDifficulty = 1;
+    private int maxDifficulty = DefaultMaxQuestDifficulty;
+
     [Header("Refs")]
     public StationPosManager posManager;
     public ModuleInventoryManager inventoryManager;
@@ -41,7 +45,7 @@ public class NPCQuestManager : MonoBehaviour
         public Vector3 toWorldPos;
 
         public float distance; // from station -> target (world distance)
-        public int difficulty; // 1..5
+        public int difficulty;
         public bool valid;
     }
 
@@ -258,12 +262,12 @@ public class NPCQuestManager : MonoBehaviour
         var rng = new System.Random(seed);
 
         // Pick difficulty (random for now, deterministic due to seed)
-        int difficulty = PickDifficulty1to5(rng);
+        int difficulty = PickDifficulty(rng, maxDifficulty); 
         offer.difficulty = difficulty;
 
         // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
         float tMin01, tMax01;
-        GetDifficultyBand01(difficulty, out tMin01, out tMax01);
+        GetDifficultyBand01(difficulty, maxDifficulty, out tMin01, out tMax01);
 
         float minD = minTargetDistance;
         float maxD = pickRadius;
@@ -417,19 +421,21 @@ public class NPCQuestManager : MonoBehaviour
 
         return false;
     }
-    private static void GetDifficultyBand01(int difficulty, out float tMin, out float tMax)
+    private static void GetDifficultyBand01(int difficulty, int maxDifficulty, out float tMin, out float tMax)
     {
-        // difficulty 1 => [0.0, 0.2], 2 => [0.2, 0.4], ... 5 => [0.8, 1.0]
-        difficulty = Mathf.Clamp(difficulty, 1, 5);
-        tMin = (difficulty - 1) * 0.2f;
-        tMax = difficulty * 0.2f;
-        if (difficulty == 5) tMax = 1f; // ensure exact 1.0
+        maxDifficulty = Mathf.Max(MinQuestDifficulty, maxDifficulty);
+        difficulty = Mathf.Clamp(difficulty, MinQuestDifficulty, maxDifficulty);
+
+        float bandSize = 1f / maxDifficulty;
+        tMin = (difficulty - MinQuestDifficulty) * bandSize;
+        tMax = difficulty == maxDifficulty ? 1f : difficulty * bandSize;
     }
 
-    private static int PickDifficulty1to5(System.Random rng)
+    private static int PickDifficulty(System.Random rng, int maxDifficulty)
     {
         // Random for now. Later you can weight this.
-        return 1 + rng.Next(0, 5);
+        maxDifficulty = Mathf.Max(MinQuestDifficulty, maxDifficulty);
+        return MinQuestDifficulty + rng.Next(0, maxDifficulty);
     }
 
     private void RefreshClosestQuest()

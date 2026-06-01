@@ -22,8 +22,6 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
     [Header("Difficulty")]
     public TMP_Text difficultyText;
-    public TMP_Text difficultyText2;
-    public Graphic difficultyTrait;
     public Graphic[] difficultyBars = new Graphic[0];
     public Color difficultyBarOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
 
@@ -119,15 +117,6 @@ public class NPCQuestDropdownUI : MonoBehaviour
         {
             difficultyText.text = difficulty > 0 ? visual.label : "--";
             difficultyText.color = difficulty > 0 ? visual.color : difficultyBarOffColor;
-        }
-
-        if (difficultyText2)
-        {
-            difficultyText2.text = difficulty > 0 ? visual.label : "--";
-            if (difficultyTrait)
-            {
-                difficultyTrait.color = difficulty > 0 ? visual.color : difficultyBarOffColor;
-            }
         }
 
         int barCount = difficultyBars != null ? difficultyBars.Length : 0;

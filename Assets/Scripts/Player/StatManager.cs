@@ -33,6 +33,8 @@ public class StatManager : MonoBehaviour
     [SerializeField] private float shieldCharge = 0;
     private int currentShieldCharges;
     public TMP_Text shieldChargeText;
+    public GameObject shieldVisual;
+    public GameObject shieldPhysicalVisual;
 
     public int MaxShieldCharges => Mathf.Max(0, Mathf.FloorToInt(shieldCharge));
     public int CurrentShieldCharges => currentShieldCharges;
@@ -75,10 +77,10 @@ public class StatManager : MonoBehaviour
     // Unique Stats
     public void SetShieldCharge(float value)
     {
-        shieldCharge = value;
+        shieldCharge = Mathf.Max(0, value);
         currentShieldCharges = Mathf.Clamp(currentShieldCharges, 0, MaxShieldCharges);
-        if (ShieldVisualHelper.Instance != null)
-            ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+
+        RefreshShieldVisuals();
     }
 
     public bool TryConsumeShieldCharge()
@@ -87,14 +89,28 @@ public class StatManager : MonoBehaviour
             return false;
 
         currentShieldCharges--;
-        if (ShieldVisualHelper.Instance != null)
-            ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+
+        RefreshShieldVisuals();
         return true;
     }
 
     public void RefillShieldCharges()
     {
         currentShieldCharges = MaxShieldCharges;
+
+        RefreshShieldVisuals();
+    }
+    private void RefreshShieldVisuals()
+    {
+        bool hasShieldModule = shieldCharge > 0f;
+        bool showPhysicalShield = currentShieldCharges > 0;
+
+        if (shieldVisual != null && shieldVisual.activeSelf != hasShieldModule)
+            shieldVisual.SetActive(hasShieldModule);
+
+        if (shieldPhysicalVisual != null && shieldPhysicalVisual.activeSelf != showPhysicalShield)
+            shieldPhysicalVisual.SetActive(showPhysicalShield);
+
         if (ShieldVisualHelper.Instance != null)
             ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
     }

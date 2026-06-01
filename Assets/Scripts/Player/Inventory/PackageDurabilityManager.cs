@@ -289,7 +289,7 @@ public class PackageDurabilityManager : MonoBehaviour
             return;
 
         float t = Mathf.InverseLerp(minSeverityForDamage, heavySeverity, impactSeverity);
-        float damage = Mathf.Lerp(lightDamage, heavyDamage, t);
+        float damage = Mathf.Lerp(lightDamage, heavyDamage, t) * 2f;
 
         foreach (var pair in _packagesByQuestId)
         {

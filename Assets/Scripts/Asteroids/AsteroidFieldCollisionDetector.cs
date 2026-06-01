@@ -13,6 +13,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     [Header("References")]
     public AsteroidFieldData fieldData;
     public SimpleMove simpleMove;
+    public GameObject shieldObject;
 
     [Tooltip("Player Rigidbody (likely the same child RB used by SimpleMove).")]
     public Rigidbody playerRb;
@@ -216,6 +217,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         Vector3 pos = playerRb.position;
         pos += normal * (pushDist + separationSlop);
         playerRb.MovePosition(pos);
+
+        if (IsShieldActive())
+            return;
 
         // Dampen velocity
         Vector3 v = playerRb.linearVelocity; // matches your SimpleMove usage :contentReference[oaicite:1]{index=1}
@@ -434,7 +438,10 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             // Optional floor so you never fully stall from a smash
             keep = Mathf.Max(keep, smashMinSpeedFraction);
 
-            playerRb.linearVelocity *= keep;
+            if (!IsShieldActive())
+            {
+                playerRb.linearVelocity *= keep;
+            }
 
             if (SimpleFollowCamera.Instance)
             {
@@ -544,5 +551,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     private bool IsDensityHidden(int index)
     {
         return index < 0 || index >= visibleCount;
+    }
+    private bool IsShieldActive()
+    {
+        return shieldObject != null && shieldObject.activeInHierarchy;
     }
 }

@@ -17,6 +17,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
     [Tooltip("Distance text in the dropdown panel")]
     public TMP_Text distanceText;
 
+    public TMP_Text creditsText;
+    public TMP_Text reputationRewardText;
+
     public TMP_Text acceptText;
     public Button acceptButton;
 
@@ -47,6 +50,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             if (distanceText)
                 distanceText.text = $"{offer.distance:0} Units";
 
+            UpdateRewardDisplay(offer);
             UpdateDifficultyDisplay(offer.difficulty);
         }
         else
@@ -54,6 +58,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             if (distanceText)
                 distanceText.text = "----";
 
+            UpdateRewardDisplay(default);
             UpdateDifficultyDisplay(0);
         }
 
@@ -106,7 +111,28 @@ public class NPCQuestDropdownUI : MonoBehaviour
     {
         _currentNpcId = -1;
         if (distanceText) distanceText.text = "----";
+        UpdateRewardDisplay(default);
         UpdateDifficultyDisplay(0);
+    }
+
+    private void UpdateRewardDisplay(NPCQuestManager.QuestOffer offer)
+    {
+        if (questManager && offer.valid)
+        {
+            if (creditsText)
+                creditsText.text = $"Credits +{questManager.GetPreviewCreditReward(offer):N0}";
+
+            if (reputationRewardText)
+                reputationRewardText.text = $"Rep +{questManager.GetPreviewReputationExpReward(offer):N0} XP";
+
+            return;
+        }
+
+        if (creditsText)
+            creditsText.text = "Credits +0";
+
+        if (reputationRewardText)
+            reputationRewardText.text = "Rep +0 XP";
     }
 
     private void UpdateDifficultyDisplay(int difficulty)

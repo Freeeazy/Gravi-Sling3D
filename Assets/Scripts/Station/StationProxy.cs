@@ -13,6 +13,7 @@ public class StationProxy : MonoBehaviour
     [Header("Quest Highlight (optional)")]
     [Tooltip("White sphere overlay (or any highlight GO). Will be toggled for the active quest target.")]
     public GameObject questHighlight;
+    public StationDeliveryReactionEmitter reactionEmitter;
 
     [Header("Bubble Visuals")]
     public GameObject bubble;
@@ -70,10 +71,14 @@ public class StationProxy : MonoBehaviour
 
         preGravity = GetComponentInChildren<PreGravityPullZone>(true);
         if (preGravity) preGravityTrigger = preGravity.GetComponent<SphereCollider>();
+
+        reactionEmitter = GetComponentInChildren<StationDeliveryReactionEmitter>(true);
     }
 
     public void Assign(Vector3Int coord, Vector3 worldPos, Quaternion worldRot, StationFieldData data)
     {
+        ClearRuntimeState();
+
         Coord = coord;
 
         transform.SetPositionAndRotation(worldPos, worldRot);
@@ -111,6 +116,8 @@ public class StationProxy : MonoBehaviour
     }
     public void AssignAtCurrentPose(Vector3Int coord, StationFieldData data)
     {
+        ClearRuntimeState();
+
         if (!data)
         {
             Coord = coord;
@@ -244,5 +251,13 @@ public class StationProxy : MonoBehaviour
     public void SetQuestHighlight(bool on)
     {
         if (questHighlight) questHighlight.SetActive(on);
+    }
+    public void ClearRuntimeState()
+    {
+        if (reactionEmitter == null)
+            reactionEmitter = GetComponentInChildren<StationDeliveryReactionEmitter>(true);
+
+        if (reactionEmitter != null)
+            reactionEmitter.ClearReaction();
     }
 }

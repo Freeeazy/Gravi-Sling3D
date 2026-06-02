@@ -34,6 +34,165 @@ public class NPCQuestManager : MonoBehaviour
     [Tooltip("Credits gained per world unit traveled. 0.10 = 100 credits per 1000 units.")]
     public float distanceCreditRate = 0.10f;
 
+    [Header("Reputation XP Quality Scaling")]
+    public float perfectDeliveryReputationMultiplier = 1.25f;
+    public float goodDeliveryReputationMultiplier = 1f;
+    public float damagedDeliveryReputationMultiplier = 0.45f;
+    public float barelyDeliveredReputationMultiplier = 0.15f;
+    public float failedDeliveryReputationMultiplier = -0.50f;
+
+    [Header("Rank Quest Offers")]
+    public RankQuestConfig[] rankQuestConfigs =
+    {
+        new RankQuestConfig
+        {
+            rankName = "Rookie",
+            minDifficulty = 1,
+            maxDifficulty = 2,
+            creditMultiplier = 1f,
+            creditBonus = 0f,
+            reputationMultiplier = 1f,
+            reputationBonus = 0,
+            difficultyWeights = new[]
+            {
+                new WeightedDifficulty { difficulty = 1, weight = 80 },
+                new WeightedDifficulty { difficulty = 2, weight = 20 }
+            }
+        },
+        new RankQuestConfig
+        {
+            rankName = "Runner",
+            minDifficulty = 1,
+            maxDifficulty = 4,
+            creditMultiplier = 1.1f,
+            creditBonus = 50f,
+            reputationMultiplier = 1.1f,
+            reputationBonus = 25,
+            difficultyWeights = new[]
+            {
+                new WeightedDifficulty { difficulty = 1, weight = 25 },
+                new WeightedDifficulty { difficulty = 2, weight = 45 },
+                new WeightedDifficulty { difficulty = 3, weight = 25 },
+                new WeightedDifficulty { difficulty = 4, weight = 5 }
+            }
+        },
+        new RankQuestConfig
+        {
+            rankName = "Trusted",
+            minDifficulty = 2,
+            maxDifficulty = 5,
+            creditMultiplier = 1.25f,
+            creditBonus = 150f,
+            reputationMultiplier = 1.25f,
+            reputationBonus = 75,
+            difficultyWeights = new[]
+            {
+                new WeightedDifficulty { difficulty = 2, weight = 25 },
+                new WeightedDifficulty { difficulty = 3, weight = 40 },
+                new WeightedDifficulty { difficulty = 4, weight = 25 },
+                new WeightedDifficulty { difficulty = 5, weight = 10 }
+            }
+        },
+        new RankQuestConfig
+        {
+            rankName = "Made Courier",
+            minDifficulty = 3,
+            maxDifficulty = 7,
+            creditMultiplier = 1.45f,
+            creditBonus = 350f,
+            reputationMultiplier = 1.45f,
+            reputationBonus = 150,
+            difficultyWeights = new[]
+            {
+                new WeightedDifficulty { difficulty = 3, weight = 20 },
+                new WeightedDifficulty { difficulty = 4, weight = 30 },
+                new WeightedDifficulty { difficulty = 5, weight = 25 },
+                new WeightedDifficulty { difficulty = 6, weight = 15 },
+                new WeightedDifficulty { difficulty = 7, weight = 10 }
+            }
+        },
+        new RankQuestConfig
+        {
+            rankName = "Family Legend",
+            minDifficulty = 4,
+            maxDifficulty = 7,
+            creditMultiplier = 1.75f,
+            creditBonus = 750f,
+            reputationMultiplier = 1.75f,
+            reputationBonus = 300,
+            difficultyWeights = new[]
+            {
+                new WeightedDifficulty { difficulty = 4, weight = 20 },
+                new WeightedDifficulty { difficulty = 5, weight = 30 },
+                new WeightedDifficulty { difficulty = 6, weight = 25 },
+                new WeightedDifficulty { difficulty = 7, weight = 25 }
+            }
+        }
+    };
+
+    [Header("Difficulty Rewards")]
+    public DifficultyRewardConfig[] difficultyRewardConfigs =
+    {
+        new DifficultyRewardConfig { difficulty = 1, baseCredits = 150f, distanceCreditRate = 0.08f, baseReputationExp = 180 },
+        new DifficultyRewardConfig { difficulty = 2, baseCredits = 250f, distanceCreditRate = 0.10f, baseReputationExp = 300 },
+        new DifficultyRewardConfig { difficulty = 3, baseCredits = 400f, distanceCreditRate = 0.12f, baseReputationExp = 475 },
+        new DifficultyRewardConfig { difficulty = 4, baseCredits = 600f, distanceCreditRate = 0.15f, baseReputationExp = 700 },
+        new DifficultyRewardConfig { difficulty = 5, baseCredits = 850f, distanceCreditRate = 0.18f, baseReputationExp = 975 },
+        new DifficultyRewardConfig { difficulty = 6, baseCredits = 1200f, distanceCreditRate = 0.22f, baseReputationExp = 1350 },
+        new DifficultyRewardConfig { difficulty = 7, baseCredits = 1700f, distanceCreditRate = 0.28f, baseReputationExp = 1850 }
+    };
+
+    [Serializable]
+    public struct WeightedDifficulty
+    {
+        [Min(1)]
+        public int difficulty;
+
+        [Min(0)]
+        public int weight;
+    }
+
+    [Serializable]
+    public struct RankQuestConfig
+    {
+        public string rankName;
+
+        [Min(1)]
+        public int minDifficulty;
+
+        [Min(1)]
+        public int maxDifficulty;
+
+        [Tooltip("Weighted difficulties offered at this rank. If empty, the min/max range is used evenly.")]
+        public WeightedDifficulty[] difficultyWeights;
+
+        [Tooltip("Multiplier applied after the difficulty and distance credit reward are calculated.")]
+        public float creditMultiplier;
+
+        [Tooltip("Flat credit bonus added for every quest offered at this rank.")]
+        public float creditBonus;
+
+        [Tooltip("Multiplier applied after the difficulty reputation XP reward is calculated.")]
+        public float reputationMultiplier;
+
+        [Tooltip("Flat reputation XP bonus added for every quest offered at this rank.")]
+        public int reputationBonus;
+    }
+
+    [Serializable]
+    public struct DifficultyRewardConfig
+    {
+        [Min(1)]
+        public int difficulty;
+
+        public float baseCredits;
+
+        public int baseReputationExp;
+
+        [Tooltip("Credits gained per world unit traveled for this difficulty.")]
+        public float distanceCreditRate;
+    }
+
     [Serializable]
     public struct QuestOffer
     {
@@ -46,6 +205,7 @@ public class NPCQuestManager : MonoBehaviour
 
         public float distance; // from station -> target (world distance)
         public int difficulty;
+        public int reputationRankIndex;
         public bool valid;
     }
 
@@ -58,6 +218,7 @@ public class NPCQuestManager : MonoBehaviour
         public Vector3 toWorldPos;
         public float distanceAtAccept;
         public int difficulty;
+        public int reputationRankIndex;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -76,6 +237,7 @@ public class NPCQuestManager : MonoBehaviour
     // Current station context
     private Vector3Int _currentStationCoord;
     private Vector3 _currentStationWorldPos;
+    private int _currentOfferRankIndex;
     private bool _hasStationContext;
 
     public IReadOnlyList<ActiveQuest> ActiveQuests => _active;
@@ -87,6 +249,7 @@ public class NPCQuestManager : MonoBehaviour
 
         _currentStationWorldPos = stationWorldPos;
         _currentStationCoord = posManager.WorldToChunkCoord(stationWorldPos);
+        _currentOfferRankIndex = GetCurrentReputationRankIndex();
         _hasStationContext = true;
 
         // Just clear offers; they'll be regenerated lazily when asked
@@ -120,7 +283,35 @@ public class NPCQuestManager : MonoBehaviour
 
         return offer.valid;
     }
+    public float GetPreviewCreditReward(QuestOffer offer)
+    {
+        if (!offer.valid)
+            return 0f;
 
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex
+        };
+
+        return Mathf.Round(CalculateQuestCredits(previewQuest));
+    }
+
+    public int GetPreviewReputationExpReward(QuestOffer offer)
+    {
+        if (!offer.valid)
+            return 0;
+
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex
+        };
+
+        return CalculateQuestReputationExp(previewQuest, PackageDurabilityManager.DeliveryQuality.Good);
+    }
     public bool AcceptQuest(int npcId)
     {
         if (_active.Count >= maxAcceptedQuests)
@@ -227,19 +418,22 @@ public class NPCQuestManager : MonoBehaviour
     }
     private void HandleFailedQuestPenalty(ActiveQuest quest)
     {
+        int reputationExpReward = CalculateQuestReputationExp(quest, PackageDurabilityManager.DeliveryQuality.Failed);
+
         if (RewardPopupUI.Instance != null)
         {
             RewardPopupUI.Instance.ShowDeliveryReward(
                 "<color=#FF3D3D>Delivery Failed</color>",
                 0f,
-                null
+                null,
+                reputationExpReward
             );
         }
 
         if (FamilyReputationManager.Instance != null)
         {
-            FamilyReputationManager.Instance.AddReputation(
-                GetFamilyReputationChange(PackageDurabilityManager.DeliveryQuality.Failed)
+            FamilyReputationManager.Instance.AddReputationExp(
+                reputationExpReward
             );
         }
     }
@@ -252,7 +446,8 @@ public class NPCQuestManager : MonoBehaviour
             fromCoord = _currentStationCoord,
             fromWorldPos = _currentStationWorldPos,
             valid = false,
-            difficulty = 1
+            difficulty = 1,
+            reputationRankIndex = _currentOfferRankIndex
         };
 
         if (!_hasStationContext || !posManager) return offer;
@@ -262,12 +457,13 @@ public class NPCQuestManager : MonoBehaviour
         var rng = new System.Random(seed);
 
         // Pick difficulty (random for now, deterministic due to seed)
-        int difficulty = PickDifficulty(rng, maxDifficulty); 
+        RankQuestConfig rankConfig = GetRankQuestConfig(_currentOfferRankIndex);
+        int difficulty = PickDifficulty(rng, rankConfig); 
         offer.difficulty = difficulty;
 
         // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
         float tMin01, tMax01;
-        GetDifficultyBand01(difficulty, maxDifficulty, out tMin01, out tMax01);
+        GetDifficultyBand01(difficulty, GetHighestConfiguredDifficulty(), out tMin01, out tMax01);
 
         float minD = minTargetDistance;
         float maxD = pickRadius;
@@ -431,13 +627,98 @@ public class NPCQuestManager : MonoBehaviour
         tMax = difficulty == maxDifficulty ? 1f : difficulty * bandSize;
     }
 
-    private static int PickDifficulty(System.Random rng, int maxDifficulty)
+    private int GetHighestConfiguredDifficulty()
     {
-        // Random for now. Later you can weight this.
-        maxDifficulty = Mathf.Max(MinQuestDifficulty, maxDifficulty);
-        return MinQuestDifficulty + rng.Next(0, maxDifficulty);
-    }
+        int highestDifficulty = Mathf.Max(MinQuestDifficulty, maxDifficulty);
 
+        if (difficultyRewardConfigs != null)
+        {
+            for (int i = 0; i < difficultyRewardConfigs.Length; i++)
+                highestDifficulty = Mathf.Max(highestDifficulty, difficultyRewardConfigs[i].difficulty);
+        }
+
+        if (rankQuestConfigs != null)
+        {
+            for (int i = 0; i < rankQuestConfigs.Length; i++)
+                highestDifficulty = Mathf.Max(highestDifficulty, rankQuestConfigs[i].maxDifficulty);
+        }
+
+        return highestDifficulty;
+    }
+    private RankQuestConfig GetRankQuestConfig(int rankIndex)
+    {
+        RankQuestConfig config = default;
+
+        if (rankQuestConfigs != null && rankQuestConfigs.Length > 0)
+        {
+            int configIndex = Mathf.Clamp(rankIndex, 0, rankQuestConfigs.Length - 1);
+            config = rankQuestConfigs[configIndex];
+        }
+
+        if (config.minDifficulty <= 0)
+            config.minDifficulty = MinQuestDifficulty;
+
+        if (config.maxDifficulty <= 0)
+            config.maxDifficulty = Mathf.Max(config.minDifficulty, maxDifficulty);
+
+        config.minDifficulty = Mathf.Max(MinQuestDifficulty, config.minDifficulty);
+        config.maxDifficulty = Mathf.Max(config.minDifficulty, config.maxDifficulty);
+
+        if (config.creditMultiplier <= 0f)
+            config.creditMultiplier = 1f;
+
+        return config;
+    }
+    private int PickDifficulty(System.Random rng, RankQuestConfig rankConfig)
+    {
+        int minDifficulty = Mathf.Max(MinQuestDifficulty, rankConfig.minDifficulty);
+        int maxRankDifficulty = Mathf.Max(minDifficulty, rankConfig.maxDifficulty);
+
+        if (rankConfig.difficultyWeights != null && rankConfig.difficultyWeights.Length > 0)
+        {
+            int totalWeight = 0;
+
+            for (int i = 0; i < rankConfig.difficultyWeights.Length; i++)
+            {
+                int difficulty = Mathf.Clamp(rankConfig.difficultyWeights[i].difficulty, minDifficulty, maxRankDifficulty);
+                int weight = Mathf.Max(0, rankConfig.difficultyWeights[i].weight);
+
+                if (difficulty <= 0 || weight <= 0)
+                    continue;
+
+                totalWeight += weight;
+            }
+
+            if (totalWeight > 0)
+            {
+                int roll = rng.Next(0, totalWeight);
+                int cursor = 0;
+
+                for (int i = 0; i < rankConfig.difficultyWeights.Length; i++)
+                {
+                    int difficulty = Mathf.Clamp(rankConfig.difficultyWeights[i].difficulty, minDifficulty, maxRankDifficulty);
+                    int weight = Mathf.Max(0, rankConfig.difficultyWeights[i].weight);
+
+                    if (difficulty <= 0 || weight <= 0)
+                        continue;
+
+                    cursor += weight;
+
+                    if (roll < cursor)
+                        return difficulty;
+                }
+            }
+        }
+
+        return rng.Next(minDifficulty, maxRankDifficulty + 1);
+    }
+    private int GetCurrentReputationRankIndex()
+    {
+        if (FamilyReputationManager.Instance == null)
+            return 0;
+
+        return FamilyReputationManager.Instance.GetCurrentRankIndex();
+    }
     private void RefreshClosestQuest()
     {
         HasClosestQuest = false;
@@ -492,9 +773,7 @@ public class NPCQuestManager : MonoBehaviour
                 ? PackageDurabilityManager.Instance.GetRewardMultiplier(quality)
                 : 1f;
 
-        float distanceBonus = quest.distanceAtAccept * distanceCreditRate;
-
-        float rawCredits = baseCreditReward + (quest.difficulty * rewardPerDifficulty) + distanceBonus;
+        float rawCredits = CalculateQuestCredits(quest);
 
         float finalCredits = Mathf.Round(rawCredits * multiplier);
 
@@ -511,29 +790,135 @@ public class NPCQuestManager : MonoBehaviour
 
         bool gaveModule = rewardModule != null;
 
+        int reputationExpReward = CalculateQuestReputationExp(quest, quality);
+
         if (RewardPopupUI.Instance != null)
         {
             RewardPopupUI.Instance.ShowDeliveryReward(
                 FormatDeliveryQuality(quality),
                 finalCredits,
-                rewardModule
+                rewardModule,
+                reputationExpReward
             );
         }
 
         if (FamilyReputationManager.Instance != null)
         {
-            FamilyReputationManager.Instance.AddReputation(
-                GetFamilyReputationChange(quality)
+            FamilyReputationManager.Instance.AddReputationExp(
+                reputationExpReward
             );
         }
 
         Debug.Log(
             $"[NPCQuestManager] Delivery complete. " +
             $"Quality={quality}, Late={isLate}, Integrity={integrity:0}%, " +
-            $"Credits={finalCredits:0}, ModuleGiven={gaveModule}"
+            $"Difficulty={quest.difficulty}, OfferRank={quest.reputationRankIndex}, " +
+            $"Credits={finalCredits:0}, ReputationXP={reputationExpReward}, ModuleGiven={gaveModule}"
         );
 
         return GetDeliveryQualityIndex(quality);
+    }
+    private float CalculateQuestCredits(ActiveQuest quest)
+    {
+        RankQuestConfig rankConfig = GetRankQuestConfig(quest.reputationRankIndex);
+        DifficultyRewardConfig difficultyConfig = GetDifficultyRewardConfig(quest.difficulty);
+
+        float distanceRate = difficultyConfig.distanceCreditRate > 0f
+            ? difficultyConfig.distanceCreditRate
+            : distanceCreditRate;
+
+        float difficultyCredits = difficultyConfig.baseCredits > 0f
+            ? difficultyConfig.baseCredits
+            : baseCreditReward + (quest.difficulty * rewardPerDifficulty);
+
+        float distanceBonus = quest.distanceAtAccept * distanceRate;
+        float rawCredits = difficultyCredits + distanceBonus;
+
+        return (rawCredits * rankConfig.creditMultiplier) + rankConfig.creditBonus;
+    }
+    private int CalculateQuestReputationExp(ActiveQuest quest, PackageDurabilityManager.DeliveryQuality quality)
+    {
+        RankQuestConfig rankConfig = GetRankQuestConfig(quest.reputationRankIndex);
+        DifficultyRewardConfig difficultyConfig = GetDifficultyRewardConfig(quest.difficulty);
+
+        int baseReputationExp = difficultyConfig.baseReputationExp > 0
+            ? difficultyConfig.baseReputationExp
+            : GetFallbackBaseReputationExp(quest.difficulty);
+
+        float rawReputationExp = (baseReputationExp * rankConfig.reputationMultiplier) + rankConfig.reputationBonus;
+        float qualityMultiplier = GetReputationQualityMultiplier(quality);
+
+        return Mathf.RoundToInt(rawReputationExp * qualityMultiplier);
+    }
+    private DifficultyRewardConfig GetDifficultyRewardConfig(int difficulty)
+    {
+        if (difficultyRewardConfigs != null)
+        {
+            for (int i = 0; i < difficultyRewardConfigs.Length; i++)
+            {
+                if (difficultyRewardConfigs[i].difficulty == difficulty)
+                    return difficultyRewardConfigs[i];
+            }
+        }
+
+        return new DifficultyRewardConfig
+        {
+            difficulty = difficulty,
+            baseCredits = baseCreditReward + (difficulty * rewardPerDifficulty),
+            distanceCreditRate = distanceCreditRate
+        };
+    }
+    private int GetFallbackBaseReputationExp(int difficulty)
+    {
+        switch (difficulty)
+        {
+            case 1:
+                return 180;
+
+            case 2:
+                return 300;
+
+            case 3:
+                return 475;
+
+            case 4:
+                return 700;
+
+            case 5:
+                return 975;
+
+            case 6:
+                return 1350;
+
+            case 7:
+                return 1850;
+
+            default:
+                return Mathf.Max(0, Mathf.RoundToInt(120f + (Mathf.Max(1, difficulty) * 120f)));
+        }
+    }
+    private float GetReputationQualityMultiplier(PackageDurabilityManager.DeliveryQuality quality)
+    {
+        switch (quality)
+        {
+            case PackageDurabilityManager.DeliveryQuality.Perfect:
+                return perfectDeliveryReputationMultiplier;
+
+            case PackageDurabilityManager.DeliveryQuality.Good:
+                return goodDeliveryReputationMultiplier;
+
+            case PackageDurabilityManager.DeliveryQuality.Damaged:
+                return damagedDeliveryReputationMultiplier;
+
+            case PackageDurabilityManager.DeliveryQuality.BarelyDelivered:
+                return barelyDeliveredReputationMultiplier;
+
+            case PackageDurabilityManager.DeliveryQuality.Failed:
+                return failedDeliveryReputationMultiplier;
+
+            default:
+                return 0f;
+        }
     }
     private float GetModuleRewardChance(PackageDurabilityManager.DeliveryQuality quality)
     {
@@ -593,29 +978,6 @@ public class NPCQuestManager : MonoBehaviour
 
             default:
                 return "<color=#FFFFFF>Delivery Complete</color>";
-        }
-    }
-    private int GetFamilyReputationChange(PackageDurabilityManager.DeliveryQuality quality)
-    {
-        switch (quality)
-        {
-            case PackageDurabilityManager.DeliveryQuality.Perfect:
-                return 5;
-
-            case PackageDurabilityManager.DeliveryQuality.Good:
-                return 3;
-
-            case PackageDurabilityManager.DeliveryQuality.Damaged:
-                return 1;
-
-            case PackageDurabilityManager.DeliveryQuality.BarelyDelivered:
-                return 0;
-
-            case PackageDurabilityManager.DeliveryQuality.Failed:
-                return -5;
-
-            default:
-                return 0;
         }
     }
 }

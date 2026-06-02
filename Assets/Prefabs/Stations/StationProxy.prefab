@@ -525,6 +525,7 @@ MonoBehaviour:
   preGravityTrigger: {fileID: 3389974876249596906}
   preGravity: {fileID: 4967203091336313616}
   questHighlight: {fileID: 3329196204730148865}
+  reactionEmitter: {fileID: 4893908126153709187}
   bubble: {fileID: 1858667739632006358}
   bubbleRenderer: {fileID: 3555375457191696723}
   bubbleMaterials:

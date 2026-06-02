@@ -21,6 +21,12 @@ public class StationDeliveryReactionEmitter : MonoBehaviour
     [TextArea] public string[] goodLines;
     [TextArea] public string[] perfectLines;
 
+    private Coroutine _popupRoutine;
+    private GameObject _activePopup;
+    private void OnDisable()
+    {
+        ClearReaction();
+    }
     public void ShowReaction(int qualityIndex)
     {
         if (popupPrefab == null || popupParent == null)
@@ -34,7 +40,11 @@ public class StationDeliveryReactionEmitter : MonoBehaviour
         if (string.IsNullOrEmpty(message))
             return;
 
+        ClearReaction();
+
         GameObject popupObject = Instantiate(popupPrefab, popupParent);
+        _activePopup = popupObject;
+
         popupObject.transform.localPosition = Vector3.zero;
         popupObject.transform.localRotation = Quaternion.identity;
         popupObject.transform.localScale = Vector3.one;
@@ -48,9 +58,22 @@ public class StationDeliveryReactionEmitter : MonoBehaviour
             return;
         }
 
-        StartCoroutine(PlayPopup(popupObject.transform, text, message));
+        _popupRoutine = StartCoroutine(PlayPopup(popupObject.transform, text, message));
     }
+    public void ClearReaction()
+    {
+        if (_popupRoutine != null)
+        {
+            StopCoroutine(_popupRoutine);
+            _popupRoutine = null;
+        }
 
+        if (_activePopup != null)
+        {
+            Destroy(_activePopup);
+            _activePopup = null;
+        }
+    }
     private string GetRandomLine(int qualityIndex)
     {
         string[] selectedLines = qualityIndex switch
@@ -115,8 +138,14 @@ public class StationDeliveryReactionEmitter : MonoBehaviour
         }
 
         if (popupTransform != null)
-            Destroy(popupTransform.gameObject);
+        {
+            if (_activePopup == popupTransform.gameObject)
+                _activePopup = null;
 
+            Destroy(popupTransform.gameObject);
+        }
+
+        _popupRoutine = null;
         Debug.Log("Playing PopUp for delivery");
     }
 }

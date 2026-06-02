@@ -63,12 +63,17 @@ public class RewardPopupUI : MonoBehaviour
         ShowMessage(message);
     }
 
-    public void ShowDeliveryReward(string deliveryQuality, float creditsReceived, ModuleData rewardModule)
+    public void ShowDeliveryReward(string deliveryQuality, float creditsReceived, ModuleData rewardModule, int reputationExpReward = 0)
     {
         if (!rewardText)
             return;
 
         string message = $"{deliveryQuality}\n+{creditsReceived:0} Credits";
+
+        if (reputationExpReward > 0)
+            message += $"\n<color=#4DFF88>+{reputationExpReward:N0} Reputation XP</color>";
+        else if (reputationExpReward < 0)
+            message += $"\n<color=#FF3D3D>{reputationExpReward:N0} Reputation XP</color>";
 
         if (rewardModule != null)
         {

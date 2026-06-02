@@ -1,18 +1,35 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class FamilyReputationManager : MonoBehaviour
 {
     public static FamilyReputationManager Instance { get; private set; }
 
     [Header("UI")]
-    public TMP_Text reputationText;
+    public TMP_Text repRankText;
+    public TMP_Text repRankPercText;
+
+    [Tooltip("The RectTransform of the foreground fill image, not the background.")]
+    public RectTransform repFillBar;
+
+    [Tooltip("If 0, the script will grab the fill bar's starting width on Awake.")]
+    public float maxFillWidth = 140f;
 
     [Header("Reputation")]
-    [Tooltip("Current reputation inside the current rank, 0-100.")]
-    [Range(0, 100)]
-    public int reputationPercent = 0;
+    [Tooltip("Current reputation XP inside the current rank.")]
+    [Min(0)]
+    public int reputationExp = 0;
+
+    [Tooltip("Reputation XP required to move from each rank to the next rank. One entry per rank-up.")]
+    public int[] reputationExpToNextRank =
+    {
+        1000,
+        10000,
+        50000,
+        250000
+    };
 
     [Tooltip("Current family rank index.")]
     public int rankIndex = 0;
@@ -26,13 +43,9 @@ public class FamilyReputationManager : MonoBehaviour
         "Family Legend"
     };
 
-    [Header("Visual Bar")]
-    public int barSegments = 10;
-    public string filledChar = "█";
-    public string emptyChar = "░";
-
     [Header("Animation")]
     public float tickDelay = 0.08f;
+    public int reputationExpTickStep = 100;
 
     [Header("Debug")]
     public bool enableDebugRankKeys = true;
@@ -44,7 +57,11 @@ public class FamilyReputationManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        RefreshText();
+
+        if (repFillBar != null && maxFillWidth <= 0f)
+            maxFillWidth = repFillBar.sizeDelta.x;
+
+        RefreshUI();
     }
 
     private void OnDestroy()
@@ -69,6 +86,11 @@ public class FamilyReputationManager : MonoBehaviour
     }
     public void AddReputation(int amount)
     {
+        AddReputationExp(amount);
+    }
+
+    public void AddReputationExp(int amount)
+    {
         if (amount == 0)
             return;
 
@@ -82,84 +104,104 @@ public class FamilyReputationManager : MonoBehaviour
     {
         while (_pendingChange != 0)
         {
-            int step = _pendingChange > 0 ? 1 : -1;
+            int tickSize = Mathf.Max(1, reputationExpTickStep);
+            int step = Mathf.Clamp(_pendingChange, -tickSize, tickSize);
 
-            reputationPercent += step;
+            reputationExp += step;
             _pendingChange -= step;
 
             HandleRankBounds();
-
-            RefreshText(_pendingChange);
+            RefreshUI(_pendingChange);
 
             yield return new WaitForSeconds(tickDelay);
         }
 
-        RefreshText();
+        RefreshUI();
         _animateRoutine = null;
     }
 
     private void HandleRankBounds()
     {
-        while (reputationPercent >= 100)
+        while (rankIndex < GetMaxRankIndex() && reputationExp >= GetCurrentRankExpRequirement())
         {
-            if (rankIndex < rankNames.Length - 1)
-            {
-                rankIndex++;
-                reputationPercent -= 100;
-            }
-            else
-            {
-                reputationPercent = 100;
-                _pendingChange = 0;
-                break;
-            }
+            reputationExp -= GetCurrentRankExpRequirement();
+            rankIndex++;
         }
 
-        while (reputationPercent < 0)
+        while (reputationExp < 0)
         {
             if (rankIndex > 0)
             {
                 rankIndex--;
-                reputationPercent += 100;
+                reputationExp += GetCurrentRankExpRequirement();
             }
             else
             {
-                reputationPercent = 0;
+                reputationExp = 0;
                 _pendingChange = 0;
                 break;
             }
         }
+
+        if (rankIndex >= GetMaxRankIndex())
+        {
+            reputationExp = Mathf.Max(0, reputationExp);
+            _pendingChange = Mathf.Max(0, _pendingChange);
+        }
     }
 
-    private void RefreshText(int pendingChange = 0)
+    private void RefreshUI(int pendingChange = 0)
     {
-        if (reputationText == null)
-            return;
-
         string rankName = GetCurrentRankName();
-        string bar = BuildProgressBar();
 
-        string pendingText = "";
+        if (repRankText != null)
+            repRankText.text = $"[{rankName}]";
+
+        if (repRankPercText != null)
+            repRankPercText.text = BuildExpText(pendingChange);
+
+        UpdateFillBar();
+    }
+
+    private string BuildExpText(int pendingChange)
+    {
+        string progressText = $"{GetCurrentRankProgressPercent():0}%";
 
         if (pendingChange > 0)
-            pendingText = $" <color=#4DFF88>+ {pendingChange}%</color>";
-        else if (pendingChange < 0)
-            pendingText = $" <color=#FF3D3D>- {Mathf.Abs(pendingChange)}%</color>";
+            return $"{progressText} <color=#4DFF88>+{GetPendingProgressPercent(pendingChange):0}%</color>";
 
-        reputationText.text =
-            $"FAMILY REPUTATION\n" +
-            $"[{rankName}] {bar} {reputationPercent}%{pendingText}";
+        if (pendingChange < 0)
+            return $"{progressText} <color=#FF3D3D>-{Mathf.Abs(GetPendingProgressPercent(pendingChange)):0}%</color>";
+
+        return progressText;
     }
-
-    private string BuildProgressBar()
+    private float GetCurrentRankProgressPercent()
     {
-        int filledSegments = Mathf.RoundToInt((reputationPercent / 100f) * barSegments);
-        filledSegments = Mathf.Clamp(filledSegments, 0, barSegments);
+        if (rankIndex >= GetMaxRankIndex())
+            return 100f;
 
-        int emptySegments = barSegments - filledSegments;
+        return Mathf.Clamp01((float)reputationExp / GetCurrentRankExpRequirement()) * 100f;
+    }
+    private float GetPendingProgressPercent(int pendingChange)
+    {
+        if (rankIndex >= GetMaxRankIndex())
+            return 0f;
 
-        return new string(filledChar[0], filledSegments) +
-               new string(emptyChar[0], emptySegments);
+        return ((float)pendingChange / GetCurrentRankExpRequirement()) * 100f;
+    }
+    private void UpdateFillBar()
+    {
+        if (repFillBar == null)
+            return;
+
+        float fillPercent = rankIndex >= GetMaxRankIndex()
+            ? 1f
+            : Mathf.Clamp01((float)reputationExp / GetCurrentRankExpRequirement());
+        float targetWidth = maxFillWidth * fillPercent;
+
+        Vector2 size = repFillBar.sizeDelta;
+        size.x = targetWidth;
+        repFillBar.sizeDelta = size;
     }
 
     private string GetCurrentRankName()
@@ -170,6 +212,7 @@ public class FamilyReputationManager : MonoBehaviour
         rankIndex = Mathf.Clamp(rankIndex, 0, rankNames.Length - 1);
         return rankNames[rankIndex];
     }
+
     public int GetCurrentRankIndex()
     {
         if (rankNames == null || rankNames.Length == 0)
@@ -177,5 +220,27 @@ public class FamilyReputationManager : MonoBehaviour
 
         rankIndex = Mathf.Clamp(rankIndex, 0, rankNames.Length - 1);
         return rankIndex;
+    }
+
+    public int GetCurrentRankExpRequirement()
+    {
+        int maxRankIndex = GetMaxRankIndex();
+
+        if (rankIndex >= maxRankIndex)
+            return 0;
+
+        if (reputationExpToNextRank == null || reputationExpToNextRank.Length == 0)
+            return 1000;
+
+        int requirementIndex = Mathf.Clamp(rankIndex, 0, reputationExpToNextRank.Length - 1);
+        return Mathf.Max(1, reputationExpToNextRank[requirementIndex]);
+    }
+
+    private int GetMaxRankIndex()
+    {
+        if (rankNames == null || rankNames.Length == 0)
+            return 0;
+
+        return rankNames.Length - 1;
     }
 }

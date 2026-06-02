@@ -101,6 +101,7 @@ public class StationProxyManager : MonoBehaviour
         if (!_active.TryGetValue(coord, out var p) || !p) return;
 
         _active.Remove(coord);
+        p.ClearRuntimeState();
         p.gameObject.SetActive(false);
         _pool.Push(p);
     }

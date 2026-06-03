@@ -13,6 +13,14 @@ public class NPCUILink : MonoBehaviour
         public TMP_Text label;      // tag text
     }
 
+    [Serializable]
+    public struct DeliveryTypeVisual
+    {
+        public NPCQuestManager.DeliveryType deliveryType;
+        public string label;
+        public Color color;
+    }
+
     [Header("Tag Sizing")]
     public float tagPaddingX = 12f;     // total extra width (left+right)
     public float tagMinWidth = 40f;     // optional: keep tiny tags from looking weird
@@ -25,6 +33,20 @@ public class NPCUILink : MonoBehaviour
 
     [Header("Interaction")]
     public Button rowButton;
+
+    [Header("Delivery Type Pill")]
+    public GameObject deliveryTypePillRoot;
+    public Image deliveryTypePillImage;
+    public TMP_Text deliveryTypePillText;
+
+    public DeliveryTypeVisual[] deliveryTypeVisuals =
+{
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Urgent, label = "Urgent", color = new Color(1.00f, 0.30f, 0.22f, 1f) },
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Standard, label = "Standard", color = new Color(0.42f, 0.76f, 1.00f, 1f) },
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Relaxed, label = "Relaxed", color = new Color(0.48f, 0.92f, 0.58f, 1f) }
+    };
+
+    public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
 
     [Header("Tag Slots (max 4)")]
     public TagSlot[] tagSlots = new TagSlot[4];
@@ -69,6 +91,7 @@ public class NPCUILink : MonoBehaviour
         }
 
         ClearDistance();
+        ClearDeliveryType();
 
         // Hide all tags
         if (tagSlots == null) return;
@@ -142,6 +165,58 @@ public class NPCUILink : MonoBehaviour
     {
         if (!distanceText) return;
         distanceText.text = "";
+    }
+
+    public void SetDeliveryType(NPCQuestManager.DeliveryType deliveryType)
+    {
+        DeliveryTypeVisual visual = GetDeliveryTypeVisual(deliveryType);
+
+        if (deliveryTypePillRoot)
+            deliveryTypePillRoot.SetActive(true);
+
+        if (deliveryTypePillText)
+            deliveryTypePillText.text = visual.label;
+
+        if (deliveryTypePillImage)
+            deliveryTypePillImage.color = visual.color;
+    }
+
+    public void ClearDeliveryType()
+    {
+        if (deliveryTypePillRoot)
+            deliveryTypePillRoot.SetActive(false);
+
+        if (deliveryTypePillText)
+            deliveryTypePillText.text = "";
+
+        if (deliveryTypePillImage)
+            deliveryTypePillImage.color = deliveryTypePillOffColor;
+    }
+
+    private DeliveryTypeVisual GetDeliveryTypeVisual(NPCQuestManager.DeliveryType deliveryType)
+    {
+        if (deliveryTypeVisuals != null)
+        {
+            for (int i = 0; i < deliveryTypeVisuals.Length; i++)
+            {
+                if (deliveryTypeVisuals[i].deliveryType == deliveryType)
+                {
+                    DeliveryTypeVisual visual = deliveryTypeVisuals[i];
+
+                    if (string.IsNullOrEmpty(visual.label))
+                        visual.label = deliveryType.ToString();
+
+                    return visual;
+                }
+            }
+        }
+
+        return new DeliveryTypeVisual
+        {
+            deliveryType = deliveryType,
+            label = deliveryType.ToString(),
+            color = Color.white
+        };
     }
 
 #if UNITY_EDITOR

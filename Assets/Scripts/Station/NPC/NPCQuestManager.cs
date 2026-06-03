@@ -11,6 +11,7 @@ public class NPCQuestManager : MonoBehaviour
     [Header("Refs")]
     public StationPosManager posManager;
     public ModuleInventoryManager inventoryManager;
+    public PackageDurabilityManager packageDurabilityManager;
 
     [Tooltip("Optional: used for consistent selection across stations.")]
     public int globalSeed = 12345;
@@ -33,6 +34,21 @@ public class NPCQuestManager : MonoBehaviour
 
     [Tooltip("Credits gained per world unit traveled. 0.10 = 100 credits per 1000 units.")]
     public float distanceCreditRate = 0.10f;
+
+    [Header("Delivery Type Modifiers")]
+    [Tooltip("Chance weight for urgent delivery offers. Default weights are 25 urgent / 50 standard / 25 relaxed.")]
+    public int urgentDeliveryWeight = 25;
+
+    [Tooltip("Chance weight for standard delivery offers. Default weights are 25 urgent / 50 standard / 25 relaxed.")]
+    public int standardDeliveryWeight = 50;
+
+    [Tooltip("Chance weight for relaxed delivery offers. Default weights are 25 urgent / 50 standard / 25 relaxed.")]
+    public int relaxedDeliveryWeight = 25;
+
+    public Vector2 urgentTimeMultiplierRange = new Vector2(0.85f, 0.70f);
+    public Vector2 urgentRewardMultiplierRange = new Vector2(1.25f, 1.50f);
+    public Vector2 relaxedTimeMultiplierRange = new Vector2(1.50f, 2.00f);
+    public Vector2 relaxedRewardMultiplierRange = new Vector2(0.90f, 0.75f);
 
     [Header("Reputation XP Quality Scaling")]
     public float perfectDeliveryReputationMultiplier = 1.25f;
@@ -192,6 +208,12 @@ public class NPCQuestManager : MonoBehaviour
         [Tooltip("Credits gained per world unit traveled for this difficulty.")]
         public float distanceCreditRate;
     }
+    public enum DeliveryType
+    {
+        Standard,
+        Urgent,
+        Relaxed
+    }
 
     [Serializable]
     public struct QuestOffer
@@ -206,6 +228,9 @@ public class NPCQuestManager : MonoBehaviour
         public float distance; // from station -> target (world distance)
         public int difficulty;
         public int reputationRankIndex;
+        public DeliveryType deliveryType;
+        public float deliveryTimeMultiplier;
+        public float deliveryRewardMultiplier;
         public bool valid;
     }
 
@@ -219,6 +244,9 @@ public class NPCQuestManager : MonoBehaviour
         public float distanceAtAccept;
         public int difficulty;
         public int reputationRankIndex;
+        public DeliveryType deliveryType;
+        public float deliveryTimeMultiplier;
+        public float deliveryRewardMultiplier;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -292,12 +320,31 @@ public class NPCQuestManager : MonoBehaviour
         {
             distanceAtAccept = offer.distance,
             difficulty = offer.difficulty,
-            reputationRankIndex = offer.reputationRankIndex
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
         };
 
         return Mathf.Round(CalculateQuestCredits(previewQuest));
     }
+    public float GetPreviewBaseCreditReward(QuestOffer offer)
+    {
+        if (!offer.valid)
+            return 0f;
 
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = 1f
+        };
+
+        return Mathf.Round(CalculateQuestCredits(previewQuest));
+    }
     public int GetPreviewReputationExpReward(QuestOffer offer)
     {
         if (!offer.valid)
@@ -307,10 +354,57 @@ public class NPCQuestManager : MonoBehaviour
         {
             distanceAtAccept = offer.distance,
             difficulty = offer.difficulty,
-            reputationRankIndex = offer.reputationRankIndex
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
         };
 
         return CalculateQuestReputationExp(previewQuest, PackageDurabilityManager.DeliveryQuality.Good);
+    }
+
+    public int GetPreviewBaseReputationExpReward(QuestOffer offer)
+    {
+        if (!offer.valid)
+            return 0;
+
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = 1f
+        };
+
+        return CalculateQuestReputationExp(previewQuest, PackageDurabilityManager.DeliveryQuality.Good);
+    }
+    public float GetPreviewDeliveryTimeSeconds(QuestOffer offer)
+    {
+        if (!offer.valid)
+            return 0f;
+
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = offer.distance,
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
+        };
+
+        PackageDurabilityManager packageManager = packageDurabilityManager != null
+            ? packageDurabilityManager
+            : PackageDurabilityManager.Instance;
+        if (packageManager == null)
+            packageManager = FindFirstObjectByType<PackageDurabilityManager>();
+
+        if (packageManager != null)
+            return packageManager.CalculateStartingDeliveryTime(previewQuest);
+
+        return 0f;
     }
     public bool AcceptQuest(int npcId)
     {
@@ -342,7 +436,11 @@ public class NPCQuestManager : MonoBehaviour
             toCoord = offer.toCoord,
             toWorldPos = offer.toWorldPos,
             distanceAtAccept = offer.distance,
-            difficulty = offer.difficulty
+            difficulty = offer.difficulty,
+            reputationRankIndex = offer.reputationRankIndex,
+            deliveryType = offer.deliveryType,
+            deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
         };
 
         _active.Add(q);
@@ -447,7 +545,10 @@ public class NPCQuestManager : MonoBehaviour
             fromWorldPos = _currentStationWorldPos,
             valid = false,
             difficulty = 1,
-            reputationRankIndex = _currentOfferRankIndex
+            reputationRankIndex = _currentOfferRankIndex,
+            deliveryType = DeliveryType.Standard,
+            deliveryTimeMultiplier = 1f,
+            deliveryRewardMultiplier = 1f
         };
 
         if (!_hasStationContext || !posManager) return offer;
@@ -458,8 +559,9 @@ public class NPCQuestManager : MonoBehaviour
 
         // Pick difficulty (random for now, deterministic due to seed)
         RankQuestConfig rankConfig = GetRankQuestConfig(_currentOfferRankIndex);
-        int difficulty = PickDifficulty(rng, rankConfig); 
+        int difficulty = PickDifficulty(rng, rankConfig);
         offer.difficulty = difficulty;
+        ApplyDeliveryTypeModifiers(ref offer, rng);
 
         // Convert difficulty into a distance band inside [minTargetDistance .. pickRadius]
         float tMin01, tMax01;
@@ -667,6 +769,9 @@ public class NPCQuestManager : MonoBehaviour
         if (config.creditMultiplier <= 0f)
             config.creditMultiplier = 1f;
 
+        if (config.reputationMultiplier <= 0f)
+            config.reputationMultiplier = 1f;
+
         return config;
     }
     private int PickDifficulty(System.Random rng, RankQuestConfig rankConfig)
@@ -711,6 +816,76 @@ public class NPCQuestManager : MonoBehaviour
         }
 
         return rng.Next(minDifficulty, maxRankDifficulty + 1);
+    }
+    private void ApplyDeliveryTypeModifiers(ref QuestOffer offer, System.Random rng)
+    {
+        DeliveryType deliveryType = PickDeliveryType(rng);
+        float rankT = GetRankProgress01(offer.reputationRankIndex);
+
+        offer.deliveryType = deliveryType;
+        offer.deliveryTimeMultiplier = GetDeliveryTimeMultiplier(deliveryType, rankT);
+        offer.deliveryRewardMultiplier = GetDeliveryRewardMultiplier(deliveryType, rankT);
+    }
+    private DeliveryType PickDeliveryType(System.Random rng)
+    {
+        int urgentWeight = Mathf.Max(0, urgentDeliveryWeight);
+        int standardWeight = Mathf.Max(0, standardDeliveryWeight);
+        int relaxedWeight = Mathf.Max(0, relaxedDeliveryWeight);
+        int totalWeight = urgentWeight + standardWeight + relaxedWeight;
+
+        if (totalWeight <= 0)
+            return DeliveryType.Standard;
+
+        int roll = rng.Next(0, totalWeight);
+
+        if (roll < urgentWeight)
+            return DeliveryType.Urgent;
+
+        roll -= urgentWeight;
+
+        if (roll < standardWeight)
+            return DeliveryType.Standard;
+
+        return DeliveryType.Relaxed;
+    }
+    private float GetRankProgress01(int rankIndex)
+    {
+        int maxRankIndex = rankQuestConfigs != null && rankQuestConfigs.Length > 0
+            ? rankQuestConfigs.Length - 1
+            : 0;
+
+        if (maxRankIndex <= 0)
+            return 0f;
+
+        return Mathf.Clamp01((float)Mathf.Clamp(rankIndex, 0, maxRankIndex) / maxRankIndex);
+    }
+    private float GetDeliveryTimeMultiplier(DeliveryType deliveryType, float rankT)
+    {
+        switch (deliveryType)
+        {
+            case DeliveryType.Urgent:
+                return Mathf.Lerp(urgentTimeMultiplierRange.x, urgentTimeMultiplierRange.y, rankT);
+
+            case DeliveryType.Relaxed:
+                return Mathf.Lerp(relaxedTimeMultiplierRange.x, relaxedTimeMultiplierRange.y, rankT);
+
+            default:
+                return 1f;
+        }
+    }
+    private float GetDeliveryRewardMultiplier(DeliveryType deliveryType, float rankT)
+    {
+        switch (deliveryType)
+        {
+            case DeliveryType.Urgent:
+                return Mathf.Lerp(urgentRewardMultiplierRange.x, urgentRewardMultiplierRange.y, rankT);
+
+            case DeliveryType.Relaxed:
+                return Mathf.Lerp(relaxedRewardMultiplierRange.x, relaxedRewardMultiplierRange.y, rankT);
+
+            default:
+                return 1f;
+        }
     }
     private int GetCurrentReputationRankIndex()
     {

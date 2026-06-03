@@ -110,7 +110,7 @@ public static class NPCUtil
     /// <summary>
     /// Always returns 2–4 distinct tags, deterministic per npcId.
     /// </summary>
-    public static NPCTag[] GenerateTags(int npcId, int min = 2, int max = 4)
+    public static NPCTag[] GenerateTags(int npcId, int min = 1, int max = 3)
     {
         if (min < 0) min = 0;
         if (max < min) max = min;

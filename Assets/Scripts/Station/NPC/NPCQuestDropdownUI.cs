@@ -11,6 +11,14 @@ public class NPCQuestDropdownUI : MonoBehaviour
         public Color color;
     }
 
+    [System.Serializable]
+    public struct DeliveryTypeVisual
+    {
+        public NPCQuestManager.DeliveryType deliveryType;
+        public string label;
+        public Color color;
+    }
+
     [Header("Refs")]
     public NPCQuestManager questManager;
 
@@ -19,9 +27,23 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
     public TMP_Text creditsText;
     public TMP_Text reputationRewardText;
+    public TMP_Text timerText;
 
     public TMP_Text acceptText;
     public Button acceptButton;
+
+    [Header("Delivery Type Pill")]
+    public Image deliveryTypePillImage;
+    public TMP_Text deliveryTypePillText;
+
+    public DeliveryTypeVisual[] deliveryTypeVisuals =
+{
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Urgent, label = "Urgent", color = new Color(1.00f, 0.30f, 0.22f, 1f) },
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Standard, label = "Standard", color = new Color(0.42f, 0.76f, 1.00f, 1f) },
+        new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Relaxed, label = "Relaxed", color = new Color(0.48f, 0.92f, 0.58f, 1f) }
+    };
+
+    public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
 
     [Header("Difficulty")]
     public TMP_Text difficultyText;
@@ -52,6 +74,8 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
             UpdateRewardDisplay(offer);
             UpdateDifficultyDisplay(offer.difficulty);
+            UpdateDeliveryTypeDisplay(offer);
+            UpdateTimerDisplay(offer);
         }
         else
         {
@@ -60,6 +84,8 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
             UpdateRewardDisplay(default);
             UpdateDifficultyDisplay(0);
+            UpdateDeliveryTypeDisplay(default);
+            UpdateTimerDisplay(default);
         }
 
         if (questManager && !questManager.HasActiveQuestFromNpc(npcId))
@@ -113,17 +139,31 @@ public class NPCQuestDropdownUI : MonoBehaviour
         if (distanceText) distanceText.text = "----";
         UpdateRewardDisplay(default);
         UpdateDifficultyDisplay(0);
+        UpdateDeliveryTypeDisplay(default);
+        UpdateTimerDisplay(default);
     }
 
     private void UpdateRewardDisplay(NPCQuestManager.QuestOffer offer)
     {
         if (questManager && offer.valid)
         {
+            float rewardMultiplier = offer.deliveryRewardMultiplier > 0f ? offer.deliveryRewardMultiplier : 1f;
+
             if (creditsText)
-                creditsText.text = $"Credits +{questManager.GetPreviewCreditReward(offer):N0}";
+                creditsText.text = FormatRewardText(
+                    "Credits",
+                    questManager.GetPreviewBaseCreditReward(offer),
+                    rewardMultiplier,
+                    string.Empty
+                );
 
             if (reputationRewardText)
-                reputationRewardText.text = $"Rep +{questManager.GetPreviewReputationExpReward(offer):N0} XP";
+                reputationRewardText.text = FormatRewardText(
+                    "Rep",
+                    questManager.GetPreviewBaseReputationExpReward(offer),
+                    rewardMultiplier,
+                    " XP"
+                );
 
             return;
         }
@@ -134,7 +174,74 @@ public class NPCQuestDropdownUI : MonoBehaviour
         if (reputationRewardText)
             reputationRewardText.text = "Rep +0 XP";
     }
+    private string FormatRewardText(string label, float baseAmount, float multiplier, string suffix)
+    {
+        string text = $"{label} +{baseAmount:N0}";
 
+        if (!Mathf.Approximately(multiplier, 1f))
+            text += $" x {multiplier:0.##}";
+
+        return text + suffix;
+    }
+    private void UpdateDeliveryTypeDisplay(NPCQuestManager.QuestOffer offer)
+    {
+        if (!offer.valid)
+        {
+            if (deliveryTypePillText)
+            {
+                deliveryTypePillText.text = "--";
+                deliveryTypePillText.color = Color.white;
+            }
+
+            if (deliveryTypePillImage)
+                deliveryTypePillImage.color = deliveryTypePillOffColor;
+
+            return;
+        }
+
+        DeliveryTypeVisual visual = GetDeliveryTypeVisual(offer.deliveryType);
+
+        if (deliveryTypePillText)
+        {
+            deliveryTypePillText.text = visual.label;
+            deliveryTypePillText.color = Color.white;
+        }
+
+        if (deliveryTypePillImage)
+            deliveryTypePillImage.color = visual.color;
+    }
+
+    private void UpdateTimerDisplay(NPCQuestManager.QuestOffer offer)
+    {
+        if (!timerText)
+            return;
+
+        if (!questManager || !offer.valid)
+        {
+            timerText.text = "--:--";
+            return;
+        }
+
+        float deliverySeconds = questManager.GetPreviewDeliveryTimeSeconds(offer);
+        float timeMultiplier = offer.deliveryTimeMultiplier > 0f ? offer.deliveryTimeMultiplier : 1f;
+
+        timerText.text = FormatTimerText(deliverySeconds, timeMultiplier);
+    }
+
+    private string FormatTimerText(float seconds, float multiplier)
+    {
+        seconds = Mathf.Max(0f, seconds);
+
+        int minutes = Mathf.FloorToInt(seconds / 60f);
+        int secs = Mathf.FloorToInt(seconds % 60f);
+
+        string text = $"{minutes:00}:{secs:00}";
+
+        if (!Mathf.Approximately(multiplier, 1f))
+            text += $" x {multiplier:0.##}";
+
+        return text;
+    }
     private void UpdateDifficultyDisplay(int difficulty)
     {
         DifficultyVisual visual = GetDifficultyVisual(difficulty);
@@ -175,5 +282,30 @@ public class NPCQuestDropdownUI : MonoBehaviour
             visual.label = $"Difficulty {difficulty}";
 
         return visual;
+    }
+    private DeliveryTypeVisual GetDeliveryTypeVisual(NPCQuestManager.DeliveryType deliveryType)
+    {
+        if (deliveryTypeVisuals != null)
+        {
+            for (int i = 0; i < deliveryTypeVisuals.Length; i++)
+            {
+                if (deliveryTypeVisuals[i].deliveryType == deliveryType)
+                {
+                    DeliveryTypeVisual visual = deliveryTypeVisuals[i];
+
+                    if (string.IsNullOrEmpty(visual.label))
+                        visual.label = deliveryType.ToString();
+
+                    return visual;
+                }
+            }
+        }
+
+        return new DeliveryTypeVisual
+        {
+            deliveryType = deliveryType,
+            label = deliveryType.ToString(),
+            color = Color.white
+        };
     }
 }

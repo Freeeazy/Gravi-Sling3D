@@ -58,9 +58,15 @@ public class NPCManager : MonoBehaviour
                 row.Bind(npcs[i]);
 
                 if (questManager && questManager.TryGetOffer(row.BoundNpcId, out var offer))
+                {
                     row.SetDistance(offer.distance);
+                    row.SetDeliveryType(offer.deliveryType);
+                }
                 else
+                {
                     row.SetDistance(0f);
+                    row.ClearDeliveryType();
+                }
             }
         }
     }

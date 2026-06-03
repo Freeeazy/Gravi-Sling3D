@@ -427,6 +427,18 @@ public class PackageDurabilityManager : MonoBehaviour
     {
         return TryGetPackageTimer(questId, out float timeRemaining) && timeRemaining <= 0f;
     }
+    public float CalculateStartingDeliveryTime(NPCQuestManager.ActiveQuest quest)
+    {
+        float baseTime =
+            baseDeliveryTime +
+            ((quest.distanceAtAccept / 1000f) * secondsPer1000Units);
+
+        float timeMultiplier = quest.deliveryTimeMultiplier > 0f
+            ? quest.deliveryTimeMultiplier
+            : 1f;
+
+        return Mathf.Max(0f, baseTime * timeMultiplier);
+    }
     public bool HasActivePackage()
     {
         return _packagesByQuestId.Count > 0;

@@ -223,24 +223,18 @@ public class NPCQuestDropdownUI : MonoBehaviour
         }
 
         float deliverySeconds = questManager.GetPreviewDeliveryTimeSeconds(offer);
-        float timeMultiplier = offer.deliveryTimeMultiplier > 0f ? offer.deliveryTimeMultiplier : 1f;
 
-        timerText.text = FormatTimerText(deliverySeconds, timeMultiplier);
+        timerText.text = FormatTimerText(deliverySeconds);
     }
 
-    private string FormatTimerText(float seconds, float multiplier)
+    private string FormatTimerText(float seconds)
     {
         seconds = Mathf.Max(0f, seconds);
 
         int minutes = Mathf.FloorToInt(seconds / 60f);
         int secs = Mathf.FloorToInt(seconds % 60f);
 
-        string text = $"{minutes:00}:{secs:00}";
-
-        if (!Mathf.Approximately(multiplier, 1f))
-            text += $" x {multiplier:0.##}";
-
-        return text;
+        return $"{minutes:00}:{secs:00}";
     }
     private void UpdateDifficultyDisplay(int difficulty)
     {

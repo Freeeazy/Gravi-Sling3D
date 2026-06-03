@@ -30,6 +30,9 @@ public class NPCUILink : MonoBehaviour
     public TMP_Text nameText;
     public Image portraitImage;
     public TMP_Text distanceText;
+    public TMP_Text creditsRewardText;
+    public TMP_Text reputationRewardText;
+    public TMP_Text expectedDeliveryTimeText;
 
     [Header("Interaction")]
     public Button rowButton;
@@ -48,7 +51,7 @@ public class NPCUILink : MonoBehaviour
 
     public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
 
-    [Header("Tag Slots (max 4)")]
+    [Header("Tag Slots (max 2)")]
     public TagSlot[] tagSlots = new TagSlot[4];
 
     [Header("Fallbacks")]
@@ -92,6 +95,7 @@ public class NPCUILink : MonoBehaviour
 
         ClearDistance();
         ClearDeliveryType();
+        ClearQuestPreview();
 
         // Hide all tags
         if (tagSlots == null) return;
@@ -167,6 +171,55 @@ public class NPCUILink : MonoBehaviour
         distanceText.text = "";
     }
 
+    public void SetQuestPreview(NPCQuestManager questManager, NPCQuestManager.QuestOffer offer)
+    {
+        if (!questManager || !offer.valid)
+        {
+            ClearQuestPreview();
+            return;
+        }
+
+        float rewardMultiplier = offer.deliveryRewardMultiplier > 0f ? offer.deliveryRewardMultiplier : 1f;
+
+        if (creditsRewardText)
+        {
+            creditsRewardText.text = FormatRewardText(
+                string.Empty,
+                questManager.GetPreviewBaseCreditReward(offer),
+                rewardMultiplier,
+                string.Empty
+            );
+        }
+
+        if (reputationRewardText)
+        {
+            reputationRewardText.text = FormatRewardText(
+                string.Empty,
+                questManager.GetPreviewBaseReputationExpReward(offer),
+                rewardMultiplier,
+                string.Empty
+            );
+        }
+
+        if (expectedDeliveryTimeText)
+        {
+            float deliverySeconds = questManager.GetPreviewDeliveryTimeSeconds(offer);
+
+            expectedDeliveryTimeText.text = FormatTimerText(deliverySeconds);
+        }
+    }
+    public void ClearQuestPreview()
+    {
+        if (creditsRewardText)
+            creditsRewardText.text = "Credits +0";
+
+        if (reputationRewardText)
+            reputationRewardText.text = "Rep +0 XP";
+
+        if (expectedDeliveryTimeText)
+            expectedDeliveryTimeText.text = "--:--";
+    }
+
     public void SetDeliveryType(NPCQuestManager.DeliveryType deliveryType)
     {
         DeliveryTypeVisual visual = GetDeliveryTypeVisual(deliveryType);
@@ -217,6 +270,24 @@ public class NPCUILink : MonoBehaviour
             label = deliveryType.ToString(),
             color = Color.white
         };
+    }
+    private string FormatRewardText(string label, float baseAmount, float multiplier, string suffix)
+    {
+        string text = $"{label} +{baseAmount:N0}";
+
+        if (!Mathf.Approximately(multiplier, 1f))
+            text += $" x {multiplier:0.##}";
+
+        return text + suffix;
+    }
+    private string FormatTimerText(float seconds)
+    {
+        seconds = Mathf.Max(0f, seconds);
+
+        int minutes = Mathf.FloorToInt(seconds / 60f);
+        int secs = Mathf.FloorToInt(seconds % 60f);
+
+        return $"{minutes:00}:{secs:00}";
     }
 
 #if UNITY_EDITOR

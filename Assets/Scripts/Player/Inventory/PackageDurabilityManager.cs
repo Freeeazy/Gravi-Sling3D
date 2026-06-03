@@ -149,9 +149,9 @@ public class PackageDurabilityManager : MonoBehaviour
             ContractCardJitterManager.Instance.RegisterCard(card.transform as RectTransform);
         }
 
-        float startingTime =
-            baseDeliveryTime +
-            ((quest.distanceAtAccept / 1000f) * secondsPer1000Units);
+        float startingTime = quest.expectedDeliveryTimeSeconds > 0f
+            ? quest.expectedDeliveryTimeSeconds
+            : CalculateStartingDeliveryTime(quest);
 
         var package = new TrackedPackage
         {

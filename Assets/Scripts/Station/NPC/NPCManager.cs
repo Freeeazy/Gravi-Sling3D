@@ -61,11 +61,13 @@ public class NPCManager : MonoBehaviour
                 {
                     row.SetDistance(offer.distance);
                     row.SetDeliveryType(offer.deliveryType);
+                    row.SetQuestPreview(questManager, offer);
                 }
                 else
                 {
                     row.SetDistance(0f);
                     row.ClearDeliveryType();
+                    row.ClearQuestPreview();
                 }
             }
         }

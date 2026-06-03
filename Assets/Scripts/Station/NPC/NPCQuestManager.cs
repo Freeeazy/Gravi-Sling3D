@@ -231,6 +231,7 @@ public class NPCQuestManager : MonoBehaviour
         public DeliveryType deliveryType;
         public float deliveryTimeMultiplier;
         public float deliveryRewardMultiplier;
+        public float expectedDeliveryTimeSeconds;
         public bool valid;
     }
 
@@ -247,6 +248,7 @@ public class NPCQuestManager : MonoBehaviour
         public DeliveryType deliveryType;
         public float deliveryTimeMultiplier;
         public float deliveryRewardMultiplier;
+        public float expectedDeliveryTimeSeconds;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -323,7 +325,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
         return Mathf.Round(CalculateQuestCredits(previewQuest));
@@ -340,7 +343,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = 1f
+            deliveryRewardMultiplier = 1f,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
         return Mathf.Round(CalculateQuestCredits(previewQuest));
@@ -357,7 +361,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
         return CalculateQuestReputationExp(previewQuest, PackageDurabilityManager.DeliveryQuality.Good);
@@ -375,7 +380,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = 1f
+            deliveryRewardMultiplier = 1f,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
         return CalculateQuestReputationExp(previewQuest, PackageDurabilityManager.DeliveryQuality.Good);
@@ -392,19 +398,14 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
-        PackageDurabilityManager packageManager = packageDurabilityManager != null
-            ? packageDurabilityManager
-            : PackageDurabilityManager.Instance;
-        if (packageManager == null)
-            packageManager = FindFirstObjectByType<PackageDurabilityManager>();
+        if (offer.expectedDeliveryTimeSeconds > 0f)
+            return offer.expectedDeliveryTimeSeconds;
 
-        if (packageManager != null)
-            return packageManager.CalculateStartingDeliveryTime(previewQuest);
-
-        return 0f;
+        return CalculateExpectedDeliveryTimeSeconds(previewQuest);
     }
     public bool AcceptQuest(int npcId)
     {
@@ -440,7 +441,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = offer.reputationRankIndex,
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
-            deliveryRewardMultiplier = offer.deliveryRewardMultiplier
+            deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
         };
 
         _active.Add(q);
@@ -548,7 +550,8 @@ public class NPCQuestManager : MonoBehaviour
             reputationRankIndex = _currentOfferRankIndex,
             deliveryType = DeliveryType.Standard,
             deliveryTimeMultiplier = 1f,
-            deliveryRewardMultiplier = 1f
+            deliveryRewardMultiplier = 1f,
+            expectedDeliveryTimeSeconds = 0f
         };
 
         if (!_hasStationContext || !posManager) return offer;
@@ -706,6 +709,7 @@ public class NPCQuestManager : MonoBehaviour
         offer.toCoord = chosenCoord;
         offer.toWorldPos = chosenPos;
         offer.distance = Vector3.Distance(_currentStationWorldPos, chosenPos);
+        offer.expectedDeliveryTimeSeconds = CalculateExpectedDeliveryTimeSeconds(offer.distance, offer.deliveryTimeMultiplier);
         offer.valid = true;
         return offer;
     }
@@ -886,6 +890,30 @@ public class NPCQuestManager : MonoBehaviour
             default:
                 return 1f;
         }
+    }
+    private float CalculateExpectedDeliveryTimeSeconds(float distance, float timeMultiplier)
+    {
+        ActiveQuest previewQuest = new ActiveQuest
+        {
+            distanceAtAccept = distance,
+            deliveryTimeMultiplier = timeMultiplier
+        };
+
+        return CalculateExpectedDeliveryTimeSeconds(previewQuest);
+    }
+
+    private float CalculateExpectedDeliveryTimeSeconds(ActiveQuest quest)
+    {
+        PackageDurabilityManager packageManager = packageDurabilityManager != null
+            ? packageDurabilityManager
+            : PackageDurabilityManager.Instance;
+        if (packageManager == null)
+            packageManager = FindFirstObjectByType<PackageDurabilityManager>();
+
+        if (packageManager != null)
+            return packageManager.CalculateStartingDeliveryTime(quest);
+
+        return 0f;
     }
     private int GetCurrentReputationRankIndex()
     {

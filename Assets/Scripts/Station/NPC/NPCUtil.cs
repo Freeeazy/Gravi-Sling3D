@@ -110,16 +110,16 @@ public static class NPCUtil
     /// <summary>
     /// Always returns 2–4 distinct tags, deterministic per npcId.
     /// </summary>
-    public static NPCTag[] GenerateTags(int npcId, int min = 1, int max = 3)
+    public static NPCTag[] GenerateTags(int npcId, int min = 1, int max = 2)
     {
         if (min < 0) min = 0;
         if (max < min) max = min;
-        max = Mathf.Min(max, 4);
+        max = Mathf.Min(max, 2);
 
         var rng = new System.Random(npcId ^ 0x5F3759DF);
 
         int count = rng.Next(min, max + 1);
-        count = Mathf.Clamp(count, 0, 4);
+        count = Mathf.Clamp(count, 0, 2);
 
         // Pick distinct tags
         var chosen = new NPCTag[count];

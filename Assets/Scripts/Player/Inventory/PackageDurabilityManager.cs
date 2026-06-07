@@ -153,11 +153,15 @@ public class PackageDurabilityManager : MonoBehaviour
             ? quest.expectedDeliveryTimeSeconds
             : CalculateStartingDeliveryTime(quest);
 
+        float plating = StatManager.Instance != null
+            ? StatManager.Instance.GetPackagePlating()
+            : 0f;
+
         var package = new TrackedPackage
         {
             quest = quest,
             deliveryItem = PickDeliveryItemName(quest),
-            integrity = startingIntegrity,
+            integrity = startingIntegrity + plating,
             timeRemaining = startingTime,
             card = card
         };

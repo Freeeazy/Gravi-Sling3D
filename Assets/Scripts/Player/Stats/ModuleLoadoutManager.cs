@@ -24,6 +24,7 @@ public class ModuleLoadoutManager : MonoBehaviour
 
     [Header("Unique Stats")]
     public float baseShieldCharge = 0;
+    public float basePackagePlating = 0;
 
     private void Awake()
     {
@@ -46,6 +47,7 @@ public class ModuleLoadoutManager : MonoBehaviour
         float regenPerSecBonus = 0f;
 
         float shieldChargeBonus = 0;
+        float packagePlatingBonus = 0;
 
         // Percent bonuses
         float chargeBonus_Percent = 0f;
@@ -81,6 +83,7 @@ public class ModuleLoadoutManager : MonoBehaviour
             regenPerSecBonus += module.regenPerSecondBonus;
 
             shieldChargeBonus += module.shieldChargeBonus;
+            packagePlatingBonus += module.packagePlatingBonus;
 
             // Percent bonuses
             chargeBonus_Percent += module.chargeRateBonus_Percent;
@@ -112,6 +115,7 @@ public class ModuleLoadoutManager : MonoBehaviour
         float finalRegenPerSecond = ApplyFlatAndPercent(baseRegenPerSecond, regenPerSecBonus, regenPerSecBonus_Percent);
 
         float finalShieldCharge = baseShieldCharge + shieldChargeBonus;
+        float finalPackagePlating = basePackagePlating + packagePlatingBonus;
 
         if (StatManager.Instance != null)
         {
@@ -128,6 +132,7 @@ public class ModuleLoadoutManager : MonoBehaviour
             StatManager.Instance.SetRegenPerSecond(finalRegenPerSecond);
 
             StatManager.Instance.SetShieldCharge(finalShieldCharge);
+            StatManager.Instance.SetPackagePlating(finalPackagePlating);
 
             StatManager.Instance.ApplyRuntimeStats();
         }

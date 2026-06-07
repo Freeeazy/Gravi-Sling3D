@@ -34,5 +34,5 @@ public class ModuleData : ScriptableObject
 
     // Unique
     public float shieldChargeBonus;
-
+    public float packagePlatingBonus;
 }

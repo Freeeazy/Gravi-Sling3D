@@ -191,6 +191,8 @@ public class ModuleTooltipUI : MonoBehaviour
 
         AppendStatLine(sb, data.shieldChargeBonus, "Shield Charge", false);
 
+        AppendStatLine(sb, data.packagePlatingBonus, "Package Plating", false);
+
         sb.AppendLine();
         sb.AppendLine("Right-click to equip");
         sb.AppendLine("Drag to slot");

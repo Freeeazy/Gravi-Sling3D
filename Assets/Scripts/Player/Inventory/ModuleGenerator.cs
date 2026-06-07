@@ -299,6 +299,12 @@ public class ModuleGenerator : MonoBehaviour
                 module.shieldChargeBonus += value;
                 break;
 
+            case "PackagePlating":
+                if (isPercent) 
+                    Debug.LogWarning("[ModuleGenerator] PackagePlating does not currently support percent rolls.");
+                module.packagePlatingBonus += value;
+                break;
+
             default:
                 Debug.LogWarning($"[ModuleGenerator] Unknown stat name: {statName}");
                 break;

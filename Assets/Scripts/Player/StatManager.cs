@@ -36,6 +36,9 @@ public class StatManager : MonoBehaviour
     public GameObject shieldVisual;
     public GameObject shieldPhysicalVisual;
 
+    [SerializeField] private float packagePlating = 0;
+    public TMP_Text packagePlatingText;
+
     public int MaxShieldCharges => Mathf.Max(0, Mathf.FloorToInt(shieldCharge));
     public int CurrentShieldCharges => currentShieldCharges;
 
@@ -59,6 +62,8 @@ public class StatManager : MonoBehaviour
     public void SetDrainPerSecond(float value) => drainPerSecond = value;
     public void SetRegenPerSecond(float value) => regenPerSecond = value;
 
+    public void SetPackagePlating(float value) => packagePlating = value;
+
 
     public float GetOrbitChargeRate() => orbitChargeRate;
     public float GetBaseLaunchSpeed() => baseLaunchSpeed;
@@ -73,6 +78,7 @@ public class StatManager : MonoBehaviour
     public float GetDrainPerSecond() => drainPerSecond;
     public float GetRegenPerSecond() => regenPerSecond;
 
+    public float GetPackagePlating() => packagePlating;
 
     // Unique Stats
     public void SetShieldCharge(float value)
@@ -164,6 +170,9 @@ public class StatManager : MonoBehaviour
 
         if (shieldChargeText)
             shieldChargeText.text = FormatWholeStat(shieldCharge);
+
+        if (packagePlatingText)
+            packagePlatingText.text = FormatWholeStat(packagePlating);
     }
 
     public void ApplyTargetByName(string targetName)
@@ -420,6 +429,9 @@ public class StatManager : MonoBehaviour
 
         if (shieldChargeText)
             shieldChargeText.text = FormatWholeStat(shieldCharge);
+
+        if (packagePlatingText)
+            packagePlatingText.text = FormatWholeStat(packagePlating);
     }
     public void ShowModuleHoverPreview(ModuleData module)
     {
@@ -510,6 +522,15 @@ public class StatManager : MonoBehaviour
             shieldChargeText,
             shieldCharge,
             module.shieldChargeBonus,
+            0,
+            0,
+            false
+        );
+
+        SetPreviewText(
+            packagePlatingText,
+            packagePlating,
+            module.packagePlatingBonus,
             0,
             0,
             false
@@ -609,6 +630,15 @@ public class StatManager : MonoBehaviour
             shieldChargeText,
             shieldCharge,
             incomingModule.shieldChargeBonus - equippedModule.shieldChargeBonus,
+            0,
+            0,
+            false
+        );
+
+        SetPreviewText(
+            packagePlatingText,
+            packagePlating,
+            incomingModule.packagePlatingBonus - equippedModule.packagePlatingBonus,
             0,
             0,
             false

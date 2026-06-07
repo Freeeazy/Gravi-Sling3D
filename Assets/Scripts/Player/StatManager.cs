@@ -39,6 +39,15 @@ public class StatManager : MonoBehaviour
     [SerializeField] private float packagePlating = 0;
     public TMP_Text packagePlatingText;
 
+    [Header("Temporary Cargo Stat Multipliers")]
+    [SerializeField] private float cargoMaxSpeedMultiplier = 1f;
+    [SerializeField] private float cargoAccelerationMultiplier = 1f;
+    [SerializeField] private float cargoBoostAccelAddMultiplier = 1f;
+    [SerializeField] private float cargoBoostMaxSpeedMultiplier = 1f;
+    [SerializeField] private float cargoCapacityMultiplier = 1f;
+    [SerializeField] private float cargoDrainPerSecondMultiplier = 1f;
+    [SerializeField] private float cargoRegenPerSecondMultiplier = 1f;
+
     public int MaxShieldCharges => Mathf.Max(0, Mathf.FloorToInt(shieldCharge));
     public int CurrentShieldCharges => currentShieldCharges;
 
@@ -80,7 +89,31 @@ public class StatManager : MonoBehaviour
 
     public float GetPackagePlating() => packagePlating;
 
-    // Unique Stats
+    public void SetCargoStatMultipliers(
+    float maxSpeedMultiplier,
+    float accelerationMultiplier,
+    float boostAccelAddMultiplier,
+    float boostMaxSpeedMultiplier,
+    float capacityMultiplier,
+    float drainPerSecondMultiplier,
+    float regenPerSecondMultiplier)
+    {
+        cargoMaxSpeedMultiplier = Mathf.Max(0f, maxSpeedMultiplier);
+        cargoAccelerationMultiplier = Mathf.Max(0f, accelerationMultiplier);
+        cargoBoostAccelAddMultiplier = Mathf.Max(0f, boostAccelAddMultiplier);
+        cargoBoostMaxSpeedMultiplier = Mathf.Max(0f, boostMaxSpeedMultiplier);
+        cargoCapacityMultiplier = Mathf.Max(0f, capacityMultiplier);
+        cargoDrainPerSecondMultiplier = Mathf.Max(0f, drainPerSecondMultiplier);
+        cargoRegenPerSecondMultiplier = Mathf.Max(0f, regenPerSecondMultiplier);
+
+        ApplyRuntimeStats();
+    }
+    public void ClearCargoStatMultipliers()
+    {
+        SetCargoStatMultipliers(1f, 1f, 1f, 1f, 1f, 1f, 1f);
+    }
+
+    // Shield Charges
     public void SetShieldCharge(float value)
     {
         shieldCharge = Mathf.Max(0, value);
@@ -139,17 +172,17 @@ public class StatManager : MonoBehaviour
     {
         if (simpleMove != null)
         {
-            simpleMove.maxSpeed = maxSpeed;
-            simpleMove.acceleration = acceleration;
-            simpleMove.boostMaxSpeed = boostMaxSpeed;
-            simpleMove.boostAccelAdd = boostAccelAdd;
+            simpleMove.maxSpeed = maxSpeed * cargoMaxSpeedMultiplier;
+            simpleMove.acceleration = acceleration * cargoAccelerationMultiplier;
+            simpleMove.boostMaxSpeed = boostMaxSpeed * cargoBoostMaxSpeedMultiplier;
+            simpleMove.boostAccelAdd = boostAccelAdd * cargoBoostAccelAddMultiplier;
         }
 
         if (BoostManager.Instance != null)
         {
-            BoostManager.Instance.SetCapacity(capacity);
-            BoostManager.Instance.SetDrainPerSecond(drainPerSecond);
-            BoostManager.Instance.SetRegenPerSecond(regenPerSecond);
+            BoostManager.Instance.SetCapacity(capacity * cargoCapacityMultiplier);
+            BoostManager.Instance.SetDrainPerSecond(drainPerSecond * cargoDrainPerSecondMultiplier);
+            BoostManager.Instance.SetRegenPerSecond(regenPerSecond * cargoRegenPerSecondMultiplier);
         }
 
         RefreshAllStatDisplays();

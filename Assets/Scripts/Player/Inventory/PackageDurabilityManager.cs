@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
+using UnityEngine;
 
 public class PackageDurabilityManager : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class PackageDurabilityManager : MonoBehaviour
         public float integrity;
         public float timeRemaining;
         public ActiveContractCardUI card;
+        public CargoEffectType cargoEffectType;
     }
 
     [Header("Refs")]
@@ -70,6 +72,9 @@ public class PackageDurabilityManager : MonoBehaviour
     [Header("Average Delivery Durability")]
     public TMP_Text averageDurabilityText;
     public int maxStoredDeliveries = 100;
+
+    public event Action<int, CargoEffectType> PackageCargoStarted;
+    public event Action<int, CargoEffectType> PackageCargoEnded;
 
     private readonly Dictionary<int, TrackedPackage> _packagesByQuestId = new Dictionary<int, TrackedPackage>();
 
@@ -157,16 +162,22 @@ public class PackageDurabilityManager : MonoBehaviour
             ? StatManager.Instance.GetPackagePlating()
             : 0f;
 
+        CargoEffectType cargoEffectType = _packagesByQuestId.Count == 0
+            ? CargoEffectType.None
+            : CargoEffectType.None;
+
         var package = new TrackedPackage
         {
             quest = quest,
             deliveryItem = PickDeliveryItemName(quest),
             integrity = startingIntegrity + plating,
             timeRemaining = startingTime,
-            card = card
+            card = card,
+            cargoEffectType = cargoEffectType
         };
 
         _packagesByQuestId.Add(quest.questId, package);
+        PackageCargoStarted?.Invoke(quest.questId, package.cargoEffectType);
         RefreshCard(package);
     }
 
@@ -186,6 +197,7 @@ public class PackageDurabilityManager : MonoBehaviour
             Destroy(package.card.gameObject);
 
         _packagesByQuestId.Remove(questId);
+        PackageCargoEnded?.Invoke(questId, package.cargoEffectType);
     }
     private void ExpirePackage(int questId)
     {
@@ -207,6 +219,7 @@ public class PackageDurabilityManager : MonoBehaviour
             Destroy(package.card.gameObject);
 
         _packagesByQuestId.Remove(questId);
+        PackageCargoEnded?.Invoke(questId, package.cargoEffectType);
 
         NPCQuestManager manager = questManager != null
             ? questManager

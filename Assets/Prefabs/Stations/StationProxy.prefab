@@ -490,10 +490,10 @@ MonoBehaviour:
   Bubble: {fileID: 1858667739632006358}
   preGravityZone: {fileID: 4967203091336313616}
   baseOrbitSpeedDegPerSec: 180
-  baseLaunchSpeed: 80
+  baseLaunchSpeed: 40
   launchAngleOffsetDeg: 0
   enableBoosting: 1
-  chargeRate: 60
+  chargeRate: 30
   shrinkRate: 10
   maxChargeTime: 60
   minCaptureTangentialSpeed: 75

@@ -4417,7 +4417,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6700,7 +6700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -23414,7 +23414,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -24350,7 +24350,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -30879,7 +30879,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -31038,7 +31038,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -33462,7 +33462,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -33890,7 +33890,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -37152,7 +37152,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43014,7 +43014,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43967,7 +43967,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -46693,7 +46693,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -47700,7 +47700,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -48947,6 +48947,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fieldData: {fileID: 0}
   simpleMove: {fileID: 1616803245}
+  shieldObject: {fileID: 0}
   playerRb: {fileID: 1616803247}
   playerBox: {fileID: 1616803248}
   cellSize: 20
@@ -49657,7 +49658,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -60641,7 +60642,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -60714,7 +60715,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -117299,7 +117300,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -119690,7 +119691,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -133025,7 +133026,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -135603,7 +135604,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -165219,7 +165220,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -166969,7 +166970,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -178280,7 +178281,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -182382,6 +182383,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   posManager: {fileID: 2048073271}
   inventoryManager: {fileID: 0}
+  packageDurabilityManager: {fileID: 0}
   globalSeed: 12345
   pickRadius: 20000
   minTargetDistance: 2000
@@ -182392,6 +182394,126 @@ MonoBehaviour:
   baseCreditReward: 100
   rewardPerDifficulty: 50
   distanceCreditRate: 0.1
+  urgentDeliveryWeight: 25
+  standardDeliveryWeight: 50
+  relaxedDeliveryWeight: 25
+  urgentTimeMultiplierRange: {x: 0.85, y: 0.7}
+  urgentRewardMultiplierRange: {x: 1.25, y: 1.5}
+  relaxedTimeMultiplierRange: {x: 1.5, y: 2}
+  relaxedRewardMultiplierRange: {x: 0.9, y: 0.75}
+  perfectDeliveryReputationMultiplier: 1.25
+  goodDeliveryReputationMultiplier: 1
+  damagedDeliveryReputationMultiplier: 0.45
+  barelyDeliveredReputationMultiplier: 0.15
+  failedDeliveryReputationMultiplier: -0.5
+  rankQuestConfigs:
+  - rankName: Rookie
+    minDifficulty: 1
+    maxDifficulty: 2
+    difficultyWeights:
+    - difficulty: 1
+      weight: 80
+    - difficulty: 2
+      weight: 20
+    creditMultiplier: 1
+    creditBonus: 0
+    reputationMultiplier: 1
+    reputationBonus: 0
+  - rankName: Runner
+    minDifficulty: 1
+    maxDifficulty: 4
+    difficultyWeights:
+    - difficulty: 1
+      weight: 25
+    - difficulty: 2
+      weight: 45
+    - difficulty: 3
+      weight: 25
+    - difficulty: 4
+      weight: 5
+    creditMultiplier: 1.1
+    creditBonus: 50
+    reputationMultiplier: 1.1
+    reputationBonus: 25
+  - rankName: Trusted
+    minDifficulty: 2
+    maxDifficulty: 5
+    difficultyWeights:
+    - difficulty: 2
+      weight: 25
+    - difficulty: 3
+      weight: 40
+    - difficulty: 4
+      weight: 25
+    - difficulty: 5
+      weight: 10
+    creditMultiplier: 1.25
+    creditBonus: 150
+    reputationMultiplier: 1.25
+    reputationBonus: 75
+  - rankName: Made Courier
+    minDifficulty: 3
+    maxDifficulty: 7
+    difficultyWeights:
+    - difficulty: 3
+      weight: 20
+    - difficulty: 4
+      weight: 30
+    - difficulty: 5
+      weight: 25
+    - difficulty: 6
+      weight: 15
+    - difficulty: 7
+      weight: 10
+    creditMultiplier: 1.45
+    creditBonus: 350
+    reputationMultiplier: 1.45
+    reputationBonus: 150
+  - rankName: Family Legend
+    minDifficulty: 4
+    maxDifficulty: 7
+    difficultyWeights:
+    - difficulty: 4
+      weight: 20
+    - difficulty: 5
+      weight: 30
+    - difficulty: 6
+      weight: 25
+    - difficulty: 7
+      weight: 25
+    creditMultiplier: 1.75
+    creditBonus: 750
+    reputationMultiplier: 1.75
+    reputationBonus: 300
+  difficultyRewardConfigs:
+  - difficulty: 1
+    baseCredits: 150
+    baseReputationExp: 180
+    distanceCreditRate: 0.08
+  - difficulty: 2
+    baseCredits: 250
+    baseReputationExp: 300
+    distanceCreditRate: 0.1
+  - difficulty: 3
+    baseCredits: 400
+    baseReputationExp: 475
+    distanceCreditRate: 0.12
+  - difficulty: 4
+    baseCredits: 600
+    baseReputationExp: 700
+    distanceCreditRate: 0.15
+  - difficulty: 5
+    baseCredits: 850
+    baseReputationExp: 975
+    distanceCreditRate: 0.18
+  - difficulty: 6
+    baseCredits: 1200
+    baseReputationExp: 1350
+    distanceCreditRate: 0.22
+  - difficulty: 7
+    baseCredits: 1700
+    baseReputationExp: 1850
+    distanceCreditRate: 0.28
 --- !u!4 &1780358254
 Transform:
   m_ObjectHideFlags: 0
@@ -194133,7 +194255,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1836859639
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194148,9 +194270,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   simpleMove: {fileID: 1616803245}
   applyOnAwake: 1
-  orbitChargeRate: 60
+  orbitChargeRate: 30
   orbitChargeRateText: {fileID: 0}
-  baseLaunchSpeed: 80
+  baseLaunchSpeed: 40
   baseLaunchSpeedText: {fileID: 0}
   maxSpeed: 200
   acceleration: 100
@@ -194159,6 +194281,12 @@ MonoBehaviour:
   capacity: 100
   drainPerSecond: 18
   regenPerSecond: 10
+  shieldCharge: 0
+  shieldChargeText: {fileID: 0}
+  shieldVisual: {fileID: 0}
+  shieldPhysicalVisual: {fileID: 0}
+  packagePlating: 0
+  packagePlatingText: {fileID: 0}
   targets:
   - targetName: SimpleMove
     targetScript: {fileID: 1616803245}
@@ -198661,7 +198789,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -200813,7 +200941,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -206940,7 +207068,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x

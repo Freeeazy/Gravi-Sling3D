@@ -21,6 +21,13 @@ public class NPCUILink : MonoBehaviour
         public Color color;
     }
 
+    [Serializable]
+    public struct DifficultyVisual
+    {
+        public string label;
+        public Color color;
+    }
+
     [Header("Tag Sizing")]
     public float tagPaddingX = 12f;     // total extra width (left+right)
     public float tagMinWidth = 40f;     // optional: keep tiny tags from looking weird
@@ -50,6 +57,21 @@ public class NPCUILink : MonoBehaviour
     };
 
     public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
+
+    [Header("Difficulty")]
+    public Graphic[] difficultyBars = new Graphic[0];
+    public Color difficultyBarOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
+
+    public DifficultyVisual[] difficultyVisuals =
+    {
+        new DifficultyVisual { label = "Very Easy", color = new Color(0.40f, 1.00f, 0.72f, 1f) },
+        new DifficultyVisual { label = "Easy", color = new Color(0.34f, 0.92f, 0.42f, 1f) },
+        new DifficultyVisual { label = "Standard", color = new Color(0.95f, 0.88f, 0.32f, 1f) },
+        new DifficultyVisual { label = "Moderate", color = new Color(1.00f, 0.66f, 0.28f, 1f) },
+        new DifficultyVisual { label = "Hard", color = new Color(1.00f, 0.38f, 0.24f, 1f) },
+        new DifficultyVisual { label = "Very Hard", color = new Color(0.88f, 0.26f, 0.86f, 1f) },
+        new DifficultyVisual { label = "Extreme", color = new Color(0.55f, 0.32f, 1.00f, 1f) }
+    };
 
     [Header("Tag Slots (max 2)")]
     public TagSlot[] tagSlots = new TagSlot[4];
@@ -207,6 +229,8 @@ public class NPCUILink : MonoBehaviour
 
             expectedDeliveryTimeText.text = FormatTimerText(deliverySeconds);
         }
+
+        UpdateDifficultyDisplay(offer.difficulty);
     }
     public void ClearQuestPreview()
     {
@@ -218,6 +242,8 @@ public class NPCUILink : MonoBehaviour
 
         if (expectedDeliveryTimeText)
             expectedDeliveryTimeText.text = "--:--";
+
+        UpdateDifficultyDisplay(0);
     }
 
     public void SetDeliveryType(NPCQuestManager.DeliveryType deliveryType)
@@ -270,6 +296,41 @@ public class NPCUILink : MonoBehaviour
             label = deliveryType.ToString(),
             color = Color.white
         };
+    }
+    private void UpdateDifficultyDisplay(int difficulty)
+    {
+        DifficultyVisual visual = GetDifficultyVisual(difficulty);
+
+        int barCount = difficultyBars != null ? difficultyBars.Length : 0;
+        int visibleDifficulty = Mathf.Clamp(difficulty, 0, barCount);
+
+        for (int i = 0; i < barCount; i++)
+        {
+            if (difficultyBars[i] == null)
+                continue;
+
+            difficultyBars[i].color = i < visibleDifficulty ? visual.color : difficultyBarOffColor;
+        }
+    }
+
+    private DifficultyVisual GetDifficultyVisual(int difficulty)
+    {
+        if (difficultyVisuals == null || difficultyVisuals.Length == 0)
+        {
+            return new DifficultyVisual
+            {
+                label = difficulty > 0 ? $"Difficulty {difficulty}" : "--",
+                color = Color.white
+            };
+        }
+
+        int index = Mathf.Clamp(difficulty, 1, difficultyVisuals.Length) - 1;
+        DifficultyVisual visual = difficultyVisuals[index];
+
+        if (string.IsNullOrEmpty(visual.label))
+            visual.label = $"Difficulty {difficulty}";
+
+        return visual;
     }
     private string FormatRewardText(string label, float baseAmount, float multiplier, string suffix)
     {

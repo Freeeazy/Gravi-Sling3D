@@ -93,7 +93,7 @@ public static class NPCUtil
     }
 
     // Expand this list whenever.
-    static readonly NPCTag[] tagPool =
+    static readonly NPCTag[] tagFactionPool =
     {
         new NPCTag("Merchant",   new Color32( 80, 180, 255, 255)),        
         new NPCTag("Veteran",    new Color32(255, 175,  80, 255)),
@@ -106,6 +106,20 @@ public static class NPCUtil
         new NPCTag("Scrapper",   new Color32(180, 130,  80, 255)),
         new NPCTag("Elite",      new Color32(255, 220, 140, 255)),
     };
+
+    //static readonly NPCTag[] tagTraitPool =
+    //{
+    //    new NPCTag("Merchant",   new Color32( 80, 180, 255, 255)),
+    //    new NPCTag("Veteran",    new Color32(255, 175,  80, 255)),
+    //    new NPCTag("Mercenary",  new Color32(255,  90,  90, 255)),
+    //    new NPCTag("Shady",      new Color32(190,  80, 255, 255)),
+    //    new NPCTag("Friendly",   new Color32( 90, 220, 140, 255)),
+    //    new NPCTag("Mechanic",   new Color32(170, 170, 170, 255)),
+    //    new NPCTag("Archivist",  new Color32(255, 230, 100, 255)),
+    //    new NPCTag("Scientist",  new Color32(100, 220, 255, 255)),
+    //    new NPCTag("Scrapper",   new Color32(180, 130,  80, 255)),
+    //    new NPCTag("Elite",      new Color32(255, 220, 140, 255)),
+    //};
 
     /// <summary>
     /// Always returns 2–4 distinct tags, deterministic per npcId.
@@ -131,13 +145,13 @@ public static class NPCUtil
             int idx;
             do
             {
-                idx = rng.Next(0, tagPool.Length);
+                idx = rng.Next(0, tagFactionPool.Length);
                 tries++;
             }
             while (used.Contains(idx) && tries < 20);
 
             used.Add(idx);
-            chosen[i] = tagPool[idx];
+            chosen[i] = tagFactionPool[idx];
         }
 
         return chosen;

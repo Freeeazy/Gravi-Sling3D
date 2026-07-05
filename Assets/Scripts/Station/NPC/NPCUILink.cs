@@ -73,7 +73,7 @@ public class NPCUILink : MonoBehaviour
         new DifficultyVisual { label = "Extreme", color = new Color(0.55f, 0.32f, 1.00f, 1f) }
     };
 
-    [Header("Tag Slots (max 2)")]
+    [Header("Tag Slots")]
     public TagSlot[] tagSlots = new TagSlot[4];
 
     [Header("Fallbacks")]

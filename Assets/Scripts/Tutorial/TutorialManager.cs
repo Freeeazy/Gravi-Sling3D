@@ -52,7 +52,6 @@ public class TutorialManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private TMP_Text tutorialText;
     [SerializeField] private GameObject tutorialPanel;
-    [SerializeField] private GameObject exitPromptObject;
 
     [Header("Typing")]
     [SerializeField] private float charactersPerSecond = 45f;
@@ -99,9 +98,6 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
-        if (exitPromptObject != null)
-            exitPromptObject.SetActive(false);
-
         StartTutorial();
     }
 
@@ -331,9 +327,6 @@ public class TutorialManager : MonoBehaviour
                 "<size=85%><color=#7FF9FF><b>TRAINING COMPLETE</b></color></size>\n" +
                 "You can keep practicing here, or press <b>ENTER</b> to begin.";
         }
-
-        if (exitPromptObject != null)
-            exitPromptObject.SetActive(true);
     }
 
     private void ApplyStageSettings(TutorialStage stage)

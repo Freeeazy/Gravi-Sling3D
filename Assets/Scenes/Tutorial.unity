@@ -4419,6 +4419,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6702,6 +6706,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -7554,7 +7562,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialText: {fileID: 1543099284}
   tutorialPanel: {fileID: 655224014}
-  exitPromptObject: {fileID: 0}
   charactersPerSecond: 35
   useTypewriterEffect: 1
   stages:
@@ -23416,6 +23423,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -24351,6 +24362,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -30881,6 +30896,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -31039,6 +31058,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -33464,6 +33487,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -33891,6 +33918,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -37153,6 +37184,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -43016,6 +43051,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -43968,6 +44007,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -46695,6 +46738,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -47701,6 +47748,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -49659,6 +49710,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -60644,6 +60699,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -60716,6 +60775,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -117302,6 +117365,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -119692,6 +119759,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -133028,6 +133099,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -135096,7 +135171,7 @@ MonoBehaviour:
   _mode: 0
   capacity: 100
   startFull: 0
-  startEnergy: 50
+  startEnergy: 75
   drainPerSecond: 18
   dontDrain: 0
   regenPerSecond: 10
@@ -135605,6 +135680,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -165222,6 +165301,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -165881,11 +165964,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1616803247}
   cameraTransform: {fileID: 330585546}
-  maxSpeed: 200
-  acceleration: 100
+  maxSpeed: 100
+  acceleration: 50
   damping: 1
   normalizeInput: 1
-  boostMaxSpeed: 900
+  boostMaxSpeed: 600
   boostRampUp: 1.2
   boostRampDown: 1
   boostAccelAdd: 50
@@ -166089,7 +166172,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1616803244}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9fa5d13db0c630f4081776eaa13b9edf, type: 3}
   m_Name: 
@@ -166126,7 +166209,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1616803244}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9fa5d13db0c630f4081776eaa13b9edf, type: 3}
   m_Name: 
@@ -166971,6 +167054,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -178282,6 +178369,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -194287,6 +194378,13 @@ MonoBehaviour:
   shieldPhysicalVisual: {fileID: 0}
   packagePlating: 0
   packagePlatingText: {fileID: 0}
+  cargoMaxSpeedMultiplier: 1
+  cargoAccelerationMultiplier: 1
+  cargoBoostAccelAddMultiplier: 1
+  cargoBoostMaxSpeedMultiplier: 1
+  cargoCapacityMultiplier: 1
+  cargoDrainPerSecondMultiplier: 1
+  cargoRegenPerSecondMultiplier: 1
   targets:
   - targetName: SimpleMove
     targetScript: {fileID: 1616803245}
@@ -198791,6 +198889,10 @@ PrefabInstance:
       propertyPath: chargeRate
       value: 30
       objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
+      objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -200942,6 +201044,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x
@@ -207069,6 +207175,10 @@ PrefabInstance:
     - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: chargeRate
       value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4816576802051389977, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
+      propertyPath: maxCaptureTangentialSpeed
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 5551375006432599013, guid: 4feee502cf78c8f43ae81171a2dd61d6, type: 3}
       propertyPath: m_LocalPosition.x

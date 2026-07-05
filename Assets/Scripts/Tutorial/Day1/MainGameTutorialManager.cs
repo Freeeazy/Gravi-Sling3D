@@ -78,6 +78,15 @@ public class MainGameTutorialManager : MonoBehaviour
     [SerializeField] private float skipHoldDuration = 2f;
     [SerializeField] private MonoBehaviour simpleMove;
 
+    [Header("Tap To Fast Type")]
+    [SerializeField] private bool allowTapToFastType = true;
+    [SerializeField] private float fastCharactersPerSecond = 180f;
+    [Tooltip("When fast typing is active, @ pause commands are multiplied by this value. Example: 0.25 makes @1 wait 0.25 seconds.")]
+    [SerializeField, Range(0.01f, 1f)] private float fastPauseMultiplier = 0.25f;
+
+    [Header("Tap To Advance")]
+    [SerializeField] private bool allowTapToAdvanceAutoDelay = true;
+
     private int currentStageIndex = -1;
     private int currentRingCount = 0;
     private bool tutorialFinished = false;
@@ -86,6 +95,10 @@ public class MainGameTutorialManager : MonoBehaviour
     private string currentVisibleBody = "";
     private Coroutine npcTalkRoutine;
     private float skipHoldTimer = 0f;
+    private bool isTypingStageText = false;
+    private bool fastTypeCurrentStage = false;
+    private bool isWaitingForAutoAdvance = false;
+    private bool autoAdvanceDelayBypassRequested = false;
 
     private void Start()
     {
@@ -104,12 +117,34 @@ public class MainGameTutorialManager : MonoBehaviour
     }
     private void Update()
     {
-        HandleSkipInput();
+        HandleTutorialInput();
     }
-    private void HandleSkipInput()
+    private void HandleTutorialInput()
     {
-        if (!allowSkipTutorial || tutorialFinished)
+        if (tutorialFinished)
             return;
+
+        // Tap F while text is actively typing to speed through the current stage's typewriter.
+        // Holding the same key still uses the existing full tutorial skip behavior below.
+        if (allowTapToFastType && useTypewriterEffect && isTypingStageText && Input.GetKeyDown(skipKey))
+        {
+            fastTypeCurrentStage = true;
+        }
+
+        // Once the current line/stage is fully typed and we are only waiting for the
+        // auto-advance delay, tap F to advance immediately instead of waiting.
+        if (allowTapToAdvanceAutoDelay && isWaitingForAutoAdvance && Input.GetKeyDown(skipKey))
+        {
+            autoAdvanceDelayBypassRequested = true;
+            skipHoldTimer = 0f;
+            return;
+        }
+
+        if (!allowSkipTutorial)
+        {
+            skipHoldTimer = 0f;
+            return;
+        }
 
         if (Input.GetKey(skipKey))
         {
@@ -118,8 +153,6 @@ public class MainGameTutorialManager : MonoBehaviour
             if (skipHoldTimer >= skipHoldDuration)
             {
                 FinishTutorial(true);
-
-                simpleMove.enabled = true;
             }
         }
         else
@@ -203,6 +236,10 @@ public class MainGameTutorialManager : MonoBehaviour
 
         currentStageIndex = stageIndex;
         currentRingCount = 0;
+        isTypingStageText = false;
+        fastTypeCurrentStage = false;
+        isWaitingForAutoAdvance = false;
+        autoAdvanceDelayBypassRequested = false;
 
         TutorialStage stage = stages[currentStageIndex];
 
@@ -217,6 +254,10 @@ public class MainGameTutorialManager : MonoBehaviour
     {
         tutorialFinished = true;
         skipHoldTimer = 0f;
+        isTypingStageText = false;
+        fastTypeCurrentStage = false;
+        isWaitingForAutoAdvance = false;
+        autoAdvanceDelayBypassRequested = false;
 
         if (markAsSeen && useTutorialSeenPlayerPref)
         {
@@ -285,7 +326,8 @@ public class MainGameTutorialManager : MonoBehaviour
 
         if (!useTypewriterEffect)
         {
-            UpdateTutorialText(stage, stage.message);
+            currentVisibleBody = stage.message;
+            UpdateTutorialText(stage, currentVisibleBody);
         }
         else
         {
@@ -294,20 +336,47 @@ public class MainGameTutorialManager : MonoBehaviour
 
         if (stage.autoAdvance && stage.ringsRequired <= 0)
         {
-            yield return new WaitForSeconds(stage.autoAdvanceDelay);
-            NextStage();
+            yield return StartCoroutine(WaitForAutoAdvanceDelay(stage.autoAdvanceDelay));
+
+            if (!tutorialFinished)
+                NextStage();
         }
+    }
+    private IEnumerator WaitForAutoAdvanceDelay(float delay)
+    {
+        if (delay <= 0f)
+            yield break;
+
+        isWaitingForAutoAdvance = true;
+        autoAdvanceDelayBypassRequested = false;
+
+        float elapsed = 0f;
+
+        while (elapsed < delay && !autoAdvanceDelayBypassRequested && !tutorialFinished)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        isWaitingForAutoAdvance = false;
+        autoAdvanceDelayBypassRequested = false;
+        skipHoldTimer = 0f;
     }
 
     private IEnumerator TypeStageText(TutorialStage stage)
     {
         string fullMessage = stage.message;
         currentVisibleBody = "";
+        isTypingStageText = true;
+        fastTypeCurrentStage = false;
 
         StartNpcTalkAnimation();
 
         for (int i = 0; i < fullMessage.Length; i++)
         {
+            if (tutorialFinished)
+                yield break;
+
             // Pause command: @2, @1.5, etc.
             if (fullMessage[i] == '@')
             {
@@ -324,7 +393,7 @@ public class MainGameTutorialManager : MonoBehaviour
                 {
                     StopNpcTalkAnimation();
 
-                    yield return new WaitForSeconds(pauseTime);
+                    yield return StartCoroutine(WaitForTypewriterPause(pauseTime));
 
                     StartNpcTalkAnimation();
                     i = end - 1;
@@ -358,14 +427,29 @@ public class MainGameTutorialManager : MonoBehaviour
             currentVisibleBody += fullMessage[i];
             UpdateTutorialText(stage, currentVisibleBody);
 
-            yield return new WaitForSeconds(1f / Mathf.Max(1f, charactersPerSecond));
+            float activeCharactersPerSecond = fastTypeCurrentStage ? fastCharactersPerSecond : charactersPerSecond;
+            yield return new WaitForSeconds(1f / Mathf.Max(1f, activeCharactersPerSecond));
         }
 
         UpdateTutorialText(stage, currentVisibleBody);
         StopNpcTalkAnimation();
-
+        isTypingStageText = false;
+        fastTypeCurrentStage = false;
     }
+    private IEnumerator WaitForTypewriterPause(float pauseTime)
+    {
+        if (pauseTime <= 0f)
+            yield break;
 
+        float remaining = pauseTime;
+
+        while (remaining > 0f && !tutorialFinished)
+        {
+            float pauseMultiplier = fastTypeCurrentStage ? fastPauseMultiplier : 1f;
+            remaining -= Time.deltaTime / Mathf.Max(0.01f, pauseMultiplier);
+            yield return null;
+        }
+    }
     private void ApplyStageSettings(TutorialStage stage)
     {
         if (stage.scriptsToEnable != null)

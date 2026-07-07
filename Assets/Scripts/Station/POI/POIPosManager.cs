@@ -2,12 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Transitional bridge manager:
-/// - New systems can read POI chunks/events.
-/// - Old station systems keep using StationPosManager, StationFieldData, and station-only helpers.
-/// </summary>
-public class StationPosManager : MonoBehaviour
+public class POIPosManager : MonoBehaviour
 {
     [Header("References")]
     public Transform player;
@@ -24,35 +19,17 @@ public class StationPosManager : MonoBehaviour
     public bool generateOnStart = true;
     public bool logChunkCreates = true;
 
-    // Old station-facing events.
-    public event Action<Vector3Int, StationFieldData> OnChunkCreated;
+    public event Action<Vector3Int, POIFieldData> OnChunkCreated;
     public event Action<Vector3Int> OnChunkRemoved;
 
-    // New POI-facing events.
-    public event Action<Vector3Int, POIFieldData> OnPOIChunkCreated;
-    public event Action<Vector3Int> OnPOIChunkRemoved;
-
-    private readonly Dictionary<Vector3Int, POIFieldData> _poiChunks = new Dictionary<Vector3Int, POIFieldData>(64);
-    private readonly Dictionary<Vector3Int, StationFieldData> _stationChunks = new Dictionary<Vector3Int, StationFieldData>(64);
+    private readonly Dictionary<Vector3Int, POIFieldData> _chunks = new Dictionary<Vector3Int, POIFieldData>(64);
 
     private readonly List<Vector3Int> _toRemove = new List<Vector3Int>(64);
     private readonly List<Vector3Int> _toAdd = new List<Vector3Int>(64);
 
     private Vector3Int _lastCenterChunk;
 
-    // Old systems keep using this.
-    public IReadOnlyDictionary<Vector3Int, StationFieldData> Chunks => _stationChunks;
-
-    // New systems can use this.
-    public IReadOnlyDictionary<Vector3Int, POIFieldData> POIChunks => _poiChunks;
-
-    public struct StationWorldInfo
-    {
-        public Vector3Int coord;
-        public Vector3 worldPos;
-        public Quaternion worldRot;
-        public StationFieldData data;
-    }
+    public IReadOnlyDictionary<Vector3Int, POIFieldData> Chunks => _chunks;
 
     public struct POIWorldInfo
     {
@@ -100,8 +77,7 @@ public class StationPosManager : MonoBehaviour
 
     private void EnsureGrid()
     {
-        _poiChunks.Clear();
-        _stationChunks.Clear();
+        _chunks.Clear();
 
         Vector3Int center = WorldToChunkCoord(player ? player.position : Vector3.zero);
         int half = gridWidth / 2;
@@ -119,48 +95,39 @@ public class StationPosManager : MonoBehaviour
     {
         Vector3 origin = ChunkCoordToWorldOrigin(coord);
 
-        POIFieldData poiData = POIRuntimeGenerator.GenerateChunk(
+        POIFieldData data = POIRuntimeGenerator.GenerateChunk(
             settings,
             origin,
             coord,
             globalSeed
         );
 
-        StationFieldData stationData = ScriptableObject.CreateInstance<StationFieldData>();
-        CopyPOIToStationData(poiData, stationData);
-
-        _poiChunks[coord] = poiData;
-        _stationChunks[coord] = stationData;
+        _chunks[coord] = data;
 
         if (logChunkCreates)
         {
-            string label = poiData && poiData.HasPOI ? poiData.poiType.ToString() : "None";
-            // Debug.Log($"[StationPosManager/POI Bridge] Created chunk {coord} -> {label}");
+            string label = data && data.HasPOI ? data.poiType.ToString() : "None";
+            // Debug.Log($"[POIPosManager] Created chunk {coord} -> {label}");
         }
 
-        OnPOIChunkCreated?.Invoke(coord, poiData);
-        OnChunkCreated?.Invoke(coord, stationData);
+        OnChunkCreated?.Invoke(coord, data);
     }
 
-    private void RefillChunkDataForCoord(POIFieldData poiData, StationFieldData stationData, Vector3Int coord)
+    private void RefillChunkDataForCoord(POIFieldData data, Vector3Int coord)
     {
-        if (poiData == null || stationData == null)
-            return;
+        if (data == null) return;
 
         Vector3 origin = ChunkCoordToWorldOrigin(coord);
 
         POIRuntimeGenerator.FillExistingChunk(
-            poiData,
+            data,
             settings,
             origin,
             coord,
             globalSeed
         );
 
-        CopyPOIToStationData(poiData, stationData);
-
-        OnPOIChunkCreated?.Invoke(coord, poiData);
-        OnChunkCreated?.Invoke(coord, stationData);
+        OnChunkCreated?.Invoke(coord, data);
     }
 
     private void ShiftGrid(Vector3Int newCenter)
@@ -170,7 +137,7 @@ public class StationPosManager : MonoBehaviour
         _toRemove.Clear();
         _toAdd.Clear();
 
-        foreach (var kv in _poiChunks)
+        foreach (var kv in _chunks)
         {
             Vector3Int c = kv.Key;
 
@@ -188,7 +155,7 @@ public class StationPosManager : MonoBehaviour
                 {
                     Vector3Int want = new Vector3Int(newCenter.x + dx, newCenter.y + dy, newCenter.z + dz);
 
-                    if (!_poiChunks.ContainsKey(want))
+                    if (!_chunks.ContainsKey(want))
                         _toAdd.Add(want);
                 }
 
@@ -199,42 +166,17 @@ public class StationPosManager : MonoBehaviour
             Vector3Int oldCoord = _toRemove[i];
             Vector3Int newCoord = _toAdd[i];
 
-            POIFieldData poiData = _poiChunks[oldCoord];
-            StationFieldData stationData = _stationChunks[oldCoord];
+            POIFieldData data = _chunks[oldCoord];
 
-            _poiChunks.Remove(oldCoord);
-            _stationChunks.Remove(oldCoord);
-
-            OnPOIChunkRemoved?.Invoke(oldCoord);
+            _chunks.Remove(oldCoord);
             OnChunkRemoved?.Invoke(oldCoord);
 
-            _poiChunks[newCoord] = poiData;
-            _stationChunks[newCoord] = stationData;
-
-            RefillChunkDataForCoord(poiData, stationData, newCoord);
+            _chunks[newCoord] = data;
+            RefillChunkDataForCoord(data, newCoord);
         }
 
         for (int i = moves; i < _toAdd.Count; i++)
             CreateChunk(_toAdd[i]);
-    }
-
-    private void CopyPOIToStationData(POIFieldData poiData, StationFieldData stationData)
-    {
-        stationData.Clear();
-
-        if (!poiData)
-            return;
-
-        stationData.fieldCenter = poiData.fieldCenter;
-        stationData.fieldSize = poiData.fieldSize;
-        stationData.useFixedSeed = poiData.useFixedSeed;
-        stationData.seed = poiData.seed;
-
-        stationData.hasStation = poiData.poiType == POIType.Station;
-        stationData.localPosition = poiData.localPosition;
-        stationData.localRotation = poiData.localRotation;
-        stationData.preGravityRadius = poiData.preGravityRadius;
-        stationData.orbitRadius = poiData.orbitRadius;
     }
 
     public Vector3Int WorldToChunkCoord(Vector3 worldPos)
@@ -253,10 +195,9 @@ public class StationPosManager : MonoBehaviour
 
     public void FillActivePOIs(List<POIWorldInfo> outPOIs)
     {
-        if (outPOIs == null)
-            return;
+        if (outPOIs == null) return;
 
-        foreach (var kv in _poiChunks)
+        foreach (var kv in _chunks)
         {
             Vector3Int coord = kv.Key;
             POIFieldData data = kv.Value;
@@ -277,13 +218,38 @@ public class StationPosManager : MonoBehaviour
         }
     }
 
+    public void FillActiveStations(List<POIWorldInfo> outStations)
+    {
+        if (outStations == null) return;
+
+        foreach (var kv in _chunks)
+        {
+            Vector3Int coord = kv.Key;
+            POIFieldData data = kv.Value;
+
+            if (!data || !data.IsStation)
+                continue;
+
+            Vector3 origin = ChunkCoordToWorldOrigin(coord);
+
+            outStations.Add(new POIWorldInfo
+            {
+                coord = coord,
+                type = data.poiType,
+                worldPos = data.WorldPosition(origin),
+                worldRot = data.WorldRotation(),
+                data = data
+            });
+        }
+    }
+
     public bool TryGetPOIWorldPose(Vector3Int coord, out POIType type, out Vector3 worldPos, out Quaternion worldRot)
     {
         type = POIType.None;
         worldPos = default;
         worldRot = default;
 
-        if (_poiChunks.TryGetValue(coord, out POIFieldData data) && data && data.HasPOI)
+        if (_chunks.TryGetValue(coord, out POIFieldData data) && data && data.HasPOI)
         {
             Vector3 origin = ChunkCoordToWorldOrigin(coord);
 
@@ -307,63 +273,17 @@ public class StationPosManager : MonoBehaviour
         );
     }
 
-    public void FillStationRootMatrices(List<Matrix4x4> outMatrices)
-    {
-        if (outMatrices == null)
-            return;
-
-        foreach (var kv in _stationChunks)
-        {
-            Vector3Int coord = kv.Key;
-            StationFieldData data = kv.Value;
-
-            if (!data || !data.hasStation)
-                continue;
-
-            Vector3 origin = ChunkCoordToWorldOrigin(coord);
-            Vector3 worldPos = data.WorldPosition(origin);
-            Quaternion worldRot = data.localRotation;
-
-            outMatrices.Add(Matrix4x4.TRS(worldPos, worldRot, Vector3.one));
-        }
-    }
-
-    public void FillActiveStations(List<StationWorldInfo> outStations)
-    {
-        if (outStations == null)
-            return;
-
-        foreach (var kv in _stationChunks)
-        {
-            Vector3Int coord = kv.Key;
-            StationFieldData data = kv.Value;
-
-            if (!data || !data.hasStation)
-                continue;
-
-            Vector3 origin = ChunkCoordToWorldOrigin(coord);
-
-            outStations.Add(new StationWorldInfo
-            {
-                coord = coord,
-                worldPos = data.WorldPosition(origin),
-                worldRot = data.localRotation,
-                data = data
-            });
-        }
-    }
-
     public bool TryGetStationWorldPose(Vector3Int coord, out Vector3 worldPos, out Quaternion worldRot)
     {
         worldPos = default;
         worldRot = default;
 
-        if (_stationChunks.TryGetValue(coord, out StationFieldData data) && data && data.hasStation)
+        if (_chunks.TryGetValue(coord, out POIFieldData data) && data && data.IsStation)
         {
             Vector3 origin = ChunkCoordToWorldOrigin(coord);
 
             worldPos = data.WorldPosition(origin);
-            worldRot = data.localRotation;
+            worldRot = data.WorldRotation();
 
             return true;
         }
@@ -379,21 +299,4 @@ public class StationPosManager : MonoBehaviour
             out worldRot
         );
     }
-
-#if UNITY_EDITOR
-    [ContextMenu("Regenerate All POIs / Stations (Editor Only)")]
-    private void RegenerateAllEditorOnly()
-    {
-        foreach (var kv in _poiChunks)
-            UnityEngine.Object.DestroyImmediate(kv.Value, allowDestroyingAssets: true);
-
-        foreach (var kv in _stationChunks)
-            UnityEngine.Object.DestroyImmediate(kv.Value, allowDestroyingAssets: true);
-
-        _poiChunks.Clear();
-        _stationChunks.Clear();
-
-        EnsureGrid();
-    }
-#endif
 }

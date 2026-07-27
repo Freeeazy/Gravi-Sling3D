@@ -36,6 +36,8 @@ public class NPCUILink : MonoBehaviour
     [Header("Row UI")]
     public TMP_Text nameText;
     public Image portraitImage;
+    public TMP_Text questTitleText;
+    public TMP_Text questDescriptionText; 
     public TMP_Text distanceText;
     public TMP_Text creditsRewardText;
     public TMP_Text reputationRewardText;
@@ -95,8 +97,8 @@ public class NPCUILink : MonoBehaviour
             portraitImage.enabled = portraitImage.sprite != null;
         }
 
-        var tags = NPCUtil.GenerateTags(npc.npcId);
-        ApplyTags(tags);
+        NPCProfile profile = npc.profile.npcId == npc.npcId ? npc.profile : NPCProfileUtil.GenerateProfile(npc.npcId);
+        ApplyTags(NPCProfileUtil.GetVisibleTags(profile));
     }
 
     public void SetRowActive(bool on)
@@ -201,6 +203,12 @@ public class NPCUILink : MonoBehaviour
             return;
         }
 
+        if (questTitleText)
+            questTitleText.text = string.IsNullOrWhiteSpace(offer.questTitle) ? "Delivery Contract" : offer.questTitle;
+
+        if (questDescriptionText)
+            questDescriptionText.text = string.IsNullOrWhiteSpace(offer.shortDescription) ? "Deliver package to target station." : offer.shortDescription;
+
         float rewardMultiplier = offer.deliveryRewardMultiplier > 0f ? offer.deliveryRewardMultiplier : 1f;
 
         if (creditsRewardText)
@@ -234,6 +242,12 @@ public class NPCUILink : MonoBehaviour
     }
     public void ClearQuestPreview()
     {
+        if (questTitleText) 
+            questTitleText.text = "";
+
+        if (questDescriptionText) 
+            questDescriptionText.text = "";
+
         if (creditsRewardText)
             creditsRewardText.text = "Credits +0";
 

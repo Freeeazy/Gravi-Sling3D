@@ -351,7 +351,9 @@ public class PackageDurabilityManager : MonoBehaviour
         if (player != null)
             distance = Vector3.Distance(player.position, package.quest.toWorldPos);
 
-        string destinationName = "Target Station";
+        string destinationName = !string.IsNullOrWhiteSpace(package.quest.destinationName)
+            ? package.quest.destinationName
+            : "Target Station";
 
         package.card.SetInfo(
             package.deliveryItem,
@@ -364,6 +366,9 @@ public class PackageDurabilityManager : MonoBehaviour
 
     private string PickDeliveryItemName(NPCQuestManager.ActiveQuest quest)
     {
+        if (!string.IsNullOrWhiteSpace(quest.deliveryItemName))
+            return quest.deliveryItemName;
+
         if (deliveryItems == null || deliveryItems.Count == 0)
             return "Package";
 

@@ -232,6 +232,13 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryTimeMultiplier;
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
+
+        public string questTitle;
+        public string shortDescription;
+        public string fullDescription;
+        public string deliveryItemName;
+        public string destinationName;
+
         public bool valid;
     }
 
@@ -249,6 +256,12 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryTimeMultiplier;
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
+
+        public string questTitle;
+        public string shortDescription;
+        public string fullDescription;
+        public string deliveryItemName;
+        public string destinationName;
     }
 
     public bool HasClosestQuest { get; private set; }
@@ -257,6 +270,7 @@ public class NPCQuestManager : MonoBehaviour
 
     // Offered quest per NPC at the *current station context*
     private readonly Dictionary<int, QuestOffer> _offersByNpc = new();
+    private readonly Dictionary<int, NPCData> _currentNpcDataById = new();
 
     // Accepted quests
     private readonly List<ActiveQuest> _active = new();
@@ -273,7 +287,7 @@ public class NPCQuestManager : MonoBehaviour
     public IReadOnlyList<ActiveQuest> ActiveQuests => _active;
 
     /// Call this when opening quest board / arriving at a station.
-    public void RefreshOffersForStation(Vector3 stationWorldPos)
+    public void RefreshOffersForStation(Vector3 stationWorldPos, List<NPCData> stationNpcs = null)
     {
         if (!posManager) return;
 
@@ -281,6 +295,14 @@ public class NPCQuestManager : MonoBehaviour
         _currentStationCoord = posManager.WorldToChunkCoord(stationWorldPos);
         _currentOfferRankIndex = GetCurrentReputationRankIndex();
         _hasStationContext = true;
+
+        _currentNpcDataById.Clear();
+
+        if (stationNpcs != null)
+        {
+            for (int i = 0; i < stationNpcs.Count; i++)
+                _currentNpcDataById[stationNpcs[i].npcId] = stationNpcs[i];
+        }
 
         // Just clear offers; they'll be regenerated lazily when asked
         _offersByNpc.Clear();
@@ -442,7 +464,12 @@ public class NPCQuestManager : MonoBehaviour
             deliveryType = offer.deliveryType,
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
             deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
-            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds
+            expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds,
+            questTitle = offer.questTitle,
+            shortDescription = offer.shortDescription,
+            fullDescription = offer.fullDescription,
+            deliveryItemName = offer.deliveryItemName,
+            destinationName = offer.destinationName,
         };
 
         _active.Add(q);
@@ -710,6 +737,17 @@ public class NPCQuestManager : MonoBehaviour
         offer.toWorldPos = chosenPos;
         offer.distance = Vector3.Distance(_currentStationWorldPos, chosenPos);
         offer.expectedDeliveryTimeSeconds = CalculateExpectedDeliveryTimeSeconds(offer.distance, offer.deliveryTimeMultiplier);
+
+        offer.destinationName = BuildDestinationName(chosenCoord);
+
+        NPCData npcData = GetNpcDataForOffer(npcId);
+        QuestFlavor flavor = QuestFlavorUtil.Generate(npcData, offer, offer.destinationName, seed);
+
+        offer.questTitle = flavor.questTitle;
+        offer.shortDescription = flavor.shortDescription;
+        offer.fullDescription = flavor.fullDescription;
+        offer.deliveryItemName = flavor.deliveryItemName;
+
         offer.valid = true;
         return offer;
     }
@@ -1070,6 +1108,19 @@ public class NPCQuestManager : MonoBehaviour
             baseCredits = baseCreditReward + (difficulty * rewardPerDifficulty),
             distanceCreditRate = distanceCreditRate
         };
+    }
+    private NPCData GetNpcDataForOffer(int npcId)
+    {
+        if (_currentNpcDataById.TryGetValue(npcId, out NPCData npc))
+            return npc;
+
+        return new NPCData(npcId, "Client");
+    }
+
+    private string BuildDestinationName(Vector3Int coord)
+    {
+        int nameSeed = posManager != null ? posManager.globalSeed : globalSeed;
+        return StationNameUtil.StationName(coord, nameSeed);
     }
     private int GetFallbackBaseReputationExp(int difficulty)
     {

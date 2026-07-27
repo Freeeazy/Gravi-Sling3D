@@ -32,6 +32,14 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public TMP_Text acceptText;
     public Button acceptButton;
 
+    [Header("Quest Flavor")]
+    public TMP_Text questTitleText;
+    public TMP_Text questDescriptionText;
+    public TMP_Text questDescriptionBonusText;
+
+    public string fallbackQuestTitle = "Delivery Contract";
+    [TextArea] public string fallbackQuestDescription = "Deliver cargo to the destination station.";
+
     [Header("Delivery Type Pill")]
     public Image deliveryTypePillImage;
     public TMP_Text deliveryTypePillText;
@@ -76,6 +84,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             UpdateDifficultyDisplay(offer.difficulty);
             UpdateDeliveryTypeDisplay(offer);
             UpdateTimerDisplay(offer);
+            UpdateQuestFlavorDisplay(offer);
         }
         else
         {
@@ -86,6 +95,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             UpdateDifficultyDisplay(0);
             UpdateDeliveryTypeDisplay(default);
             UpdateTimerDisplay(default);
+            UpdateQuestFlavorDisplay(default);
         }
 
         if (questManager && !questManager.HasActiveQuestFromNpc(npcId))
@@ -141,6 +151,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
         UpdateDifficultyDisplay(0);
         UpdateDeliveryTypeDisplay(default);
         UpdateTimerDisplay(default);
+        UpdateQuestFlavorDisplay(default);
     }
 
     private void UpdateRewardDisplay(NPCQuestManager.QuestOffer offer)
@@ -301,5 +312,62 @@ public class NPCQuestDropdownUI : MonoBehaviour
             label = deliveryType.ToString(),
             color = Color.white
         };
+    }
+    private void UpdateQuestFlavorDisplay(NPCQuestManager.QuestOffer offer)
+    {
+        if (!offer.valid)
+        {
+            if (questTitleText)
+                questTitleText.text = fallbackQuestTitle;
+
+            if (questDescriptionText)
+                questDescriptionText.text = fallbackQuestDescription;
+
+            if (questDescriptionBonusText)
+                questDescriptionBonusText.text = "";
+
+            return;
+        }
+
+        if (questTitleText)
+        {
+            questTitleText.text = !string.IsNullOrWhiteSpace(offer.questTitle)
+                ? offer.questTitle
+                : fallbackQuestTitle;
+        }
+
+        if (questDescriptionText)
+        {
+            questDescriptionText.text = !string.IsNullOrWhiteSpace(offer.fullDescription)
+                ? offer.fullDescription
+                : !string.IsNullOrWhiteSpace(offer.shortDescription)
+                    ? offer.shortDescription
+                    : fallbackQuestDescription;
+        }
+
+        if (questDescriptionBonusText)
+        {
+            questDescriptionBonusText.text = !string.IsNullOrWhiteSpace(offer.deliveryItemName)
+                ? ToTitleCase(offer.deliveryItemName)
+                : "";
+        }
+    }
+    private static string ToTitleCase(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return "";
+
+        string[] words = text.Trim().Split(' ');
+
+        for (int i = 0; i < words.Length; i++)
+        {
+            if (string.IsNullOrWhiteSpace(words[i]))
+                continue;
+
+            string word = words[i].ToLowerInvariant();
+            words[i] = char.ToUpperInvariant(word[0]) + word.Substring(1);
+        }
+
+        return string.Join(" ", words);
     }
 }

@@ -42,7 +42,7 @@ public class NPCManager : MonoBehaviour
         int poolCount = npcRows.Length;
         int showCount = Mathf.Min(poolCount, npcs.Count);
 
-        questManager?.RefreshOffersForStation(stationWorldPos);
+        questManager?.RefreshOffersForStation(stationWorldPos, npcs);
 
         for (int i = 0; i < poolCount; i++)
         {

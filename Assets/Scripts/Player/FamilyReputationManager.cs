@@ -11,6 +11,12 @@ public class FamilyReputationManager : MonoBehaviour
     public TMP_Text repRankText;
     public TMP_Text repRankPercText;
 
+    [Tooltip("XP amount text shown over the empty/background portion of the bar.")]
+    public TMP_Text repXpAmountTextLight;
+
+    [Tooltip("XP amount text revealed over the filled portion of the bar.")]
+    public TMP_Text repXpAmountTextDark;
+
     [Tooltip("The RectTransform of the foreground fill image, not the background.")]
     public RectTransform repFillBar;
 
@@ -153,12 +159,19 @@ public class FamilyReputationManager : MonoBehaviour
     private void RefreshUI(int pendingChange = 0)
     {
         string rankName = GetCurrentRankName();
+        string expAmountText = BuildExpAmountText();
 
         if (repRankText != null)
             repRankText.text = $"[{rankName}]";
 
         if (repRankPercText != null)
             repRankPercText.text = BuildExpText(pendingChange);
+
+        if (repXpAmountTextLight != null)
+            repXpAmountTextLight.text = expAmountText;
+
+        if (repXpAmountTextDark != null)
+            repXpAmountTextDark.text = expAmountText;
 
         UpdateFillBar();
     }
@@ -174,6 +187,15 @@ public class FamilyReputationManager : MonoBehaviour
             return $"{progressText} <color=#FF3D3D>-{Mathf.Abs(GetPendingProgressPercent(pendingChange)):0}%</color>";
 
         return progressText;
+    }
+    private string BuildExpAmountText()
+    {
+        if (rankIndex >= GetMaxRankIndex())
+            return "MAX";
+
+        int requirement = GetCurrentRankExpRequirement();
+
+        return $"{reputationExp:N0} / {requirement:N0}";
     }
     private float GetCurrentRankProgressPercent()
     {

@@ -6,11 +6,19 @@ public struct NPCData
 {
     public int npcId;
     public string displayName;
+    public NPCProfile profile;
 
     public NPCData(int id, string name)
     {
         npcId = id;
         displayName = name;
+        profile = NPCProfileUtil.GenerateProfile(id);
+    }
+    public NPCData(int id, string name, NPCProfile profile)
+    {
+        npcId = id;
+        displayName = name;
+        this.profile = profile;
     }
 }
 
@@ -74,7 +82,8 @@ public static class NPCUtil
             int num = npcRng.Next(10, 99); // small suffix for flavor
 
             string name = $"{first} {last}-{num}";
-            list.Add(new NPCData(id, name));
+            NPCProfile profile = NPCProfileUtil.GenerateProfile(id);
+            list.Add(new NPCData(id, name, profile));
         }
 
         return list;

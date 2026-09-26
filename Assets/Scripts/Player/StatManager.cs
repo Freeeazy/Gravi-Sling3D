@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
@@ -34,7 +35,18 @@ public class StatManager : MonoBehaviour
     private int currentShieldCharges;
     public TMP_Text shieldChargeText;
     public GameObject shieldVisual;
-    public GameObject shieldPhysicalVisual;
+
+    [Header("Physical Shield")]
+    [SerializeField] private Material shieldMaterial;
+    [SerializeField] private Color shieldOffColor = Color.black;
+    [SerializeField, ColorUsage(true, true)] private Color shieldOnColor = new Color(0f, 1f, 1f, 1f);
+    [SerializeField, ColorUsage(true, true)] private Color shieldHurtColor = new Color(1f, 0f, 0f, 1f);
+    [SerializeField] private float shieldHitDuration = 0.45f;
+    [SerializeField] private float shieldFlickerSpeed = 30f;
+
+    private Coroutine shieldHitRoutine;
+    private static readonly int ShieldColorID = Shader.PropertyToID("_ShieldColor");
+    private static readonly int ShieldPulseID = Shader.PropertyToID("_ShieldPulse");
 
     [SerializeField] private float packagePlating = 0;
     public TMP_Text packagePlatingText;
@@ -129,6 +141,8 @@ public class StatManager : MonoBehaviour
 
         currentShieldCharges--;
 
+        PlayShieldHitEffect();
+
         RefreshShieldVisuals();
         return true;
     }
@@ -147,11 +161,83 @@ public class StatManager : MonoBehaviour
         if (shieldVisual != null && shieldVisual.activeSelf != hasShieldModule)
             shieldVisual.SetActive(hasShieldModule);
 
-        if (shieldPhysicalVisual != null && shieldPhysicalVisual.activeSelf != showPhysicalShield)
-            shieldPhysicalVisual.SetActive(showPhysicalShield);
-
         if (ShieldVisualHelper.Instance != null)
             ShieldVisualHelper.Instance.UpdateShieldVisual(currentShieldCharges);
+
+        // Don't interrupt the hit animation.
+        if (shieldHitRoutine != null)
+            return;
+
+        // If there are no charges and we're not currently playing the final hit animation, force the shield off.
+        if (currentShieldCharges > 0)
+        {
+            SetShieldMaterial(shieldOnColor, 0f);
+        }
+        else
+        {
+            SetShieldMaterial(shieldOffColor, 0f);
+        }
+    }
+    private void SetShieldMaterial(Color color, float pulse)
+    {
+        if (shieldMaterial == null)
+            return;
+
+        shieldMaterial.SetColor(ShieldColorID, color);
+        shieldMaterial.SetFloat(ShieldPulseID, pulse);
+    }
+    private void PlayShieldHitEffect()
+    {
+        if (shieldMaterial == null)
+            return;
+
+        if (shieldHitRoutine != null)
+            StopCoroutine(shieldHitRoutine);
+
+        shieldHitRoutine = StartCoroutine(ShieldHitRoutine());
+    }
+    private IEnumerator ShieldHitRoutine()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < shieldHitDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsed / shieldHitDuration);
+
+            // Starts at 1 and fades toward 0.
+            float pulse = 1f - t;
+
+            // Rapidly alternate between red and cyan.
+            float flicker = Mathf.Sin(elapsed * shieldFlickerSpeed) * 0.5f + 0.5f;
+
+            Color reactiveColor = Color.Lerp(shieldHurtColor, shieldOnColor, flicker);
+
+            // Fade the color itself toward black near the end.
+            Color finalColor = Color.Lerp(reactiveColor, shieldOffColor, t);
+
+            shieldMaterial.SetColor(ShieldColorID, finalColor);
+            shieldMaterial.SetFloat(ShieldPulseID, pulse);
+
+            yield return null;
+        }
+
+        shieldHitRoutine = null;
+
+        // After the hit animation:
+        // keep cyan if charges remain,
+        // otherwise turn the shield off.
+        if (currentShieldCharges > 0)
+        {
+            SetShieldMaterial(shieldOnColor, 0f);
+        }
+        else
+        {
+            SetShieldMaterial(shieldOffColor, 0f);
+        }
+
+        RefreshShieldVisuals();
     }
 
     private void Awake()
@@ -163,6 +249,8 @@ public class StatManager : MonoBehaviour
         }
 
         Instance = this;
+
+        SetShieldMaterial(shieldOffColor, 0f);
 
         if (applyOnAwake)
             ApplyAllStats();

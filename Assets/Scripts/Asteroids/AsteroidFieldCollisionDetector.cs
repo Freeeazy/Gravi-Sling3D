@@ -13,7 +13,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     [Header("References")]
     public AsteroidFieldData fieldData;
     public SimpleMove simpleMove;
-    public GameObject shieldObject;
+    public Material shieldMaterial;
 
     [Tooltip("Player Rigidbody (likely the same child RB used by SimpleMove).")]
     public Rigidbody playerRb;
@@ -554,6 +554,19 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     }
     private bool IsShieldActive()
     {
-        return shieldObject != null && shieldObject.activeInHierarchy;
+        if (shieldMaterial == null)
+            return false;
+
+        if (!shieldMaterial.HasProperty("_ShieldColor"))
+            return false;
+
+        Color shieldColor = shieldMaterial.GetColor("_ShieldColor");
+
+        const float threshold = 0.001f;
+
+        return
+            shieldColor.r > threshold ||
+            shieldColor.g > threshold ||
+            shieldColor.b > threshold;
     }
 }

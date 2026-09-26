@@ -45,15 +45,27 @@ public class OpenQuestBoard : MonoBehaviour
 
     private void Update()
     {
-        if (!questBoardRoot) return;
+        if (!questBoardRoot)
+            return;
+
+        bool canUseBoard = true;
 
         if (onlyAllowWhenOrbiting)
         {
-            if (SlingshotPlanet3D.Active == null || !SlingshotPlanet3D.Active.IsOrbiting || SlingshotPlanet3D.Active.IsCharging)
-                return;
+            canUseBoard =
+                SlingshotPlanet3D.Active != null &&
+                SlingshotPlanet3D.Active.IsOrbiting &&
+                !SlingshotPlanet3D.Active.IsCharging;
         }
 
-        if (Input.GetKeyDown(toggleKey))
+        // If we leave the valid state while the board is open, begin closing it automatically.
+        if (!canUseBoard && isOpen)
+        {
+            ForceClose();
+        }
+
+        // Only allow F input while we're in a valid state.
+        if (canUseBoard && Input.GetKeyDown(toggleKey))
         {
             if (!isOpen)
             {
@@ -66,7 +78,9 @@ public class OpenQuestBoard : MonoBehaviour
             }
         }
 
+        // ALWAYS let the rotation animation continue.
         Quaternion targetRot = Quaternion.Euler(targetX, 0f, 0f);
+
         questBoardRoot.localRotation = Quaternion.Slerp(
             questBoardRoot.localRotation,
             targetRot,

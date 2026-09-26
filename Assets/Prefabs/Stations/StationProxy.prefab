@@ -494,7 +494,7 @@ MonoBehaviour:
   launchAngleOffsetDeg: 0
   enableBoosting: 1
   chargeRate: 30
-  shrinkRate: 10
+  shrinkRate: 8
   maxChargeTime: 60
   minCaptureTangentialSpeed: 75
   maxCaptureTangentialSpeed: 1000

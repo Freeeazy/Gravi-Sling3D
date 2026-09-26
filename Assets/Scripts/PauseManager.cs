@@ -3,12 +3,17 @@ using UnityEngine;
 public class PauseManager : MonoBehaviour
 {
     [Header("UI")]
-    [SerializeField] private GameObject pausePanel;
+    [SerializeField] private CanvasGroup pauseCanvasGroup;
 
     [Header("Scripts To Disable When Paused")]
     [SerializeField] private MonoBehaviour[] scriptsToDisable;
 
     private bool isPaused = false;
+
+    private void Start()
+    {
+        SetPauseUI(false);
+    }
 
     void Update()
     {
@@ -30,8 +35,7 @@ public class PauseManager : MonoBehaviour
     {
         isPaused = true;
 
-        if (pausePanel != null)
-            pausePanel.SetActive(true);
+        SetPauseUI(true);
 
         // Disable scripts
         foreach (MonoBehaviour script in scriptsToDisable)
@@ -51,8 +55,7 @@ public class PauseManager : MonoBehaviour
     {
         isPaused = false;
 
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
+        SetPauseUI(false);
 
         // Re-enable scripts
         foreach (MonoBehaviour script in scriptsToDisable)
@@ -66,5 +69,15 @@ public class PauseManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+    }
+
+    private void SetPauseUI(bool visible)
+    {
+        if (pauseCanvasGroup == null)
+            return;
+
+        pauseCanvasGroup.alpha = visible ? 1f : 0f;
+        pauseCanvasGroup.interactable = visible;
+        pauseCanvasGroup.blocksRaycasts = visible;
     }
 }

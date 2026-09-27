@@ -86,57 +86,82 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
     [Tooltip("Chance of using palette[0]. Remaining probability is spread across other entries.")]
     public float tintBiasToFirst = 0.0f; // keep 0 unless you want “mostly blue”
 
-    // Per-instance mesh id (sticky)
-    private int[] _meshId;
-    private float[] _viewSpinDeg;
-    private int[] _tintId;
-
-    // Reusable per-mesh matrix lists (to avoid allocations)
+    // Stable assignments: rebuilt only when generation/assignment settings change.
     private List<int>[] _perMeshIndices;
+    private Quaternion[] _viewSpinRotations;
+    private int[] _tintId;
+    private int _assignedCount = -1;
+    private int _assignedMeshCount = -1;
+    private int _assignedMeshSeed;
+    private int _assignedSpinSeed;
+    private int _assignedTintSeed;
+    private int _assignedPaletteCount;
+    private float _assignedTintBias;
 
     // Temp batch buffer
     private static readonly Matrix4x4[] _batchMatrices = new Matrix4x4[1023];
     private static readonly Vector4[] _batchTints = new Vector4[1023];
     private MaterialPropertyBlock _mpb;
+    private string _cachedTintProperty;
+    private int _tintPropertyId;
+    private AsteroidDustPosManager _registeredManager;
+
     private void Awake()
     {
         if (!posManager) posManager = GetComponent<AsteroidDustPosManager>();
-        if (_mpb == null) _mpb = new MaterialPropertyBlock();
-        RebuildAssignments();
+        _mpb = new MaterialPropertyBlock();
     }
 
     private void OnEnable()
     {
-        if (posManager != null)
-            posManager.OnRegenerated += RebuildAssignments;
-        ;
+        SyncManager();
+        // Regeneration may have happened while this renderer was disabled.
+        _assignedCount = -1;
     }
 
     private void OnDisable()
     {
-        if (posManager != null)
-            posManager.OnRegenerated -= RebuildAssignments;
+        DetachManager();
+    }
+
+    private void SyncManager()
+    {
+        if (_registeredManager == posManager) return;
+        DetachManager();
+        _registeredManager = posManager;
+        if (_registeredManager)
+        {
+            _registeredManager.OnRegenerated += RebuildAssignments;
+            _registeredManager.RegisterRenderer(this);
+        }
+        _assignedCount = -1;
+    }
+
+    private void DetachManager()
+    {
+        if (_registeredManager)
+        {
+            _registeredManager.OnRegenerated -= RebuildAssignments;
+            _registeredManager.UnregisterRenderer(this);
+        }
+        _registeredManager = null;
     }
 
     private void LateUpdate()
     {
-        if (!posManager || posManager.Positions == null) return;
-        if (!IsValid())
-        {
-            if (disableIfInvalid) return;
-        }
+        SyncManager();
+        if (!posManager || posManager.Positions == null || !IsValid()) return;
+        EnsureAssignments();
 
-        EnsureBuffers();
+        Vector3[] positions = posManager.Positions;
+        Quaternion[] rotations = posManager.Rotations;
+        float[] scales = posManager.Scales;
+        bool viewAligned = alignToView;
+        bool applySpin = viewAligned && randomSpinAroundViewForward;
+        bool tintEnabled = useTintPalette && tintPalette != null && tintPalette.Count > 0;
 
-        // clear buckets
-        for (int m = 0; m < _perMeshIndices.Length; m++)
-            _perMeshIndices[m].Clear();
-
-        int n = posManager.Positions.Length;
-
-        // resolve view rotation once
         Quaternion viewRot = Quaternion.identity;
-        if (alignToView)
+        if (viewAligned)
         {
             Transform vt = viewTransform;
             if (!vt)
@@ -144,124 +169,103 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
                 Camera cam = Camera.main;
                 if (cam) vt = cam.transform;
             }
-            if (vt) viewRot = vt.rotation;
+            if (vt) viewRot = NormalizeSafe(vt.rotation);
         }
 
-        // bucket instances by mesh
-        for (int i = 0; i < n; i++)
+        // Resolve values shared by every instance once per frame.
+        float strength = Mathf.Clamp01(bandStrength);
+        bool applyBand = strength > 0f && scaleBand != null;
+        Vector3 distanceOrigin = Vector3.zero;
+        float inverseMaxDistance = 1f;
+        if (applyBand)
         {
-            if (posManager.IsHidden(i)) continue;
-
-            int mid = _meshId[i];
-            if ((uint)mid >= (uint)meshes.Count) mid = 0;
-
-            // compute final scale early so we can skip tiny ones
-            float d01 = ComputeDistance01(posManager.Positions[i]);
-            float band = Mathf.Clamp01(scaleBand.Evaluate(d01));
-            float bandScale = Mathf.Lerp(1f, band, Mathf.Clamp01(bandStrength));
-            float finalS = posManager.Scales[i] * bandScale;
-
-            if (finalS <= cullScaleThreshold) continue;
-
-            _perMeshIndices[mid].Add(i);
+            Transform origin = distanceFrom ? distanceFrom : posManager.player;
+            if (origin) distanceOrigin = origin.position;
+            float denominator = normalizeByOuterBox ? posManager.outerHalfExtents.magnitude : maxDistance;
+            inverseMaxDistance = 1f / Mathf.Max(0.0001f, denominator);
         }
 
-        // draw each mesh bucket in 1023 batches
-        for (int m = 0; m < meshes.Count; m++)
+        if (_mpb == null) _mpb = new MaterialPropertyBlock();
+        // Also removes a previous frame's tint if tinting has been disabled.
+        _mpb.Clear();
+        if (tintEnabled && _cachedTintProperty != tintProperty)
+        {
+            _cachedTintProperty = tintProperty;
+            _tintPropertyId = Shader.PropertyToID(tintProperty);
+        }
+
+        for (int m = 0; m < _perMeshIndices.Length; m++)
         {
             Mesh mesh = meshes[m];
             if (!mesh) continue;
 
-            var list = _perMeshIndices[m];
-            int total = list.Count;
-            int offset = 0;
-
-            while (offset < total)
+            List<int> indices = _perMeshIndices[m];
+            int batchCount = 0;
+            for (int j = 0; j < indices.Count; j++)
             {
-                int take = Mathf.Min(1023, total - offset);
+                int i = indices[j];
+                if (posManager.IsHidden(i)) continue;
 
-                // build matrices + per-instance tints
-                for (int k = 0; k < take; k++)
+                Vector3 pos = positions[i];
+                float finalScale = scales[i];
+                if (applyBand)
                 {
-                    int i = list[offset + k];
+                    float distance01 = Mathf.Clamp01((pos - distanceOrigin).magnitude * inverseMaxDistance);
+                    float band = Mathf.Clamp01(scaleBand.Evaluate(distance01));
+                    finalScale *= Mathf.Lerp(1f, band, strength);
+                }
+                if (finalScale <= cullScaleThreshold) continue;
 
-                    Vector3 pos = posManager.Positions[i];
-                    float s = posManager.Scales[i];
+                Quaternion rotation = viewAligned ? viewRot : NormalizeSafe(rotations[i]);
+                if (applySpin)
+                    rotation *= _viewSpinRotations[i];
 
-                    // apply band scale again (cheap, keeps your previous behavior)
-                    float d01 = ComputeDistance01(pos);
-                    float band = Mathf.Clamp01(scaleBand.Evaluate(d01));
-                    float bandScale = Mathf.Lerp(1f, band, Mathf.Clamp01(bandStrength));
-                    float finalS = s * bandScale;
-
-                    Quaternion rot = alignToView ? viewRot : posManager.Rotations[i];
-                    rot = NormalizeSafe(rot);
-
-                    if (alignToView && randomSpinAroundViewForward && _viewSpinDeg != null)
-                        rot = rot * Quaternion.AngleAxis(_viewSpinDeg[i], Vector3.forward);
-
-                    _batchMatrices[k] = Matrix4x4.TRS(pos, rot, Vector3.one * finalS);
-
-                    if (useTintPalette && tintPalette != null && tintPalette.Count > 0)
-                    {
-                        int tid = (_tintId != null && _tintId.Length > i) ? _tintId[i] : 0;
-                        tid = Mathf.Clamp(tid, 0, tintPalette.Count - 1);
-                        Color c = tintPalette[tid];
-                        _batchTints[k] = new Vector4(c.r, c.g, c.b, c.a);
-                    }
+                _batchMatrices[batchCount] = Matrix4x4.TRS(pos, rotation, Vector3.one * finalScale);
+                if (tintEnabled)
+                {
+                    Color color = tintPalette[_tintId[i]];
+                    _batchTints[batchCount] = new Vector4(color.r, color.g, color.b, color.a);
                 }
 
-                // MPB: only set vector array when tinting is enabled
-                _mpb.Clear();
-                if (useTintPalette && tintPalette != null && tintPalette.Count > 0)
-                    _mpb.SetVectorArray(tintProperty, _batchTints);
-
-                Graphics.DrawMeshInstanced(
-                    mesh,
-                    0,
-                    material,
-                    _batchMatrices,
-                    take,
-                    _mpb,
-                    shadows,
-                    receiveShadows,
-                    layer,
-                    null,
-                    LightProbeUsage.Off,
-                    null
-                );
-
-                offset += take;
+                batchCount++;
+                if (batchCount == _batchMatrices.Length)
+                {
+                    DrawBatch(mesh, batchCount, tintEnabled);
+                    batchCount = 0;
+                }
             }
+
+            if (batchCount > 0)
+                DrawBatch(mesh, batchCount, tintEnabled);
         }
+    }
+    private void DrawBatch(Mesh mesh, int count, bool tintEnabled)
+    {
+        if (tintEnabled)
+            _mpb.SetVectorArray(_tintPropertyId, _batchTints);
+
+        Graphics.DrawMeshInstanced(
+            mesh, 0, material, _batchMatrices, count, _mpb,
+            shadows, receiveShadows, layer, null, LightProbeUsage.Off, null);
     }
 
     private bool IsValid()
     {
-        if (material == null) return false;
-        if (meshes == null || meshes.Count == 0) return false;
-
-        // Ensure at least one non-null mesh
+        if (!material || meshes == null || meshes.Count == 0) return false;
         for (int i = 0; i < meshes.Count; i++)
-            if (meshes[i] != null) return true;
-
+            if (meshes[i]) return true;
         return false;
     }
 
-    private void EnsureBuffers()
+    private void EnsureAssignments()
     {
-        int n = posManager.Positions.Length;
-
-        // mesh ids
-        if (_meshId == null || _meshId.Length != n)
-            RebuildAssignments();
-
-        // per-mesh lists
-        if (_perMeshIndices == null || _perMeshIndices.Length != meshes.Count)
+        int paletteCount = tintPalette != null ? tintPalette.Count : 0;
+        if (_perMeshIndices == null || _assignedCount != posManager.Positions.Length ||
+            _assignedMeshCount != meshes.Count || _assignedMeshSeed != meshSeed ||
+            _assignedSpinSeed != spinSeed || _assignedTintSeed != tintSeed ||
+            _assignedPaletteCount != paletteCount || _assignedTintBias != tintBiasToFirst)
         {
-            _perMeshIndices = new List<int>[meshes.Count];
-            for (int i = 0; i < meshes.Count; i++)
-                _perMeshIndices[i] = new List<int>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
+            RebuildAssignments();
         }
     }
 
@@ -270,76 +274,59 @@ public class AsteroidDustInstancedRenderer : MonoBehaviour
         if (!posManager || posManager.Positions == null) return;
 
         int n = posManager.Positions.Length;
+        int meshCount = meshes != null ? meshes.Count : 0;
+        int paletteCount = tintPalette != null ? tintPalette.Count : 0;
 
-        // mesh id
-        _meshId = new int[n];
-        int meshCount = Mathf.Max(1, meshes.Count);
-        var rng = new System.Random(meshSeed);
+        _perMeshIndices = new List<int>[meshCount];
+        for (int m = 0; m < meshCount; m++)
+            _perMeshIndices[m] = new List<int>(Mathf.Max(64, n / Mathf.Max(1, meshCount)));
+
+        // Match the original RNG calls/order to preserve seeded assignments.
+        var meshRng = new System.Random(meshSeed);
         for (int i = 0; i < n; i++)
-            _meshId[i] = rng.Next(meshCount);
+        {
+            int meshId = meshRng.Next(Mathf.Max(1, meshCount));
+            if (meshCount > 0) _perMeshIndices[meshId].Add(i);
+        }
 
         // view spin
-        _viewSpinDeg = new float[n];
-        var srng = new System.Random(spinSeed);
+        _viewSpinRotations = new Quaternion[n];
+        var spinRng = new System.Random(spinSeed);
         for (int i = 0; i < n; i++)
-            _viewSpinDeg[i] = (float)(srng.NextDouble() * 360.0);
-
-        // tint id (only meaningful if tintPalette has entries)
-        _tintId = new int[n];
-        var trng = new System.Random(tintSeed);
-
-        int palCount = (tintPalette != null) ? tintPalette.Count : 0;
-        if (palCount <= 0)
         {
-            for (int i = 0; i < n; i++) _tintId[i] = 0;
+            float angle = (float)(spinRng.NextDouble() * 360.0);
+            _viewSpinRotations[i] = Quaternion.AngleAxis(angle, Vector3.forward);
         }
-        else
+
+        _tintId = new int[n];
+        var tintRng = new System.Random(tintSeed);
+        if (paletteCount > 0)
         {
             for (int i = 0; i < n; i++)
             {
-                // optional bias towards palette[0]
-                if (tintBiasToFirst > 0f && trng.NextDouble() < tintBiasToFirst)
-                {
+                if (tintBiasToFirst > 0f && tintRng.NextDouble() < tintBiasToFirst)
                     _tintId[i] = 0;
-                }
                 else
-                {
-                    _tintId[i] = trng.Next(palCount);
-                }
+                    _tintId[i] = tintRng.Next(paletteCount);
             }
         }
 
-        // buckets
-        if (_perMeshIndices == null || _perMeshIndices.Length != meshes.Count)
-        {
-            _perMeshIndices = new List<int>[meshes.Count];
-            for (int i = 0; i < meshes.Count; i++)
-                _perMeshIndices[i] = new List<int>(Mathf.Max(64, n / Mathf.Max(1, meshes.Count)));
-        }
-
-        if (_mpb == null) _mpb = new MaterialPropertyBlock();
+        _assignedCount = n;
+        _assignedMeshCount = meshCount;
+        _assignedMeshSeed = meshSeed;
+        _assignedSpinSeed = spinSeed;
+        _assignedTintSeed = tintSeed;
+        _assignedPaletteCount = paletteCount;
+        _assignedTintBias = tintBiasToFirst;
     }
 
     private static Quaternion NormalizeSafe(Quaternion q)
     {
-        float ls = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
-        if (!float.IsFinite(ls) || ls < 1e-12f)
+        float lengthSquared = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+        if (!float.IsFinite(lengthSquared) || lengthSquared < 1e-12f)
             return Quaternion.identity;
-        float inv = 1.0f / Mathf.Sqrt(ls);
-        return new Quaternion(q.x * inv, q.y * inv, q.z * inv, q.w * inv);
-    }
-
-    private float ComputeDistance01(Vector3 instancePos)
-    {
-        Vector3 fromPos = (distanceFrom ? distanceFrom.position :
-                          (posManager.player ? posManager.player.position : Vector3.zero));
-
-        float d = Vector3.Distance(fromPos, instancePos);
-
-        float denom = (normalizeByOuterBox && posManager != null)
-            ? posManager.outerHalfExtents.magnitude
-            : Mathf.Max(0.0001f, maxDistance);
-
-        return Mathf.Clamp01(d / Mathf.Max(0.0001f, denom));
+        float inverseLength = 1f / Mathf.Sqrt(lengthSquared);
+        return new Quaternion(q.x * inverseLength, q.y * inverseLength,
+            q.z * inverseLength, q.w * inverseLength);
     }
 }

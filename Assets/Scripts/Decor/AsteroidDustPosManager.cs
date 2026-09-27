@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -38,6 +39,8 @@ public class AsteroidDustPosManager : MonoBehaviour
     [Header("Random Rotation + Rotation Drift")]
     public bool randomRotation = true;
     public Vector2 angularSpeedRangeDeg = new Vector2(0f, 25f);
+    [Tooltip("Disable to keep initial rotations. View-aligned renderers automatically skip unused rotation simulation.")]
+    public bool enableRotationDrift = true;
 
     [Header("Position Drift (world-space ambient motion)")]
     public bool enablePositionDrift = true;
@@ -60,6 +63,12 @@ public class AsteroidDustPosManager : MonoBehaviour
 
     // Smoothed axis
     private Vector3 _wrapFwd = Vector3.forward;
+    private Vector3 _cachedForwardInput;
+    private OrientedBasis _cachedBasis;
+    private bool _basisCached;
+    private bool _hasPositionDrift;
+    private bool _hasRotationDrift;
+    private readonly List<AsteroidDustInstancedRenderer> _renderers = new List<AsteroidDustInstancedRenderer>();
 
     // RNG
     private System.Random _rng;
@@ -68,7 +77,11 @@ public class AsteroidDustPosManager : MonoBehaviour
 
     private void Awake()
     {
-        if (!player) player = Camera.main ? Camera.main.transform : transform;
+        if (!player)
+        {
+            Camera mainCamera = Camera.main;
+            player = mainCamera ? mainCamera.transform : transform;
+        }
         _rng = new System.Random(seed);
     }
 
@@ -89,8 +102,15 @@ public class AsteroidDustPosManager : MonoBehaviour
         _driftVel = new Vector3[count];
         _hideFrames = new int[count];
 
-        // Initialize axis
-        _wrapFwd = GetLockedWorldForward();
+        if (_rng == null) _rng = new System.Random(seed);
+        OrientedBasis basis = GetBasis();
+        Vector3 center = player ? player.position : transform.position;
+        _hasPositionDrift = false;
+        _hasRotationDrift = false;
+
+        float minA = angularSpeedRangeDeg.x;
+        float maxA = angularSpeedRangeDeg.y;
+        if (maxA < minA) (minA, maxA) = (maxA, minA);
 
         for (int i = 0; i < count; i++)
         {
@@ -98,8 +118,7 @@ public class AsteroidDustPosManager : MonoBehaviour
             Vector3 local = SamplePointInHollowBox(_rng, outerHalfExtents, innerHalfExtents);
 
             // Convert from axis-space -> world-space
-            OrientedBasis basis = BuildBasis(_wrapFwd);
-            Vector3 worldPos = player.position + basis.ToWorld(local);
+            Vector3 worldPos = center + basis.ToWorld(local);
 
             Positions[i] = worldPos;
 
@@ -110,10 +129,6 @@ public class AsteroidDustPosManager : MonoBehaviour
             Scales[i] = RandomRange(_rng, uniformScaleRange.x, uniformScaleRange.y);
 
             // Angular drift
-            float minA = angularSpeedRangeDeg.x;
-            float maxA = angularSpeedRangeDeg.y;
-            if (maxA < minA) (minA, maxA) = (maxA, minA);
-
             _angularVelDeg[i] = new Vector3(
                 RandomSignedRange(_rng, minA, maxA),
                 RandomSignedRange(_rng, minA, maxA),
@@ -125,6 +140,8 @@ public class AsteroidDustPosManager : MonoBehaviour
                 ? RandomDriftVelocity(_rng, _wrapFwd, driftSpeedRange, driftDirectionalBias)
                 : Vector3.zero;
 
+            _hasPositionDrift |= _driftVel[i].sqrMagnitude > 0f;
+            _hasRotationDrift |= _angularVelDeg[i].sqrMagnitude > 0f;
             _hideFrames[i] = 0;
         }
 
@@ -137,8 +154,10 @@ public class AsteroidDustPosManager : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        _wrapFwd = GetLockedWorldForward();
-        OrientedBasis basis = BuildBasis(_wrapFwd);
+        OrientedBasis basis = GetBasis();
+        Vector3 center = player ? player.position : transform.position;
+        bool driftPositions = enablePositionDrift && _hasPositionDrift;
+        bool driftRotations = enableRotationDrift && _hasRotationDrift && NeedsRotationSimulation();
 
         Vector3 outer = outerHalfExtents;
         Vector3 inner = innerHalfExtents;
@@ -153,18 +172,20 @@ public class AsteroidDustPosManager : MonoBehaviour
         for (int i = 0; i < Positions.Length; i++)
         {
             // Apply ambient position drift in world space
-            Positions[i] += _driftVel[i] * dt;
+            Vector3 position = Positions[i];
+            if (driftPositions)
+                position += _driftVel[i] * dt;
 
             // Apply rotation drift
-            Vector3 av = _angularVelDeg[i];
-            if (av.sqrMagnitude > 0f)
+            if (driftRotations)
             {
-                Quaternion dq = Quaternion.Euler(av * dt);
-                Rotations[i] = dq * Rotations[i];
+                Vector3 av = _angularVelDeg[i];
+                if (av.sqrMagnitude > 0f)
+                    Rotations[i] = Quaternion.Euler(av * dt) * Rotations[i];
             }
 
             // Wrap logic in axis-space
-            Vector3 relWorld = Positions[i] - player.position;
+            Vector3 relWorld = position - center;
             Vector3 rel = basis.ToLocal(relWorld);
 
             bool wrapped = false;
@@ -204,7 +225,7 @@ public class AsteroidDustPosManager : MonoBehaviour
 
             if (wrapped)
             {
-                Positions[i] = player.position + basis.ToWorld(rel);
+                position = center + basis.ToWorld(rel);
                 if (hideFramesOnWrap > 0)
                     _hideFrames[i] = hideFramesOnWrap;
             }
@@ -212,6 +233,9 @@ public class AsteroidDustPosManager : MonoBehaviour
             {
                 _hideFrames[i]--;
             }
+
+            if (driftPositions || wrapped)
+                Positions[i] = position;
         }
     }
 
@@ -221,6 +245,45 @@ public class AsteroidDustPosManager : MonoBehaviour
     public bool IsHidden(int index) => _hideFrames != null && (uint)index < (uint)_hideFrames.Length && _hideFrames[index] > 0;
 
     // ----------------- Axis + Basis -----------------
+    internal void RegisterRenderer(AsteroidDustInstancedRenderer renderer)
+    {
+        if (renderer && !_renderers.Contains(renderer))
+            _renderers.Add(renderer);
+    }
+
+    internal void UnregisterRenderer(AsteroidDustInstancedRenderer renderer)
+    {
+        _renderers.Remove(renderer);
+    }
+
+    private bool NeedsRotationSimulation()
+    {
+        bool hasActiveRenderer = false;
+        for (int i = 0; i < _renderers.Count; i++)
+        {
+            AsteroidDustInstancedRenderer renderer = _renderers[i];
+            if (!renderer || !renderer.isActiveAndEnabled || renderer.posManager != this)
+                continue;
+
+            hasActiveRenderer = true;
+            if (!renderer.alignToView) return true;
+        }
+
+        // Preserve standalone use by scripts reading Rotations.
+        return !hasActiveRenderer;
+    }
+
+    private OrientedBasis GetBasis()
+    {
+        if (!_basisCached || !_cachedForwardInput.Equals(lockedWorldForward))
+        {
+            _cachedForwardInput = lockedWorldForward;
+            _wrapFwd = GetLockedWorldForward();
+            _cachedBasis = BuildBasis(_wrapFwd);
+            _basisCached = true;
+        }
+        return _cachedBasis;
+    }
     private Vector3 GetLockedWorldForward()
     {
         return lockedWorldForward.sqrMagnitude > 1e-6f

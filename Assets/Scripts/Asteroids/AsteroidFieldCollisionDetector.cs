@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -22,7 +19,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     public BoxCollider playerBox;
 
     [Header("Grid")]
-    [Tooltip("Cell size for spatial hashing. Start with 20.")]
+    [Tooltip("Legacy Inspector field. Spatial index cell size now comes from AsteroidFieldData / generator Grid Cell Size.")]
     public float cellSize = 20f;
 
     [Header("Chunk Space (local->world)")]
@@ -79,136 +76,115 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
     [Tooltip("How many asteroids are currently allowed to collide/render in this chunk.")]
     public int visibleCount = int.MaxValue;
 
-    // Spatial hash: cellKey -> indices in that cell
-    private Dictionary<long, List<int>> _cellToIndices;
-
-    // Cache
-    private float[] _radii;
-    private float _maxRadius;
-    private Vector3 _gridOrigin;
-
-    // Track destroyed indices so we stop resolving them
-    private BitArray _destroyed;
-
     private void Awake()
     {
-
+        if (!posManager && instancedRenderer) posManager = instancedRenderer.posManager;
     }
 
-    private void OnEnable()
+    // Compatibility entry points: selecting/revisiting a chunk does not reset its state.
+    public void SetCurrentChunk(AsteroidFieldData data, Vector3 origin, int newVisibleCount)
     {
-        // If you regenerate assets in editor play mode, you can toggle this component to rebuild.
-        if (_cellToIndices == null || _cellToIndices.Count == 0)
-            BuildIndex();
+        fieldData = data;
+        chunkWorldOrigin = origin;
+        visibleCount = Mathf.Max(0, newVisibleCount);
     }
 
-    private void BuildIndex()
-    {
-        if (fieldData == null || fieldData.count <= 0 || fieldData.positions == null)
-        {
-            _cellToIndices = null;
-            _radii = null;
-            _maxRadius = 0f;
-            return;
-        }
-
-        int n = fieldData.count;
-        _destroyed = new BitArray(n, false);
-        cellSize = (fieldData.cellSize > 0.0001f) ? fieldData.cellSize : cellSize;
-        cellSize = Mathf.Max(0.0001f, cellSize);
-
-        // Use field bounds min as a stable origin (matches how your generator defines volume bounds)
-        _gridOrigin = chunkWorldOrigin;
-
-        _cellToIndices = new Dictionary<long, List<int>>(Mathf.Max(16, n / 8));
-        _radii = new float[n];
-        _maxRadius = 0f;
-
-        // Precompute per-instance radius (baseRadius * scale)
-        for (int i = 0; i < n; i++)
-        {
-            float baseR = 1f;
-            if (fieldData.baseRadii != null && i < fieldData.baseRadii.Length)
-                baseR = Mathf.Max(0.0001f, fieldData.baseRadii[i]);
-
-            float s = (fieldData.scales != null && i < fieldData.scales.Length) ? fieldData.scales[i] : 1f;
-            float r = baseR * s;
-
-            _radii[i] = r;
-            if (r > _maxRadius) _maxRadius = r;
-
-            Vector3 worldPos = chunkWorldOrigin + fieldData.positions[i];
-            long key = ComputeCellKey(worldPos);
-
-            if (!_cellToIndices.TryGetValue(key, out var list))
-            {
-                list = new List<int>(8);
-                _cellToIndices.Add(key, list);
-            }
-            list.Add(i);
-        }
-    }
     public void Rebuild(int newVisibleCount)
     {
         visibleCount = Mathf.Max(0, newVisibleCount);
-        BuildIndex();
+        // Geometry-array replacement is detected by Runtime. For edits to existing array
+        // elements, call fieldData.InvalidateRuntimeCache() explicitly before this method.
+        if (fieldData) _ = fieldData.Runtime;
     }
+
     private void FixedUpdate()
     {
-        if (fieldData == null || fieldData.count <= 0) return;
-        if (playerRb == null || playerBox == null) return;
-        if (_cellToIndices == null) return;
+        if (!playerRb || !playerBox) return;
+        QueryLoadedChunks(playerBox.bounds, false);
+    }
 
-        // World-space AABB of the player box
-        Bounds b = playerBox.bounds;
-
-        // Expand by max asteroid radius so we catch spheres whose centers are outside the box but still overlapping
-        float expand = _maxRadius + separationSlop;
-        Vector3 min = b.min - new Vector3(expand, expand, expand);
-        Vector3 max = b.max + new Vector3(expand, expand, expand);
-
-        // Determine cell range overlapped by this expanded AABB
-        Vector3Int cmin = WorldToCell(min);
-        Vector3Int cmax = WorldToCell(max);
-
+    private void QueryLoadedChunks(Bounds playerBounds, bool drawOnly)
+    {
         int resolves = 0;
+        if (posManager)
+        {
+            // Keep the player's own chunk first, preserving the previous priority.
+            Vector3 trackedPosition = posManager.player ? posManager.player.position : playerBounds.center;
+            Vector3Int currentCoord = posManager.WorldToChunkCoord(trackedPosition);
+            if (posManager.Chunks.TryGetValue(currentCoord, out var currentData) && currentData)
+            {
+                Vector3 origin = posManager.ChunkCoordToWorldOrigin(currentCoord);
+                int count = posManager.GetVisibleCountForChunk(currentCoord, currentData);
+                if (!drawOnly) SetCurrentChunk(currentData, origin, count);
+                if (QueryChunk(currentData, origin, count, playerBounds, drawOnly, ref resolves)) return;
+            }
 
-        for (int cx = cmin.x - neighborRadius; cx <= cmax.x + neighborRadius; cx++)
-            for (int cy = cmin.y - neighborRadius; cy <= cmax.y + neighborRadius; cy++)
-                for (int cz = cmin.z - neighborRadius; cz <= cmax.z + neighborRadius; cz++)
+            // Cheap chunk-bounds rejection comes before any neighboring cell scan.
+            foreach (var chunk in posManager.Chunks)
+            {
+                if (chunk.Key == currentCoord || !chunk.Value) continue;
+                if (QueryChunk(chunk.Value, posManager.ChunkCoordToWorldOrigin(chunk.Key),
+                    posManager.GetVisibleCountForChunk(chunk.Key, chunk.Value),
+                    playerBounds, drawOnly, ref resolves)) return;
+            }
+        }
+        else if (fieldData)
+        {
+            // Preserve manually assigned/single-field use.
+            QueryChunk(fieldData, chunkWorldOrigin, visibleCount, playerBounds, drawOnly, ref resolves);
+        }
+    }
+
+    private bool QueryChunk(AsteroidFieldData data, Vector3 origin, int allowedCount,
+        Bounds playerBounds, bool drawOnly, ref int resolves)
+    {
+        if (data.count <= 0 || allowedCount <= 0) return false;
+        AsteroidFieldData.RuntimeCache runtime = data.Runtime;
+        int count = Mathf.Min(allowedCount, runtime.Count);
+        if (count <= 0) return false;
+
+        Bounds localPlayer = playerBounds;
+        localPlayer.center -= origin;
+        if (!runtime.CollisionBounds.Intersects(localPlayer)) return false;
+
+        // Radius expansion already covers overlapping spheres; neighborRadius is kept
+        // as an optional extra margin to preserve existing Inspector configurations.
+        float expand = runtime.MaxRadius + Mathf.Max(0f, separationSlop);
+        Vector3 extent = Vector3.one * expand;
+        Vector3Int min = runtime.ToCell(localPlayer.min - extent);
+        Vector3Int max = runtime.ToCell(localPlayer.max + extent);
+        int margin = Mathf.Clamp(neighborRadius, 0, 3);
+        min = Vector3Int.Max(min - Vector3Int.one * margin, runtime.MinCell);
+        max = Vector3Int.Min(max + Vector3Int.one * margin, runtime.MaxCell);
+
+        var destroyed = runtime.Destroyed;
+        var positions = data.positions;
+        var indices = runtime.CellIndices;
+        var radii = runtime.Radii;
+        for (int x = min.x; x <= max.x; x++)
+            for (int y = min.y; y <= max.y; y++)
+                for (int z = min.z; z <= max.z; z++)
                 {
-                    long key = PackCell(cx, cy, cz);
-                    if (!_cellToIndices.TryGetValue(key, out var list))
-                        continue;
-
-                    for (int li = 0; li < list.Count; li++)
+                    if (!runtime.TryGetCellRange(x, y, z, out int start, out int end)) continue;
+                    for (int entry = start; entry < end; entry++)
                     {
-                        int i = list[li];
-
-                        // Density-hidden asteroids should not collide.
-                        if (i >= visibleCount)
-                            continue;
-
-                        // Smashed asteroids should not collide.
-                        if (_destroyed != null && _destroyed[i])
-                            continue;
-
-                        Vector3 sphereCenter = chunkWorldOrigin + fieldData.positions[i];
-                        float sphereRadius = _radii[i];
-
-                        if (SphereIntersectsAABB(sphereCenter, sphereRadius, b, out Vector3 pushNormal, out float pushDist))
+                        int i = indices[entry];
+                        if (i >= count || destroyed[i]) continue;
+                        if (drawOnly)
                         {
-                            if (TrySmash(i, pushNormal))
-                                continue;
-
-                            Resolve(pushNormal, pushDist);
-
-                            resolves++;
-                            if (resolves >= maxResolvesPerStep)
-                                return;
+                            Gizmos.DrawWireSphere(origin + positions[i], radii[i]);
+                            continue;
                         }
+
+                        if (!SphereIntersectsAABB(positions[i], radii[i], localPlayer,
+                            out Vector3 normal, out float pushDistance)) continue;
+                        if (TrySmash(data, runtime, origin, i, normal)) continue;
+                        Resolve(normal, pushDistance);
+                        resolves++;
+                        if (resolves >= Mathf.Max(1, maxResolvesPerStep)) return true;
                     }
                 }
+        return false;
     }
 
     private void Resolve(Vector3 normal, float pushDist)
@@ -222,7 +198,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             return;
 
         // Dampen velocity
-        Vector3 v = playerRb.linearVelocity; // matches your SimpleMove usage :contentReference[oaicite:1]{index=1}
+        Vector3 v = playerRb.linearVelocity;
         float vn = Vector3.Dot(v, normal);
 
         // Remove some inward normal component
@@ -253,98 +229,46 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             return false;
         }
 
-        float dist = Mathf.Sqrt(Mathf.Max(distSq, 1e-12f));
-
-        // If center is inside the box or extremely close, pick a stable normal:
-        if (dist < 1e-6f)
+        if (distSq < 1e-12f)
         {
-            Vector3 toCenter = c - aabb.center;
-            if (toCenter.sqrMagnitude < 1e-8f) toCenter = Vector3.up;
-            normal = toCenter.normalized;
-            pushDist = r;
+            // Sphere center lies inside the player box. Pick the minimum translation
+            // that moves the BOX away from the sphere, including the sphere radius.
+            Vector3 min = aabb.min;
+            Vector3 max = aabb.max;
+            float nearest = c.x - min.x;
+            normal = Vector3.right;
+            float candidate = max.x - c.x;
+            if (candidate < nearest) { nearest = candidate; normal = Vector3.left; }
+            candidate = c.y - min.y;
+            if (candidate < nearest) { nearest = candidate; normal = Vector3.up; }
+            candidate = max.y - c.y;
+            if (candidate < nearest) { nearest = candidate; normal = Vector3.down; }
+            candidate = c.z - min.z;
+            if (candidate < nearest) { nearest = candidate; normal = Vector3.forward; }
+            candidate = max.z - c.z;
+            if (candidate < nearest) { nearest = candidate; normal = Vector3.back; }
+            pushDist = r + Mathf.Max(0f, nearest);
             return true;
         }
 
+        float dist = Mathf.Sqrt(distSq);
         normal = d / dist;
         pushDist = r - dist;
         return true;
     }
 
-    // --- Grid hashing ---
-    private Vector3Int WorldToCell(Vector3 p)
-    {
-        int cx = Mathf.FloorToInt((p.x - _gridOrigin.x) / cellSize);
-        int cy = Mathf.FloorToInt((p.y - _gridOrigin.y) / cellSize);
-        int cz = Mathf.FloorToInt((p.z - _gridOrigin.z) / cellSize);
-        return new Vector3Int(cx, cy, cz);
-    }
-
-    private long ComputeCellKey(Vector3 p)
-    {
-        Vector3Int c = WorldToCell(p);
-        return PackCell(c.x, c.y, c.z);
-    }
-
-    private const int CELL_BITS = 21;
-    private const int CELL_BIAS = 1 << (CELL_BITS - 1);
-    private const long CELL_MASK = (1L << CELL_BITS) - 1L;
-
-    private static long PackCell(int x, int y, int z)
-    {
-        long lx = ((long)(x + CELL_BIAS)) & CELL_MASK;
-        long ly = ((long)(y + CELL_BIAS)) & CELL_MASK;
-        long lz = ((long)(z + CELL_BIAS)) & CELL_MASK;
-        return lx | (ly << CELL_BITS) | (lz << (CELL_BITS * 2));
-    }
     private void OnDrawGizmosSelected()
     {
-        DrawDebugGizmos();
-    }
-
-    private void DrawDebugGizmos()
-    {
-        if (fieldData == null || playerBox == null)
-            return;
-
-        // Build caches if needed (OnDrawGizmosSelected can run before Awake/OnEnable).
-        if (_cellToIndices == null || _radii == null || _radii.Length != fieldData.count)
-            BuildIndex();
-
-        if (_cellToIndices == null || _radii == null)
-            return;
-
-        Bounds b = playerBox.bounds;
-
-        float expand = _maxRadius + separationSlop;
-        Vector3 min = b.min - Vector3.one * expand;
-        Vector3 max = b.max + Vector3.one * expand;
-
-        Vector3Int cmin = WorldToCell(min);
-        Vector3Int cmax = WorldToCell(max);
-
+        if (!playerBox) return;
         Gizmos.color = new Color(1f, 0.2f, 0.2f, 0.35f);
-
-        for (int cx = cmin.x - neighborRadius; cx <= cmax.x + neighborRadius; cx++)
-            for (int cy = cmin.y - neighborRadius; cy <= cmax.y + neighborRadius; cy++)
-                for (int cz = cmin.z - neighborRadius; cz <= cmax.z + neighborRadius; cz++)
-                {
-                    long key = PackCell(cx, cy, cz);
-                    if (!_cellToIndices.TryGetValue(key, out var list))
-                        continue;
-
-                    foreach (int i in list)
-                    {
-                        Vector3 center = chunkWorldOrigin + fieldData.positions[i];
-                        float r = _radii[i];
-                        Gizmos.DrawWireSphere(center, r);
-                    }
-                }
-
-        // Draw player AABB
+        QueryLoadedChunks(playerBox.bounds, true);
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireCube(b.center, b.size);
+        Bounds bounds = playerBox.bounds;
+        Gizmos.DrawWireCube(bounds.center, bounds.size);
     }
-    private bool TrySmash(int index, Vector3 pushNormal)
+
+    private bool TrySmash(AsteroidFieldData hitData, AsteroidFieldData.RuntimeCache runtime,
+        Vector3 hitOrigin, int index, Vector3 pushNormal)
     {
         if (smashSpeedThreshold <= 0f) return false;
 
@@ -408,7 +332,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         // Scalar strength (tune this)            // How Much Speed Gets Applied - Min - Max
         float vfxSpeed = Mathf.Clamp(speed * 0.8f, 8f, 400f);
 
-        DestroyAsteroid(index, smashDir, vfxSpeed);
+        DestroyAsteroid(hitData, runtime, hitOrigin, index, smashDir, vfxSpeed);
 
         // small nudge forward so we don't remain overlapping for a frame
         if (smashForwardNudge > 0f)
@@ -468,17 +392,18 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
                 // Kick direction: opposite the impact (pushNormal is asteroid -> player)
                 Vector3 kickDir = pushNormal;
 
-                if (simpleMove.enabled)
+                if (simpleMove != null && simpleMove.enabled)
                     SimpleFollowCamera.Instance.AddShakeImpulse(kickDir, lossFrac);
             }
         }
 
         return true;
     }
-    private void DestroyAsteroid(int index, Vector3 smashDir, float vfxSpeed)
+    private void DestroyAsteroid(AsteroidFieldData hitData, AsteroidFieldData.RuntimeCache runtime,
+        Vector3 hitOrigin, int index, Vector3 smashDir, float vfxSpeed)
     {
-        if (_destroyed != null && index >= 0 && index < _destroyed.Length)
-            _destroyed[index] = true;
+        // Shared by collision and every renderer of this data assignment.
+        runtime.Destroyed[index] = true;
 
         float rbSpeed = playerRb ? playerRb.linearVelocity.magnitude : 0f;
 
@@ -496,8 +421,8 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         {
             Color asteroidColor = Color.white;
 
-            int typeId = (fieldData.typeIds != null && index < fieldData.typeIds.Length)
-                ? fieldData.typeIds[index]
+            int typeId = (hitData.typeIds != null && index < hitData.typeIds.Length)
+                ? hitData.typeIds[index]
                 : 0;
 
             if (instancedRenderer != null &&
@@ -516,13 +441,13 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             asteroidColor = BrightenMultiply(asteroidColor, 2.5f);
 
             // Example tuning knobs
-            float t = Mathf.InverseLerp(smashSpeedThreshold, smashSpeedThreshold * 2f, speed); 
+            float t = Mathf.InverseLerp(smashSpeedThreshold, smashSpeedThreshold * 2f, speed);
             float dirSpeed = vfxSpeed;                                  // from your velocity-based scalar
             float radialSpeed = Mathf.Lerp(6f, 50f, t);                // explosion strength
             float randomSpeed = Mathf.Lerp(1f, 20f, t);                  // chaos
             int count = Mathf.RoundToInt(Mathf.Lerp(20f, 60f, t));      // particles
 
-            Vector3 asteroidPos = chunkWorldOrigin + fieldData.positions[index];
+            Vector3 asteroidPos = hitOrigin + hitData.positions[index];
             Vector3 hitPos = playerBox.bounds.ClosestPoint(asteroidPos);
 
             bool useMutedVfx = simpleMove != null && !simpleMove.enabled;
@@ -537,9 +462,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             }
         }
 
-        // Hide from instanced renderer (visual deletion)
-        if (instancedRenderer != null)
-            instancedRenderer.SetInstanceHidden(fieldData, index, true);
+        // No separate renderer mask to synchronize: runtime.Destroyed is authoritative.
     }
     public static Color BrightenMultiply(Color c, float mult)
     {
@@ -547,10 +470,6 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
         c.g *= mult;
         c.b *= mult;
         return c;
-    }
-    private bool IsDensityHidden(int index)
-    {
-        return index < 0 || index >= visibleCount;
     }
     private bool IsShieldActive()
     {

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -73,360 +72,298 @@ public class AsteroidFieldInstancedRenderer : MonoBehaviour
     public AsteroidPosManager posManager;
 
     private const int MaxInstancesPerCall = 1023;
-
-    private Dictionary<AsteroidFieldData, BitArray> _hiddenByData;
     private static readonly int VoxelCellSizeID = Shader.PropertyToID("_VoxelCellSize");
+    private readonly Matrix4x4[] _batchBuffer = new Matrix4x4[MaxInstancesPerCall];
+    private readonly Plane[] _frustumPlanes = new Plane[6];
     private MaterialPropertyBlock _mpb;
 
-    // Per-chunk cache
-    private readonly Plane[] _frustumPlanes = new Plane[6];
     private sealed class ChunkCache
     {
-        public int count;
+        public AsteroidFieldData.RuntimeCache runtime;
+        public Quaternion[] sourceRotations;
+        public int[] sourceTypes;
         public Matrix4x4[] matrices;
-        public Quaternion[] runtimeRotations;
+        public Quaternion[] rotations;
         public List<int>[,] buckets;
-        public Bounds localBounds;     // <-- local-space bounds
-        public Bounds worldBounds;     // <-- cached world bounds for this frame/coord
-        public Vector3 worldOrigin;    // <-- where this chunk is in world space
-        public bool initialized;
+        public Bounds localBounds;
+        public Bounds worldBounds;
+        public Vector3 worldOrigin;
+        public int typeLayoutVersion;
+        public float padding;
     }
 
-    private readonly Dictionary<AsteroidFieldData, ChunkCache> _cacheByData = new();
+    private readonly Dictionary<AsteroidFieldData, ChunkCache> _cacheByData =
+        new Dictionary<AsteroidFieldData, ChunkCache>();
+    private readonly HashSet<AsteroidFieldData> _activeData = new HashSet<AsteroidFieldData>();
+    private readonly List<AsteroidFieldData> _toRemove = new List<AsteroidFieldData>();
+    private AsteroidPosManager _cacheManager;
+    private int _lastChunksVersion = -1;
+    private bool[] _validTypes;
+    private Mesh[] _lastMeshes;
+    private float[] _typeBoundsRadii;
+    private int _typeLayoutVersion;
 
     private void OnEnable()
     {
-        _hiddenByData ??= new Dictionary<AsteroidFieldData, BitArray>();
-
-        _mpb ??= new MaterialPropertyBlock();
-
-        if (posManager) posManager.OnChunkCreated += HandleChunkCreated;
+        if (_mpb == null) _mpb = new MaterialPropertyBlock();
+        _lastChunksVersion = -1;
     }
 
     private void OnDisable()
     {
-        if (posManager) posManager.OnChunkCreated -= HandleChunkCreated;
         _cacheByData.Clear();
+        _activeData.Clear();
+        _cacheManager = null;
+        _lastChunksVersion = -1;
+        // Destruction belongs to the chunk assignment, not this renderer's lifetime.
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        if (onlyRenderInPlayMode && !Application.isPlaying)
-            return;
+        if (onlyRenderInPlayMode && !Application.isPlaying) return;
+        if (!posManager) return;
+        SyncActiveChunks();
+        if (posManager.Chunks.Count == 0) return;
+        Camera cam = renderCamera ? renderCamera : Camera.main;
+        if (!cam) return;
 
-        if (posManager == null)
-            return;
-
-        var chunks = posManager.Chunks;
-        if (chunks == null || chunks.Count == 0)
-            return;
-
-        var cam = renderCamera ? renderCamera : Camera.main;
-        if (!cam)
-            return;
-
-        // Compute frustum planes once per frame
+        CacheTypeSettings();
+        if (_validTypes.Length == 0) return;
         GeometryUtility.CalculateFrustumPlanes(cam, _frustumPlanes);
-
-        // Optional: cleanup dead entries (if chunks are destroyed/replaced)
-        CleanupCache();
-
-        foreach (var kv in posManager.Chunks) // coord -> data
-        {
-            var coord = kv.Key;
-            var data = kv.Value;
-            if (data == null || data.count <= 0) continue;
-
-            Vector3 origin = posManager.ChunkCoordToWorldOrigin(coord);
-
-            var cache = GetOrInitCache(data, origin);
-
-            // Update world bounds from local bounds
-            cache.worldBounds = cache.localBounds;
-            cache.worldBounds.center += origin;
-
-            if (!GeometryUtility.TestPlanesAABB(_frustumPlanes, cache.worldBounds))
-                continue;
-
-            if (applyRotationDriftInPlayMode && Application.isPlaying)
-                ApplyRotationDrift(data, cache, Time.deltaTime);
-
-            Render(data, cache, cam);
-        }
-    }
-    public void ClearHidden(AsteroidFieldData data)
-    {
-        if (data == null) return;
-
-        if (_hiddenByData != null && _hiddenByData.TryGetValue(data, out var mask) && mask != null)
-            mask.SetAll(false);
-    }
-    private void CleanupCache()
-    {
-        // Remove cache entries whose data is gone or not referenced anymore
-        // (keeps memory stable if you replace chunk objects)
-        var toRemove = ListPool<AsteroidFieldData>.Get();
-        foreach (var kvp in _cacheByData)
-        {
-            if (kvp.Key == null || fieldDatas == null || !fieldDatas.Contains(kvp.Key))
-                toRemove.Add(kvp.Key);
-        }
-        foreach (var d in toRemove)
-            _cacheByData.Remove(d);
-        ListPool<AsteroidFieldData>.Release(toRemove);
-    }
-    private ChunkCache GetOrInitCache(AsteroidFieldData data, Vector3 worldOrigin)
-    {
-        if (!_cacheByData.TryGetValue(data, out var cache) || cache == null)
-        {
-            cache = new ChunkCache();
-            _cacheByData[data] = cache;
-        }
-
-        bool originChanged = cache.worldOrigin != worldOrigin;
-        cache.worldOrigin = worldOrigin;
-
-        // Re-init if count changed (or never init)
-        if (!cache.initialized || cache.count != data.count || originChanged)
-            InitCache(data, cache);
-
-        return cache;
-    }
-    private void InitCache(AsteroidFieldData fieldData, ChunkCache cache)
-    {
-        int n = fieldData.count;
-        cache.count = n;
-
-        cache.matrices = new Matrix4x4[n];
-        cache.runtimeRotations = new Quaternion[n];
-
-        // Build matrices + compute bounds in the same pass (LOCAL bounds)
-        bool boundsInit = false;
-        Bounds b = default;
-
-        for (int i = 0; i < n; i++)
-        {
-            Vector3 localPos = fieldData.positions[i];
-
-            Quaternion rot = fieldData.rotations[i];
-            float s = fieldData.scales[i];
-
-            if (!IsFinite(rot) || (rot.x == 0f && rot.y == 0f && rot.z == 0f && rot.w == 0f))
-                rot = Quaternion.identity;
-            else
-                rot = Quaternion.Normalize(rot);
-
-            cache.runtimeRotations[i] = rot;
-
-            Vector3 worldPos = cache.worldOrigin + localPos;
-            cache.matrices[i] = Matrix4x4.TRS(worldPos, rot, Vector3.one * s);
-
-            if (!boundsInit)
-            {
-                b = new Bounds(localPos, Vector3.zero);
-                boundsInit = true;
-            }
-            else
-            {
-                b.Encapsulate(localPos);
-            }
-        }
-
-        // Pad LOCAL bounds (world bounds handled per-frame in Update)
-        float pad = Mathf.Max(0f, chunkBoundsPadding);
-        b.Expand(pad * 2f);
-        cache.localBounds = b;
-
-        int typeCount = (typeRenders != null && typeRenders.Length > 0) ? typeRenders.Length : 15;
-        cache.buckets = new List<int>[typeCount, 3];
-
-        for (int t = 0; t < typeCount; t++)
-            for (int l = 0; l < 3; l++)
-                cache.buckets[t, l] = new List<int>(256);
-
-        cache.initialized = true;
-    }
-
-    private void ApplyRotationDrift(AsteroidFieldData fieldData, ChunkCache cache, float dt)
-    {
-        int n = fieldData.count;
-        var ang = fieldData.angularVelocityDeg;
-        if (ang == null || ang.Length != n)
-            return;
-
-        for (int i = 0; i < n; i++)
-        {
-            Vector3 av = ang[i];
-            if (av.sqrMagnitude < 0.000001f)
-                continue;
-
-            Quaternion delta = Quaternion.Euler(av * dt);
-            Quaternion q = cache.runtimeRotations[i] * delta;
-
-            if (!IsFinite(q) || (q.x == 0f && q.y == 0f && q.z == 0f && q.w == 0f))
-                q = Quaternion.identity;
-            else
-                q = Quaternion.Normalize(q);
-
-            cache.runtimeRotations[i] = q;
-            Vector3 worldPos = cache.worldOrigin + fieldData.positions[i];
-            cache.matrices[i] = Matrix4x4.TRS(worldPos, q, Vector3.one * fieldData.scales[i]);
-        }
-    }
-    private void Render(AsteroidFieldData fieldData, ChunkCache cache, Camera cam)
-    {
-        var buckets = cache.buckets;
-
-        int typeCount = buckets.GetLength(0);
-        for (int t = 0; t < typeCount; t++)
-            for (int l = 0; l < 3; l++)
-                buckets[t, l].Clear();
-
-        Vector3 camPos = cam.transform.position;
+        Vector3 cameraPosition = cam.transform.position;
         float d0 = Mathf.Max(0f, lod0Distance);
         float d1 = Mathf.Max(d0, lod1Distance);
+        float d0Squared = d0 * d0;
+        float d1Squared = d1 * d1;
+        bool rotate = applyRotationDriftInPlayMode && Application.isPlaying;
+        float dt = Time.deltaTime;
 
-        int n = fieldData.count;
-        var typeIds = fieldData.typeIds;
-
-        for (int i = 0; i < n; i++)
+        foreach (var chunk in posManager.Chunks)
         {
-            if (IsHidden(fieldData, i))
-                continue;
+            AsteroidFieldData data = chunk.Value;
+            if (!data || data.count <= 0) continue;
+            AsteroidFieldData.RuntimeCache runtime = data.Runtime;
+            int visibleCount = Mathf.Min(runtime.Count, posManager.GetVisibleCountForChunk(chunk.Key, data));
+            if (visibleCount <= 0) continue;
 
-            int typeId = (typeIds != null && i < typeIds.Length) ? typeIds[i] : 0;
-            if (typeId < 0 || typeId >= typeCount)
-                continue;
+            Vector3 origin = posManager.ChunkCoordToWorldOrigin(chunk.Key);
+            ChunkCache cache = GetOrInitCache(data, runtime, origin);
+            if (!GeometryUtility.TestPlanesAABB(_frustumPlanes, cache.worldBounds)) continue;
 
-            var tr = typeRenders != null && typeId < typeRenders.Length ? typeRenders[typeId] : null;
-            if (tr == null || !tr.IsValid)
-                continue;
+            Render(data, cache, visibleCount, cameraPosition, d0Squared, d1Squared, rotate, dt, cam);
+        }
+    }
 
-            Vector3 worldPos = cache.worldOrigin + fieldData.positions[i];
-            float dist = Vector3.Distance(camPos, worldPos);
-            int lod = (dist < d0) ? 0 : (dist < d1 ? 1 : 2);
+    private void SyncActiveChunks()
+    {
+        if (_cacheManager != posManager)
+        {
+            _cacheByData.Clear();
+            _cacheManager = posManager;
+            _lastChunksVersion = -1;
+        }
+        if (_lastChunksVersion == posManager.ChunksVersion) return;
+        _lastChunksVersion = posManager.ChunksVersion;
+        _activeData.Clear();
+        foreach (var chunk in posManager.Chunks)
+            if (chunk.Value) _activeData.Add(chunk.Value);
+        _toRemove.Clear();
+        foreach (var entry in _cacheByData)
+            if (!entry.Key || !_activeData.Contains(entry.Key)) _toRemove.Add(entry.Key);
+        for (int i = 0; i < _toRemove.Count; i++) _cacheByData.Remove(_toRemove[i]);
+        _toRemove.Clear();
+    }
 
+    private void CacheTypeSettings()
+    {
+        int count = typeRenders != null ? typeRenders.Length : 0;
+        if (_validTypes == null || _validTypes.Length != count)
+        {
+            _validTypes = new bool[count];
+            _lastMeshes = new Mesh[count * 3];
+            _typeBoundsRadii = new float[count];
+            _typeLayoutVersion++;
+        }
+        bool meshesChanged = false;
+        for (int t = 0; t < count; t++)
+        {
+            AsteroidTypeRender type = typeRenders[t];
+            _validTypes[t] = type != null && type.IsValid;
+            Mesh m0 = type != null ? type.lod0Mesh : null;
+            Mesh m1 = type != null ? type.lod1Mesh : null;
+            Mesh m2 = type != null ? type.lod2Mesh : null;
+            int offset = t * 3;
+            if (_lastMeshes[offset] == m0 && _lastMeshes[offset + 1] == m1 &&
+                _lastMeshes[offset + 2] == m2) continue;
+            _lastMeshes[offset] = m0;
+            _lastMeshes[offset + 1] = m1;
+            _lastMeshes[offset + 2] = m2;
+            _typeBoundsRadii[t] = Mathf.Max(MeshRadius(m0), Mathf.Max(MeshRadius(m1), MeshRadius(m2)));
+            meshesChanged = true;
+        }
+        if (meshesChanged) _typeLayoutVersion++;
+    }
+
+    private static float MeshRadius(Mesh mesh)
+    {
+        if (!mesh) return 0f;
+        Bounds bounds = mesh.bounds;
+        // A sphere about the transform origin covers every rotation of this mesh.
+        return bounds.center.magnitude + bounds.extents.magnitude;
+    }
+
+    private ChunkCache GetOrInitCache(AsteroidFieldData data,
+        AsteroidFieldData.RuntimeCache runtime, Vector3 origin)
+    {
+        if (!_cacheByData.TryGetValue(data, out var cache))
+        {
+            cache = new ChunkCache();
+            _cacheByData.Add(data, cache);
+        }
+        bool geometryChanged = cache.runtime != runtime || cache.sourceRotations != data.rotations;
+        if (geometryChanged)
+        {
+            cache.runtime = runtime;
+            cache.sourceRotations = data.rotations;
+            if (cache.matrices == null || cache.matrices.Length != runtime.Count)
+            {
+                cache.matrices = new Matrix4x4[runtime.Count];
+                cache.rotations = new Quaternion[runtime.Count];
+            }
+            for (int i = 0; i < runtime.Count; i++)
+            {
+                Quaternion q = data.rotations != null && i < data.rotations.Length
+                    ? NormalizeSafe(data.rotations[i]) : Quaternion.identity;
+                cache.rotations[i] = q;
+                float scale = data.scales != null && i < data.scales.Length ? data.scales[i] : 1f;
+                cache.matrices[i] = Matrix4x4.TRS(origin + data.positions[i], q, Vector3.one * scale);
+            }
+        }
+        else if (!cache.worldOrigin.Equals(origin))
+        {
+            // Recycle existing buffers; preserve rotation/scale and replace only translation.
+            for (int i = 0; i < runtime.Count; i++)
+            {
+                Vector3 p = origin + data.positions[i];
+                Matrix4x4 matrix = cache.matrices[i];
+                matrix.m03 = p.x;
+                matrix.m13 = p.y;
+                matrix.m23 = p.z;
+                cache.matrices[i] = matrix;
+            }
+        }
+        cache.worldOrigin = origin;
+
+        int typeCount = _validTypes.Length;
+        if (cache.buckets == null || cache.buckets.GetLength(0) != typeCount)
+        {
+            cache.buckets = new List<int>[typeCount, 3];
+            int capacity = Mathf.Max(8, runtime.Count / Mathf.Max(1, typeCount));
+            for (int t = 0; t < typeCount; t++)
+                for (int lod = 0; lod < 3; lod++) cache.buckets[t, lod] = new List<int>(capacity);
+        }
+
+        if (geometryChanged || cache.typeLayoutVersion != _typeLayoutVersion ||
+            cache.sourceTypes != data.typeIds || cache.padding != chunkBoundsPadding)
+        {
+            // Unlike a center-only AABB, include asteroid size so edge meshes do not pop out.
+            Bounds bounds = runtime.CollisionBounds;
+            for (int i = 0; i < runtime.Count; i++)
+            {
+                int typeId = data.typeIds != null && i < data.typeIds.Length ? data.typeIds[i] : 0;
+                if ((uint)typeId >= (uint)typeCount) continue;
+                float scale = data.scales != null && i < data.scales.Length ? Mathf.Abs(data.scales[i]) : 1f;
+                Vector3 extent = Vector3.one * (_typeBoundsRadii[typeId] * scale);
+                bounds.Encapsulate(data.positions[i] - extent);
+                bounds.Encapsulate(data.positions[i] + extent);
+            }
+            bounds.Expand(Mathf.Max(0f, chunkBoundsPadding) * 2f);
+            cache.localBounds = bounds;
+            cache.padding = chunkBoundsPadding;
+            cache.sourceTypes = data.typeIds;
+            cache.typeLayoutVersion = _typeLayoutVersion;
+        }
+        cache.worldBounds = cache.localBounds;
+        cache.worldBounds.center += origin;
+        return cache;
+    }
+
+    private void Render(AsteroidFieldData data, ChunkCache cache, int visibleCount,
+        Vector3 cameraPosition, float d0Squared, float d1Squared, bool rotate, float dt, Camera cam)
+    {
+        var buckets = cache.buckets;
+        int typeCount = _validTypes.Length;
+        for (int t = 0; t < typeCount; t++)
+            for (int lod = 0; lod < 3; lod++) buckets[t, lod].Clear();
+
+        var destroyed = cache.runtime.Destroyed;
+        var types = data.typeIds;
+        var angular = data.angularVelocityDeg;
+        rotate &= angular != null && angular.Length >= cache.runtime.Count;
+        Vector3 localCamera = cameraPosition - cache.worldOrigin;
+
+        for (int i = 0; i < visibleCount; i++)
+        {
+            if (destroyed[i]) continue;
+            int typeId = types != null && i < types.Length ? types[i] : 0;
+            if ((uint)typeId >= (uint)typeCount || !_validTypes[typeId]) continue;
+
+            if (rotate && angular[i].sqrMagnitude >= 0.000001f)
+            {
+                Quaternion q = NormalizeSafe(cache.rotations[i] * Quaternion.Euler(angular[i] * dt));
+                cache.rotations[i] = q;
+                float scale = data.scales != null && i < data.scales.Length ? data.scales[i] : 1f;
+                cache.matrices[i] = Matrix4x4.TRS(cache.worldOrigin + data.positions[i], q, Vector3.one * scale);
+            }
+
+            float distanceSquared = (localCamera - data.positions[i]).sqrMagnitude;
+            int lod = distanceSquared < d0Squared ? 0 : (distanceSquared < d1Squared ? 1 : 2);
             buckets[typeId, lod].Add(i);
         }
 
-        for (int typeId = 0; typeId < typeCount; typeId++)
+        for (int t = 0; t < typeCount; t++)
         {
-            var tr = typeRenders != null && typeId < typeRenders.Length ? typeRenders[typeId] : null;
-            if (tr == null || !tr.IsValid)
-                continue;
-
-            DrawBucket(tr.lod0Mesh, tr.material, buckets[typeId, 0], cache, lod0VoxelCellSize, cam);
-            DrawBucket(tr.lod1Mesh, tr.material, buckets[typeId, 1], cache, lod1VoxelCellSize, cam);
-            DrawBucket(tr.lod2Mesh, tr.material, buckets[typeId, 2], cache, lod2VoxelCellSize, cam);
+            if (!_validTypes[t]) continue;
+            AsteroidTypeRender type = typeRenders[t];
+            DrawBucket(type.lod0Mesh, type.material, buckets[t, 0], cache, lod0VoxelCellSize, cam);
+            DrawBucket(type.lod1Mesh, type.material, buckets[t, 1], cache, lod1VoxelCellSize, cam);
+            DrawBucket(type.lod2Mesh, type.material, buckets[t, 2], cache, lod2VoxelCellSize, cam);
         }
     }
 
-    private void DrawBucket(Mesh mesh, Material mat, List<int> indices, ChunkCache cache, float voxelCellSize, Camera cam)
+    private void DrawBucket(Mesh mesh, Material material, List<int> indices,
+        ChunkCache cache, float voxelCellSize, Camera cam)
     {
-        int count = indices.Count;
-        if (count <= 0) return;
-
+        if (indices.Count == 0) return;
         _mpb.SetFloat(VoxelCellSizeID, voxelCellSize);
-
-        int offset = 0;
-        while (offset < count)
+        for (int offset = 0; offset < indices.Count; offset += MaxInstancesPerCall)
         {
-            int batchCount = Mathf.Min(MaxInstancesPerCall, count - offset);
-            Matrix4x4[] buffer = MatrixBufferCache.Get();
-
-            // Fill buffer directly from cache.matrices using indices
-            for (int j = 0; j < batchCount; j++)
-                buffer[j] = cache.matrices[indices[offset + j]];
-
-            Graphics.DrawMeshInstanced(
-                mesh, 0, mat,
-                buffer, batchCount,
-                _mpb, shadowCasting, receiveShadows,
-                renderLayer, cam,
-                LightProbeUsage.Off, null
-            );
-
-            offset += batchCount;
+            int count = Mathf.Min(MaxInstancesPerCall, indices.Count - offset);
+            for (int j = 0; j < count; j++) _batchBuffer[j] = cache.matrices[indices[offset + j]];
+            Graphics.DrawMeshInstanced(mesh, 0, material, _batchBuffer, count, _mpb,
+                shadowCasting, receiveShadows, renderLayer, cam, LightProbeUsage.Off, null);
         }
     }
 
-    /// <summary>
-    /// Shared per-frame buffers to avoid allocating Matrix4x4[1023] repeatedly.
-    /// </summary>
-    private static class MatrixBufferCache
+    // These compatibility methods now update the SAME state that collision reads.
+    // Density is an independent visible-count limit and is never stored in this mask.
+    public void ClearHidden(AsteroidFieldData data)
     {
-        private static Matrix4x4[] _buffer1023;
-        public static Matrix4x4[] Get()
-        {
-            if (_buffer1023 == null || _buffer1023.Length != MaxInstancesPerCall)
-                _buffer1023 = new Matrix4x4[MaxInstancesPerCall];
-            return _buffer1023;
-        }
-    }
-
-    private static bool IsFinite(Quaternion q)
-    {
-        return float.IsFinite(q.x) && float.IsFinite(q.y) && float.IsFinite(q.z) && float.IsFinite(q.w);
-    }
-
-    private bool IsHidden(AsteroidFieldData data, int index)
-    {
-        if (_hiddenByData == null || data == null)
-            return false;
-
-        if (!_hiddenByData.TryGetValue(data, out var mask) || mask == null)
-            return false;
-
-        return (index >= 0 && index < mask.Length) && mask[index];
+        if (data) data.ResetRuntimeDestruction();
     }
 
     public void SetInstanceHidden(AsteroidFieldData data, int index, bool hidden)
     {
-        if (data == null || data.count <= 0) return;
-        int n = data.count;
-        if (index < 0 || index >= n) return;
-
-        if (!_hiddenByData.TryGetValue(data, out var mask) || mask == null || mask.Length != n)
-        {
-            mask = new BitArray(n, false);
-            _hiddenByData[data] = mask;
-        }
-
-        mask[index] = hidden;
+        if (!data) return;
+        var runtime = data.Runtime;
+        if ((uint)index < (uint)runtime.Count) runtime.Destroyed[index] = hidden;
     }
-    private void HandleChunkCreated(Vector3Int coord, AsteroidFieldData data)
+
+    private static Quaternion NormalizeSafe(Quaternion q)
     {
-        if (data == null) return;
-
-        // Reset any "destroyed/hidden" visual state when this data is reused elsewhere
-        ClearHidden(data);
-
-        ApplyChunkDensityMask(coord, data);
-
-        if (_cacheByData.TryGetValue(data, out var cache) && cache != null)
-            cache.initialized = false;
-    }
-    // tiny pooled list helper so CleanupCache doesn't allocate garbage every Update
-    private static class ListPool<T>
-    {
-        private static readonly Stack<List<T>> _pool = new();
-        public static List<T> Get() => _pool.Count > 0 ? _pool.Pop() : new List<T>(64);
-        public static void Release(List<T> list) { list.Clear(); _pool.Push(list); }
-    }
-    private void ApplyChunkDensityMask(Vector3Int coord, AsteroidFieldData data)
-    {
-        if (data == null || data.count <= 0)
-            return;
-
-        if (!posManager)
-            return;
-
-        int visibleCount = posManager.GetVisibleCountForChunk(coord, data);
-
-        for (int i = 0; i < data.count; i++)
-        {
-            bool shouldHide = i >= visibleCount;
-            SetInstanceHidden(data, i, shouldHide);
-        }
+        float lengthSquared = q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+        if (!float.IsFinite(lengthSquared) || lengthSquared < 1e-12f) return Quaternion.identity;
+        float inverseLength = 1f / Mathf.Sqrt(lengthSquared);
+        return new Quaternion(q.x * inverseLength, q.y * inverseLength, q.z * inverseLength, q.w * inverseLength);
     }
 }

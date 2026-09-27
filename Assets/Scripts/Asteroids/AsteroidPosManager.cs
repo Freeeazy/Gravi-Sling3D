@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Runtime chunk manager: keeps a 3x3x3 set of AsteroidFieldData chunks around the player.
-/// For now: just guarantees the 27 exist and are stable. Recycling/shift logic can be added next.
+/// Recycles data without regenerating geometry; owns assignment and density state.
 /// </summary>
 public class AsteroidPosManager : MonoBehaviour
 {
@@ -48,6 +48,21 @@ public class AsteroidPosManager : MonoBehaviour
     /// IMPORTANT: data contents don't change; only its coord changes.
     /// </summary>
     public event Action<Vector3Int, AsteroidFieldData> OnChunkCreated;
+    public event Action OnGridChanged;
+    public int ChunksVersion { get; private set; }
+
+    private struct DensityCache
+    {
+        public AsteroidFieldData data;
+        public int sourceCount;
+        public int visibleCount;
+    }
+    private readonly Dictionary<Vector3Int, DensityCache> _densityByCoord =
+        new Dictionary<Vector3Int, DensityCache>(64);
+    private bool _densitySettingsCached;
+    private bool _cachedUseDensity;
+    private float _cachedMinDensity, _cachedMaxDensity, _cachedFrequency;
+    private int _cachedDensitySeed;
 
     // coord -> data currently occupying that coord (changes on shift)
     private readonly Dictionary<Vector3Int, AsteroidFieldData> _chunks = new Dictionary<Vector3Int, AsteroidFieldData>(64);
@@ -60,13 +75,20 @@ public class AsteroidPosManager : MonoBehaviour
 
     private void Awake()
     {
-        if (!player) player = Camera.main ? Camera.main.transform : transform;
+        if (!player)
+        {
+            Camera cam = Camera.main;
+            player = cam ? cam.transform : transform;
+        }
+        chunkSize = Mathf.Max(1f, chunkSize);
         gridWidth = Mathf.Max(1, gridWidth);
 
         if (gridWidth % 2 == 0) gridWidth += 1; // enforce odd
 
         if (!collisionDetector)
             collisionDetector = FindFirstObjectByType<AsteroidFieldCollisionDetector>();
+        if (collisionDetector && !collisionDetector.posManager)
+            collisionDetector.posManager = this;
     }
 
     private void Start()
@@ -80,8 +102,13 @@ public class AsteroidPosManager : MonoBehaviour
 
     private void Update()
     {
-        Vector3Int newCenter = WorldToChunkCoord(player.position);
-        if (newCenter == _lastCenterChunk) return;
+        bool densityChanged = RefreshDensitySettings();
+        Vector3Int newCenter = WorldToChunkCoord(player ? player.position : transform.position);
+        if (newCenter == _lastCenterChunk)
+        {
+            if (densityChanged) UpdateCollisionChunk(newCenter);
+            return;
+        }
 
         ShiftGrid_NoRegen(newCenter);
         _lastCenterChunk = newCenter;
@@ -97,6 +124,7 @@ public class AsteroidPosManager : MonoBehaviour
             return;
 
         _chunks.Clear();
+        _densityByCoord.Clear();
 
         Vector3Int center = WorldToChunkCoord(player ? player.position : Vector3.zero);
         int half = gridWidth / 2;
@@ -108,6 +136,7 @@ public class AsteroidPosManager : MonoBehaviour
                     Vector3Int coord = new Vector3Int(center.x + dx, center.y + dy, center.z + dz);
                     CreateChunk_OneTime(coord);
                 }
+        NotifyGridChanged();
     }
 
     private void CreateChunk_OneTime(Vector3Int coord)
@@ -174,7 +203,11 @@ public class AsteroidPosManager : MonoBehaviour
 
             AsteroidFieldData data = _chunks[oldCoord];
             _chunks.Remove(oldCoord);
+            _densityByCoord.Remove(oldCoord);
 
+            // A new spatial assignment respawns this recycled template for BOTH consumers.
+            // Revisiting a still-loaded assignment never runs this reset.
+            data.ResetRuntimeDestruction();
             _chunks[newCoord] = data;
 
             if (logChunkCreates)
@@ -196,32 +229,39 @@ public class AsteroidPosManager : MonoBehaviour
         {
             CreateChunk_OneTime(_toAdd[i]);
         }
+        NotifyGridChanged();
     }
+
+    private void NotifyGridChanged()
+    {
+        unchecked { ChunksVersion++; }
+        OnGridChanged?.Invoke();
+    }
+
     private void UpdateCollisionChunk(Vector3Int centerChunk)
     {
         if (!collisionDetector) return;
 
         if (_chunks.TryGetValue(centerChunk, out var data))
         {
-            collisionDetector.fieldData = data;
-            collisionDetector.chunkWorldOrigin = ChunkCoordToWorldOrigin(centerChunk);
-
-            int visible = GetVisibleCountForChunk(centerChunk, data);
-            collisionDetector.Rebuild(visible);
+            collisionDetector.SetCurrentChunk(data, ChunkCoordToWorldOrigin(centerChunk),
+                GetVisibleCountForChunk(centerChunk, data));
         }
     }
 
     public Vector3Int WorldToChunkCoord(Vector3 worldPos)
     {
-        int cx = Mathf.FloorToInt(worldPos.x / chunkSize);
-        int cy = Mathf.FloorToInt(worldPos.y / chunkSize);
-        int cz = Mathf.FloorToInt(worldPos.z / chunkSize);
+        float size = Mathf.Max(1f, chunkSize);
+        int cx = Mathf.FloorToInt(worldPos.x / size);
+        int cy = Mathf.FloorToInt(worldPos.y / size);
+        int cz = Mathf.FloorToInt(worldPos.z / size);
         return new Vector3Int(cx, cy, cz);
     }
 
     public Vector3 ChunkCoordToWorldOrigin(Vector3Int coord)
     {
-        return new Vector3(coord.x * chunkSize, coord.y * chunkSize, coord.z * chunkSize);
+        float size = Mathf.Max(1f, chunkSize);
+        return new Vector3(coord.x * size, coord.y * size, coord.z * size);
     }
 
     private static int HashSeed(int baseSeed, Vector3Int c)
@@ -257,9 +297,38 @@ public class AsteroidPosManager : MonoBehaviour
         if (data == null || data.count <= 0)
             return 0;
 
-        float density = GetDensityForChunk(coord);
-        return Mathf.Clamp(Mathf.RoundToInt(data.count * density), 0, data.count);
+        RefreshDensitySettings();
+        if (_densityByCoord.TryGetValue(coord, out var cached) &&
+            cached.data == data && cached.sourceCount == data.count)
+            return cached.visibleCount;
+
+        int visible = Mathf.Clamp(Mathf.RoundToInt(data.count * GetDensityForChunk(coord)), 0, data.count);
+        _densityByCoord[coord] = new DensityCache
+        {
+            data = data,
+            sourceCount = data.count,
+            visibleCount = visible
+        };
+        return visible;
     }
+
+    private bool RefreshDensitySettings()
+    {
+        if (_densitySettingsCached && _cachedUseDensity == useDensity &&
+            _cachedMinDensity == minDensity && _cachedMaxDensity == maxDensity &&
+            _cachedFrequency == densityFrequency && _cachedDensitySeed == densitySeed)
+            return false;
+
+        _cachedUseDensity = useDensity;
+        _cachedMinDensity = minDensity;
+        _cachedMaxDensity = maxDensity;
+        _cachedFrequency = densityFrequency;
+        _cachedDensitySeed = densitySeed;
+        _densitySettingsCached = true;
+        _densityByCoord.Clear();
+        return true;
+    }
+
     private static float SmoothValueNoise3D(Vector3 p, int seed)
     {
         int x0 = Mathf.FloorToInt(p.x);

@@ -19,6 +19,30 @@ public class SimpleMove : MonoBehaviour
     public float damping = 2f;                 // lower = more drift
     public bool normalizeInput = true;
 
+    [Header("Tractor Beam")]
+    [Range(0f, 1f)] public float speedReductionPerBeam = 0.10f;
+    [Tooltip("How quickly excess speed is removed, in units per second squared.")]
+    [Min(0.1f)] public float tractorBraking = 200f;
+    [SerializeField] private int activeTractorBeamCount;
+
+    public int ActiveTractorBeamCount => activeTractorBeamCount;
+    public float TractorSpeedMultiplier => Mathf.Clamp01(1f - activeTractorBeamCount * Mathf.Clamp01(speedReductionPerBeam));
+
+    private float _tractorMomentumReferenceSpeed;
+    public void SetTractorBeamCount(int count)
+    {
+        count = Mathf.Max(0, count);
+
+        // Capture incoming momentum when the first beam connects.
+        if (activeTractorBeamCount == 0 && count > 0)
+            _tractorMomentumReferenceSpeed = rb != null ? rb.linearVelocity.magnitude : 0f;
+
+        activeTractorBeamCount = count;
+
+        if (count == 0)
+            _tractorMomentumReferenceSpeed = 0f;
+    }
+
     [Header("Boost (Hold LeftShift) - Additive")]
     [Tooltip("Adds this many m/s to maxSpeed at full boostCharge. (Additive, not multiplicative)")]
     public float boostMaxSpeed = 8f;     // e.g. maxSpeed 8 + 8 = 16 at full charge
@@ -410,7 +434,9 @@ public class SimpleMove : MonoBehaviour
         }
 
         // --- BOOSTED SPEED/ACCEL (ADDITIVE) ---
-        float boostedMaxSpeed = maxSpeed + (boostMaxSpeed * boostCharge);
+        float unmodifiedMaxSpeed = Mathf.Max(0f, maxSpeed + (boostMaxSpeed * boostCharge));
+
+        float boostedMaxSpeed = unmodifiedMaxSpeed * TractorSpeedMultiplier;
 
         // optional extra snap while boosting (additive)
         float boostedAccel = acceleration + (boostAccelAdd * boostCharge);
@@ -454,6 +480,34 @@ public class SimpleMove : MonoBehaviour
                 float effectiveDamping = damping * slipDampScale;
                 float dampFactor = Mathf.Exp(-effectiveDamping * dt);
                 newVel *= dampFactor;
+            }
+        }
+
+        // Apply tractor resistance to excess momentum without repeatedly
+        // multiplying the current velocity by the slowdown percentage.
+        if (activeTractorBeamCount > 0 && TractorSpeedMultiplier < 1f)
+        {
+            // A faster external launch can establish a higher momentum reference.
+            _tractorMomentumReferenceSpeed = Mathf.Max(
+                _tractorMomentumReferenceSpeed, currentVel.magnitude);
+
+            // Powered movement uses its normal speed target.
+            // Coasting preserves a reference to incoming slingshot momentum.
+            float referenceSpeed = hasInput
+                ? unmodifiedMaxSpeed
+                : Mathf.Max(unmodifiedMaxSpeed, _tractorMomentumReferenceSpeed);
+
+            float allowedSpeed = referenceSpeed * TractorSpeedMultiplier;
+            float speed = newVel.magnitude;
+
+            if (speed > allowedSpeed)
+            {
+                float reducedSpeed = Mathf.MoveTowards(
+                    speed,
+                    allowedSpeed,
+                    Mathf.Max(0.1f, tractorBraking) * dt);
+
+                newVel *= reducedSpeed / speed;
             }
         }
 

@@ -1,8 +1,10 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 /// <summary>
-/// One cop for any positive wanted level. Owns spawning and the escape timer.
-/// Requires the existing WantedLevelManager; no changes to SimpleMove are needed.
+/// Spawns three cops per wanted star, up to fifteen. Positive star decreases leave
+/// existing cops in the chase. Escape requires every cop to lose contact.
+/// Requires WantedLevelManager and the existing SimpleMove tractor-beam API.
 /// </summary>
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(-100)]
@@ -25,11 +27,15 @@ public class PoliceChaseManager : MonoBehaviour
     [SerializeField] private bool logChaseEvents = true;
 
     [Header("Runtime Debug")]
-    [SerializeField] private PoliceShipAI activePolice;
+    [SerializeField] private List<PoliceShipAI> activePoliceShips = new List<PoliceShipAI>();
+    [SerializeField] private int targetPoliceCount;
     [SerializeField] private bool escapeTimerRunning;
     [SerializeField] private float escapeTimeRemaining;
 
-    public PoliceShipAI ActivePolice => activePolice;
+    // Kept for existing callers that only need one cop.
+    public PoliceShipAI ActivePolice => activePoliceShips.Count > 0 ? activePoliceShips[0] : null;
+    public IReadOnlyList<PoliceShipAI> ActivePoliceShips => activePoliceShips;
+    public int ActivePoliceCount => activePoliceShips.Count;
     public bool IsEscapeTimerRunning => escapeTimerRunning;
     public float EscapeTimeRemaining => escapeTimeRemaining;
 
@@ -40,6 +46,8 @@ public class PoliceChaseManager : MonoBehaviour
 
     private void Start()
     {
+        activePoliceShips.Clear();
+        targetPoliceCount = 0;
         started = true;
         Connect();
     }
@@ -78,16 +86,18 @@ public class PoliceChaseManager : MonoBehaviour
             return;
         }
 
-        // Raising/lowering stars while still wanted never duplicates the cop or
-        // resets an existing search countdown in this prototype.
-        if (activePolice == null)
+        // Remember the peak level until the chase ends. Lowering debug stars
+        // neither removes cops nor lowers the replacement count.
+        targetPoliceCount = Mathf.Max(targetPoliceCount, Mathf.Clamp(newLevel, 1, WantedLevelManager.SupportedMaxWantedLevel) * 3);
+        RemoveUnavailablePolice();
+        if (activePoliceShips.Count < targetPoliceCount)
             TrySpawnPolice();
     }
 
     private void TrySpawnPolice()
     {
         nextSpawnAttempt = Time.time + 1f;
-        if (activePolice != null || wantedManager == null || !wantedManager.IsWanted)
+        if (wantedManager == null || !wantedManager.IsWanted || activePoliceShips.Count >= targetPoliceCount)
             return;
         if (playerBody == null && SimpleMove.Instance != null)
             playerBody = SimpleMove.Instance.rb;
@@ -104,60 +114,92 @@ public class PoliceChaseManager : MonoBehaviour
 
         reportedSpawnError = false;
         ResetEscapeTimer();
-        Vector3 position = playerBody.position + Random.onUnitSphere * spawnRadius;
-        activePolice = Instantiate(policePrefab, position, Quaternion.identity);
-        // Supports a disabled prefab root/component as well as the recommended active prefab.
-        activePolice.gameObject.SetActive(true);
-        activePolice.enabled = true;
-        activePolice.StateChanged += OnPoliceStateChanged;
-        activePolice.Initialize(playerBody);
+        while (activePoliceShips.Count < targetPoliceCount)
+        {
+            Vector3 position = playerBody.position + Random.onUnitSphere * spawnRadius;
+            PoliceShipAI police = Instantiate(policePrefab, position, Quaternion.identity);
+            police.gameObject.SetActive(true);
+            police.enabled = true;
+            activePoliceShips.Add(police);
+            police.StateChanged += OnPoliceStateChanged;
+            police.Initialize(playerBody);
 
-        if (spawnRadius > activePolice.LoseContactDistance)
-            Debug.LogWarning("Spawn Radius exceeds Lose Contact Distance; the cop may lose you immediately.", this);
+            if (spawnRadius > police.LoseContactDistance)
+                Debug.LogWarning("Spawn Radius exceeds Lose Contact Distance; the cop may lose you immediately.", this);
+        }
+
         if (logChaseEvents)
-            Debug.Log("Police spawned: pursuit started.", this);
+            Debug.Log($"Police deployed: {activePoliceShips.Count} cop(s) in the chase.", this);
     }
 
     private void OnPoliceStateChanged(PoliceShipAI police, PoliceShipAI.ChaseState state)
     {
-        if (police != activePolice || wantedManager == null || !wantedManager.IsWanted)
+        if (!activePoliceShips.Contains(police) || wantedManager == null || !wantedManager.IsWanted)
             return;
 
         if (logChaseEvents)
-            Debug.Log($"Police state: {state}", this);
+            Debug.Log($"Police {police.name} state: {state}", police);
 
-        if (state == PoliceShipAI.ChaseState.Searching)
-        {
-            escapeTimerRunning = true;
-            escapeTimeRemaining = escapeDuration;
-            wantedManager.SetEscapeTimer(escapeTimeRemaining);
-        }
-        else
-        {
+        // Any reacquisition cancels escape immediately. Start the countdown in
+        // Update, after all cops have completed their physics state changes.
+        if (state != PoliceShipAI.ChaseState.Searching)
             ResetEscapeTimer();
-        }
     }
 
     private void FixedUpdate()
     {
+        // This manager runs before PoliceShipAI. Sample every cop first, then
+        // distribute one real sighting before any cop chooses movement this tick.
+        SharePoliceSightings();
+
         var movement = SimpleMove.Instance;
         if (movement == null)
             return;
 
-        // One cop for now. Later, count all connected cops here.
-        int beamCount =
-            wantedManager != null &&
-            wantedManager.IsWanted &&
-            playerBody != null &&
-            playerBody.gameObject.activeInHierarchy &&
-            movement.rb == playerBody &&
-            activePolice != null &&
-            activePolice.isActiveAndEnabled &&
-            activePolice.IsBeamActive
-                ? 1
-                : 0;
-
+        int beamCount = 0;
+        if (wantedManager != null && wantedManager.IsWanted &&
+            playerBody != null && playerBody.gameObject.activeInHierarchy &&
+            movement.rb == playerBody)
+        {
+            foreach (PoliceShipAI police in activePoliceShips)
+            {
+                if (police != null && police.isActiveAndEnabled && police.IsBeamActive)
+                    beamCount++;
+            }
+        }
         movement.SetTractorBeamCount(beamCount);
+    }
+
+    private void SharePoliceSightings()
+    {
+        if (wantedManager == null || !wantedManager.IsWanted ||
+            playerBody == null || !playerBody.gameObject.activeInHierarchy)
+            return;
+
+        PoliceShipAI spotter = null;
+        foreach (PoliceShipAI police in activePoliceShips)
+        {
+            if (police == null || !police.isActiveAndEnabled)
+                continue;
+            police.RefreshDirectContact();
+            if (police.HasDirectContact &&
+                (spotter == null || police.DistanceToPlayer < spotter.DistanceToPlayer))
+                spotter = police;
+        }
+
+        if (spotter == null)
+            return;
+
+        // Received reports never qualify as direct sightings on the next pass.
+        Vector3 position = spotter.LastObservedPosition;
+        Vector3 velocity = spotter.LastObservedVelocity;
+        foreach (PoliceShipAI police in activePoliceShips)
+        {
+            if (police != null && police.isActiveAndEnabled)
+                police.ReceiveSharedSighting(position, velocity);
+        }
+        if (escapeTimerRunning)
+            ResetEscapeTimer();
     }
 
     private void Update()
@@ -170,22 +212,38 @@ public class PoliceChaseManager : MonoBehaviour
         if (!wantedManager.IsWanted)
             return;
 
-        if (activePolice == null || !activePolice.isActiveAndEnabled ||
-            playerBody == null || !playerBody.gameObject.activeInHierarchy)
+        if (playerBody == null || !playerBody.gameObject.activeInHierarchy)
         {
-            // Missing/disabled actors are not treated as successful escapes.
-            EndChase();
+            // A missing player is not an escape. Retain the target count for retry.
+            DespawnAllPolice();
+            ResetEscapeTimer();
             if (Time.time >= nextSpawnAttempt)
                 TrySpawnPolice();
             return;
         }
 
-        if (!escapeTimerRunning)
-            return;
-        // Defensive check: reacquisition wins before consuming the countdown.
-        if (!activePolice.IsSearching)
+        RemoveUnavailablePolice();
+        if (activePoliceShips.Count < targetPoliceCount)
         {
+            // Replace only missing/disabled cops, preserving the other pursuers.
             ResetEscapeTimer();
+            if (Time.time >= nextSpawnAttempt)
+                TrySpawnPolice();
+            return;
+        }
+
+        if (!AllPoliceSearching())
+        {
+            if (escapeTimerRunning)
+                ResetEscapeTimer();
+            return;
+        }
+
+        if (!escapeTimerRunning)
+        {
+            escapeTimerRunning = true;
+            escapeTimeRemaining = escapeDuration;
+            wantedManager.SetEscapeTimer(escapeTimeRemaining);
             return;
         }
 
@@ -194,9 +252,43 @@ public class PoliceChaseManager : MonoBehaviour
         if (escapeTimeRemaining <= 0f)
         {
             if (logChaseEvents)
-                Debug.Log("Pursuit lost: wanted level cleared.", this);
-            wantedManager.ClearWantedLevel(); // The change event also despawns the cop.
+                Debug.Log("All police lost: wanted level cleared.", this);
+            wantedManager.ClearWantedLevel(); // Change event despawns every cop.
         }
+    }
+
+    private bool AllPoliceSearching()
+    {
+        if (activePoliceShips.Count == 0)
+            return false;
+        foreach (PoliceShipAI police in activePoliceShips)
+        {
+            if (police == null || !police.isActiveAndEnabled || !police.IsSearching)
+                return false;
+        }
+        return true;
+    }
+
+    private void RemoveUnavailablePolice()
+    {
+        for (int i = activePoliceShips.Count - 1; i >= 0; i--)
+        {
+            PoliceShipAI police = activePoliceShips[i];
+            if (police != null && police.isActiveAndEnabled)
+                continue;
+            activePoliceShips.RemoveAt(i);
+            DestroyPolice(police);
+            ResetEscapeTimer();
+        }
+    }
+
+    private void DestroyPolice(PoliceShipAI police)
+    {
+        if (police == null)
+            return;
+        police.StateChanged -= OnPoliceStateChanged;
+        police.gameObject.SetActive(false);
+        Destroy(police.gameObject);
     }
 
     private void ResetEscapeTimer()
@@ -207,19 +299,20 @@ public class PoliceChaseManager : MonoBehaviour
             wantedManager.ClearEscapeTimer();
     }
 
-    private void EndChase()
+    private void DespawnAllPolice()
     {
         if (SimpleMove.Instance != null)
             SimpleMove.Instance.SetTractorBeamCount(0);
+        foreach (PoliceShipAI police in activePoliceShips)
+            DestroyPolice(police);
+        activePoliceShips.Clear();
+    }
 
+    private void EndChase()
+    {
+        targetPoliceCount = 0;
         ResetEscapeTimer();
-        if (activePolice == null)
-            return;
-        PoliceShipAI police = activePolice;
-        activePolice = null;
-        police.StateChanged -= OnPoliceStateChanged;
-        police.gameObject.SetActive(false);
-        Destroy(police.gameObject);
+        DespawnAllPolice();
     }
 
     private void OnDisable()

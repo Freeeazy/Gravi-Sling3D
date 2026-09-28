@@ -19,8 +19,10 @@ public class WantedLevelManager : MonoBehaviour
 {
     public static WantedLevelManager Instance { get; private set; }
 
+    public const int SupportedMaxWantedLevel = 5;
+
     [Header("Wanted Level")]
-    [SerializeField, Min(1)] private int maxWantedLevel = 5;
+    [SerializeField, Range(1, SupportedMaxWantedLevel)] private int maxWantedLevel = SupportedMaxWantedLevel;
     [SerializeField, Min(0)] private int startingWantedLevel = 0;
 
     [Header("Wanted UI")]
@@ -93,7 +95,6 @@ public class WantedLevelManager : MonoBehaviour
         if (!enableDebugKeys || (!allowDebugKeysWhilePaused && Time.timeScale == 0f))
             return;
 
-#if ENABLE_INPUT_SYSTEM
         Keyboard keyboard = Keyboard.current;
         if (keyboard == null)
             return;
@@ -104,14 +105,6 @@ public class WantedLevelManager : MonoBehaviour
             AddStars();
         else if (decreaseKey != Key.None && keyboard[decreaseKey].wasPressedThisFrame)
             RemoveStars();
-#elif ENABLE_LEGACY_INPUT_MANAGER || !UNITY_2019_3_OR_NEWER
-        if (Input.GetKeyDown(clearKey))
-            ClearWantedLevel();
-        else if (Input.GetKeyDown(increaseKey))
-            AddStars();
-        else if (Input.GetKeyDown(decreaseKey))
-            RemoveStars();
-#endif
     }
 
     /// <summary>Adds a positive number of stars, stopping at the maximum.</summary>

@@ -1508,9 +1508,10 @@ MonoBehaviour:
   playerBody: {fileID: 1616803247}
   policePrefab: {fileID: 3975543815697745802, guid: a3c82e41e64b42449aa38baf409b342c, type: 3}
   spawnRadius: 500
-  escapeDuration: 30
+  escapeDuration: 15
   logChaseEvents: 1
-  activePolice: {fileID: 0}
+  activePoliceShips: []
+  targetPoliceCount: 0
   escapeTimerRunning: 0
   escapeTimeRemaining: 0
 --- !u!1 &33977154
@@ -40845,7 +40846,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.00016784668}
+  m_AnchoredPosition: {x: 0, y: 0.0001449585}
   m_SizeDelta: {x: 0, y: 40}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &1149800074
@@ -47477,7 +47478,7 @@ MonoBehaviour:
   startFull: 1
   startEnergy: 100
   drainPerSecond: 20
-  dontDrain: 1
+  dontDrain: 0
   regenPerSecond: 5
   boostRampUp: 1.2
   boostRampDown: 1
@@ -58306,6 +58307,9 @@ MonoBehaviour:
   acceleration: 100
   damping: 1
   normalizeInput: 1
+  speedReductionPerBeam: 0.1
+  tractorBraking: 1000
+  activeTractorBeamCount: 0
   boostMaxSpeed: 500
   boostRampUp: 1.2
   boostRampDown: 1

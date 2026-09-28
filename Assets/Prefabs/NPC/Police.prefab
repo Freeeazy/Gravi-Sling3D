@@ -19593,6 +19593,18 @@ MonoBehaviour:
   followDistance: 30
   arrivalTolerance: 0.15
   resumeDistanceBuffer: 1
+  holdingRange: 10
+  springStrength: 5
+  springDamping: 2.5
+  velocityResponseTime: 0.45
+  formationSpread: 0.65
+  personalityVariation: 0.15
+  formationTurnSpeed: 45
+  driftAmplitude: 0.75
+  driftSpeed: 0.6
+  separationRadius: 6
+  separationStrength: 25
+  separationDamping: 3
   tractorBeamParticles:
   - {fileID: 5089097850523717843}
   beamRangeOrigin: {fileID: 0}
@@ -19604,7 +19616,7 @@ MonoBehaviour:
   loseContactGraceTime: 2
   searchSpeedMultiplier: 1
   searchLookAheadTime: 1
-  rotationSpeed: 180
+  rotationSpeed: 360
   baseEulerOffset: {x: 0, y: 0, z: 0}
   currentState: 0
   distanceToPlayer: 0

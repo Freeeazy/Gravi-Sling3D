@@ -218,7 +218,7 @@ public class WantedLevelManager : MonoBehaviour
         IsEscapeTimerActive = false;
         EscapeTimeRemaining = 0f;
         if (escapeTimerText != null)
-            escapeTimerText.text = "Escape: --";
+            escapeTimerText.text = "";
     }
 
     private void OnValidate()

@@ -5,12 +5,19 @@ using UnityEngine.UI;
 
 public class NPCUILink : MonoBehaviour
 {
+    private static readonly int HologramColorID = Shader.PropertyToID("_HologramColor");
     [Serializable]
     public class TagSlot
     {
         public GameObject root;     // parent GO for the tag pill (so we can SetActive)
         public Image background;    // image color
         public TMP_Text label;      // tag text
+
+        [Header("Hologram Cover")]
+        public Graphic cover;       // UI object using UI/HologramFilter material
+
+        [NonSerialized]
+        public Material runtimeCoverMaterial;
     }
 
     [Serializable]
@@ -35,6 +42,7 @@ public class NPCUILink : MonoBehaviour
 
     [Header("Row UI")]
     public TMP_Text nameText;
+    public TMP_Text nameTextVisible;
     public Image portraitImage;
     public TMP_Text questTitleText;
     public TMP_Text questDescriptionText; 
@@ -89,6 +97,7 @@ public class NPCUILink : MonoBehaviour
         BoundNpcId = npc.npcId;
 
         if (nameText) nameText.text = npc.displayName;
+        if (nameTextVisible) nameTextVisible.text = npc.displayName;
 
         if (portraitImage)
         {
@@ -110,6 +119,7 @@ public class NPCUILink : MonoBehaviour
     public void Clear()
     {
         if (nameText) nameText.text = "";
+        if (nameTextVisible) nameTextVisible.text = "";
 
         if (portraitImage)
         {
@@ -150,6 +160,7 @@ public class NPCUILink : MonoBehaviour
             if (slot.root) slot.root.SetActive(true);
             if (slot.label) slot.label.text = tags[i].label;
             if (slot.background) slot.background.color = tags[i].color;
+            ApplyTagCoverColor(slot, tags[i].color);
 
             SizeTagToLabel(slot);
         }
@@ -364,26 +375,47 @@ public class NPCUILink : MonoBehaviour
 
         return $"{minutes:00}:{secs:00}";
     }
-
-#if UNITY_EDITOR
-    // Optional: auto-grab common references when you hit "Reset" in inspector
-    private void Reset()
+    private void ApplyTagCoverColor(TagSlot slot, Color color)
     {
-        if (!nameText) nameText = GetComponentInChildren<TMP_Text>(true);
+        if (slot == null || slot.cover == null)
+            return;
 
-        // Try to find an Image named "Portrait" under this row
-        if (!portraitImage)
+        // Create a unique material instance for this specific tag slot.
+        // This prevents us from modifying the shared material asset.
+        if (slot.runtimeCoverMaterial == null)
         {
-            var images = GetComponentsInChildren<Image>(true);
-            foreach (var img in images)
+            Material sourceMaterial = slot.cover.material;
+
+            if (sourceMaterial == null)
+                return;
+
+            slot.runtimeCoverMaterial = new Material(sourceMaterial)
             {
-                if (img && img.gameObject.name.IndexOf("portrait", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    portraitImage = img;
-                    break;
-                }
-            }
+                name = sourceMaterial.name + " (Runtime Instance)"
+            };
+
+            slot.cover.material = slot.runtimeCoverMaterial;
+        }
+
+        if (slot.runtimeCoverMaterial.HasProperty(HologramColorID))
+        {
+            slot.runtimeCoverMaterial.SetColor(HologramColorID, color);
         }
     }
-#endif
+    private void OnDestroy()
+    {
+        if (tagSlots == null)
+            return;
+
+        for (int i = 0; i < tagSlots.Length; i++)
+        {
+            TagSlot slot = tagSlots[i];
+
+            if (slot == null || slot.runtimeCoverMaterial == null)
+                continue;
+
+            Destroy(slot.runtimeCoverMaterial);
+            slot.runtimeCoverMaterial = null;
+        }
+    }
 }

@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class FPSCounterTMP : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class FPSCounterTMP : MonoBehaviour
     [Header("Update")]
     [Tooltip("How often to update the displayed FPS (seconds).")]
     public float updateInterval = 0.1f;
+
+    [Header("Toggle")]
+    [SerializeField] private Key toggleKey = Key.F12;
 
     private float _timer;
     private int _frames;
@@ -26,6 +30,18 @@ public class FPSCounterTMP : MonoBehaviour
 
     private void Update()
     {
+        // Toggle FPS display with F12
+        if (Keyboard.current != null &&
+            Keyboard.current[toggleKey].wasPressedThisFrame)
+        {
+            if (fpsText != null)
+                fpsText.gameObject.SetActive(!fpsText.gameObject.activeSelf);
+        }
+
+        // Don't bother calculating/updating text while hidden.
+        if (fpsText == null || !fpsText.gameObject.activeSelf)
+            return;
+
         float dt = Time.unscaledDeltaTime;
 
         _frames++;

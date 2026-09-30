@@ -81,7 +81,8 @@ public static class NPCUtil
             string last = lastNames[npcRng.Next(lastNames.Length)];
             int num = npcRng.Next(10, 99); // small suffix for flavor
 
-            string name = $"{first} {last}-{num}";
+            //string name = $"{first} {last}-{num}";
+            string name = $"{first} {last}";
             NPCProfile profile = NPCProfileUtil.GenerateProfile(id);
             list.Add(new NPCData(id, name, profile));
         }

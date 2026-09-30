@@ -41,6 +41,7 @@ public class OpenQuestBoard : MonoBehaviour
         }
 
         UIBlock.IsUIOpen = false;
+        ForceClose();
     }
 
     private void Update()

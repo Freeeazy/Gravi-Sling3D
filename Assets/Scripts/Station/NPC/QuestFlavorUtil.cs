@@ -44,7 +44,7 @@ public static class QuestFlavorUtil
 
     private static QuestFlavor Make(string title, string item, string shortDesc, string fullDesc)
     {
-        return new QuestFlavor { questTitle = title, deliveryItemName = item, shortDescription = shortDesc, fullDescription = fullDesc };
+        return new QuestFlavor { questTitle = "- " + title, deliveryItemName = item, shortDescription = shortDesc, fullDescription = fullDesc };
     }
 
     private static bool Has(NPCProfile profile, NPCPersonalityTrait trait)

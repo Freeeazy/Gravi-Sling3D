@@ -403,6 +403,18 @@ public class PlayerThrustManager : MonoBehaviour
 
         emission.SetBursts(new ParticleSystem.Burst[] { burst });
 
+        int ghostCount = 0;
+
+        if (launchSpeed > 1250f)
+            ghostCount = 3;
+        else if (launchSpeed > 750f)
+            ghostCount = 2;
+        else if (launchSpeed > 500f)
+            ghostCount = 1;
+
+        if (ghostCount > 0 && SlingGhostTrail.Instance != null)
+            SlingGhostTrail.Instance.EmitGhost(ghostCount);
+
         PlayOneShot(MachRing);
     }
 }

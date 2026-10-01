@@ -3,6 +3,21 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class MouseObjectSpin : MonoBehaviour
 {
+    public static bool MouseInteractionEnabled { get; private set; } = true;
+    public static void SetMouseInteraction(bool enabled)
+    {
+        MouseInteractionEnabled = enabled;
+    }
+    public void DisableMouseInteraction()
+    {
+        SetMouseInteraction(false);
+    }
+
+    public void EnableMouseInteraction()
+    {
+        SetMouseInteraction(true);
+    }
+
     [Header("Spin Settings")]
     public int fullSpins = 2;
     public float extraDegrees = 25f;
@@ -89,6 +104,9 @@ public class MouseObjectSpin : MonoBehaviour
 
     void OnMouseEnter()
     {
+        if (!MouseInteractionEnabled)
+            return;
+
         hovered = true;
         TriggerSpin();
     }

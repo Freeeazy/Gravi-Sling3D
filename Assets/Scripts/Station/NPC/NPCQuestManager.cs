@@ -506,7 +506,12 @@ public class NPCQuestManager : MonoBehaviour
         }
 
         if (completed > 0)
+        {
             RefreshClosestQuest();
+
+            if (SaveManager.Instance != null)
+                SaveManager.Instance.SaveNow();
+        }
 
         return returnedQualityIndex;
     }
@@ -1049,6 +1054,9 @@ public class NPCQuestManager : MonoBehaviour
                 reputationExpReward
             );
         }
+
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.RecordDelivery(finalCredits);
 
         Debug.Log(
             $"[NPCQuestManager] Delivery complete. " +

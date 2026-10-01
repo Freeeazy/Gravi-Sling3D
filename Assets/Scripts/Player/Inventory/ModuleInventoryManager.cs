@@ -760,4 +760,18 @@ public class ModuleInventoryManager : MonoBehaviour
 
         text.text = message;
     }
+    public void RestoreSavedCredits(float amount)
+    {
+        if (_creditsRoutine != null)
+        {
+            StopCoroutine(_creditsRoutine);
+            _creditsRoutine = null;
+        }
+
+        credits = Mathf.Max(0f, amount);
+        _displayedCredits = credits;
+        _pendingCreditGain = 0f;
+
+        UpdateCreditsText();
+    }
 }

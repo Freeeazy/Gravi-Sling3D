@@ -1,36 +1,74 @@
+using System.Collections;
 using UnityEngine;
 
 public class OpenPanel : MonoBehaviour
 {
     [Header("Panel")]
-    public GameObject panelToToggle;
+    public CanvasGroup panelToToggle;
 
     [Header("Settings")]
     public bool startClosed = true;
 
+    private const float Delay = 0.1f;
+
     private void Start()
     {
         if (panelToToggle != null && startClosed)
-            panelToToggle.SetActive(false);
+        {
+            panelToToggle.alpha = 0f;
+            panelToToggle.interactable = false;
+            panelToToggle.blocksRaycasts = false;
+        }
     }
 
     public void TogglePanel()
     {
-        if (panelToToggle == null)
-            return;
-
-        panelToToggle.SetActive(!panelToToggle.activeSelf);
+        StartCoroutine(TogglePanelDelayed());
     }
 
     public void Open()
     {
-        if (panelToToggle != null)
-            panelToToggle.SetActive(true);
+        StartCoroutine(OpenDelayed());
     }
 
     public void Close()
     {
+        StartCoroutine(CloseDelayed());
+    }
+
+    private IEnumerator TogglePanelDelayed()
+    {
+        yield return new WaitForSecondsRealtime(Delay);
+
         if (panelToToggle != null)
-            panelToToggle.SetActive(false);
+        {
+            panelToToggle.alpha = panelToToggle.alpha == 0f ? 1f : 0f;
+            panelToToggle.interactable = !panelToToggle.interactable;
+            panelToToggle.blocksRaycasts = !panelToToggle.blocksRaycasts;
+        }
+    }
+
+    private IEnumerator OpenDelayed()
+    {
+        yield return new WaitForSecondsRealtime(Delay);
+
+        if (panelToToggle != null)
+        {
+            panelToToggle.alpha = 1f;
+            panelToToggle.interactable = true;
+            panelToToggle.blocksRaycasts = true;
+        }
+    }
+
+    private IEnumerator CloseDelayed()
+    {
+        yield return new WaitForSecondsRealtime(Delay);
+
+        if (panelToToggle != null)
+        {
+            panelToToggle.alpha = 0f;
+            panelToToggle.interactable = false;
+            panelToToggle.blocksRaycasts = false;
+        }
     }
 }

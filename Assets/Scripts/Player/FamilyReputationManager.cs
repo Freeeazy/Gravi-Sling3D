@@ -265,4 +265,57 @@ public class FamilyReputationManager : MonoBehaviour
 
         return rankNames.Length - 1;
     }
+    public void RestoreSavedReputation(int savedRank, int savedExp)
+    {
+        if (_animateRoutine != null)
+        {
+            StopCoroutine(_animateRoutine);
+            _animateRoutine = null;
+        }
+
+        _pendingChange = 0;
+
+        rankIndex = Mathf.Clamp(savedRank, 0, GetMaxRankIndex());
+        reputationExp = Mathf.Max(0, savedExp);
+
+        HandleRankBounds();
+        RefreshUI();
+    }
+
+    public void GetSaveReputation(out int savedRank, out int savedExp)
+    {
+        int maxRank = GetMaxRankIndex();
+
+        savedRank = Mathf.Clamp(rankIndex, 0, maxRank);
+        savedExp = reputationExp + _pendingChange;
+
+        while (savedRank < maxRank &&
+               savedExp >= GetSaveRankRequirement(savedRank))
+        {
+            savedExp -= GetSaveRankRequirement(savedRank);
+            savedRank++;
+        }
+
+        while (savedExp < 0 && savedRank > 0)
+        {
+            savedRank--;
+            savedExp += GetSaveRankRequirement(savedRank);
+        }
+
+        savedExp = Mathf.Max(0, savedExp);
+    }
+
+    private int GetSaveRankRequirement(int rank)
+    {
+        if (reputationExpToNextRank == null ||
+            reputationExpToNextRank.Length == 0)
+        {
+            return 1000;
+        }
+
+        int index = Mathf.Clamp(
+            rank, 0, reputationExpToNextRank.Length - 1);
+
+        return Mathf.Max(1, reputationExpToNextRank[index]);
+    }
 }

@@ -826,9 +826,9 @@ MonoBehaviour:
   lightDamage: 1
   heavyDamage: 50
   heavySeverity: 1
-  baseDeliveryTime: 20
-  secondsPer1000Units: 2
-  maxLateSecondsBeforeExpire: 30
+  baseDeliveryTime: 30
+  secondsPer1000Units: 1
+  maxLateSecondsBeforeExpire: 15
   distanceUpdateInterval: 0.25
   averageDurabilityText: {fileID: 1548235381}
   maxStoredDeliveries: 100
@@ -1510,6 +1510,10 @@ MonoBehaviour:
   spawnRadius: 500
   escapeDuration: 15
   logChaseEvents: 1
+  captureSpeedThreshold: 20
+  captureDuration: 3
+  captureReputationPenalty: 500
+  captureCreditPenalty: 5000
   activePoliceShips: []
   targetPoliceCount: 0
   escapeTimerRunning: 0
@@ -8032,6 +8036,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 213293297}
   m_CullTransparentMesh: 1
+--- !u!114 &213410763 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 1186887324}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &213924459 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -5169882889933108077, guid: 2e030c7b6b6f23c47847893fe9c7443d, type: 3}
@@ -13494,7 +13509,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -13511,7 +13526,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 396122822}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -13604,10 +13619,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1138649795}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!1001 &358464606
 PrefabInstance:
@@ -19609,6 +19621,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 390209248}
   m_CullTransparentMesh: 1
+--- !u!114 &396122822 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 357868120}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &400287694
 GameObject:
   m_ObjectHideFlags: 0
@@ -23259,6 +23282,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a256062415bbd4a47b3d6b8fdc0f6017, type: 3}
+--- !u!114 &575076654 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 1957246511}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &577046459
 GameObject:
   m_ObjectHideFlags: 0
@@ -24630,11 +24664,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 609961915}
   m_CullTransparentMesh: 1
---- !u!1 &610174538 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 1186887324}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &612115875
 GameObject:
   m_ObjectHideFlags: 0
@@ -27416,6 +27445,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 688415702}
   m_CullTransparentMesh: 1
+--- !u!114 &689357950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 1518567623}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &689942443
 GameObject:
   m_ObjectHideFlags: 0
@@ -33017,7 +33057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -33034,7 +33074,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1557109950}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -33127,10 +33167,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1246106508}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!224 &862492159 stripped
 RectTransform:
@@ -35468,11 +35505,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 946664836}
   m_CullTransparentMesh: 1
---- !u!1 &949036742 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 357868120}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &950371530
 GameObject:
   m_ObjectHideFlags: 0
@@ -36000,6 +36032,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 959758934}
   m_CullTransparentMesh: 1
+--- !u!114 &962465218 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 1522339011}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &963451511
 GameObject:
   m_ObjectHideFlags: 0
@@ -36075,91 +36118,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963451511}
   m_CullTransparentMesh: 1
---- !u!1 &963577493 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 988810009}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &963577494
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963577493}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &963577499 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 988810009}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963577493}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -37299,7 +37263,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -37316,7 +37280,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1925096418}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -37409,10 +37373,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 963577494}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!1 &991792962
 GameObject:
@@ -38388,11 +38349,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1007713077}
   m_CullTransparentMesh: 1
---- !u!1 &1009229856 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 1957246511}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1009430526 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3670708455105610708, guid: a299491b09aa7c64685a24873c8f9f78, type: 3}
@@ -41432,86 +41388,12 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2716067841963529442, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 357868120}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1138649795
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 949036742}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &1138649800 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 357868120}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 949036742}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -43487,7 +43369,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -43504,7 +43386,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 213410763}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -43597,10 +43479,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1865202013}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!1 &1192989356
 GameObject:
@@ -45338,91 +45217,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1243273618}
   m_CullTransparentMesh: 1
---- !u!1 &1246106506 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 862492157}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1246106508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1246106506}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &1246106513 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 862492157}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1246106506}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -54720,11 +54520,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1484814592}
   m_CullTransparentMesh: 1
---- !u!1 &1489956756 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 1518567623}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1493343012
 GameObject:
   m_ObjectHideFlags: 0
@@ -56046,7 +55841,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -56063,7 +55858,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 689357950}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -56156,96 +55951,19 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1518567629}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!224 &1518567624 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2716067841963529442, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1518567623}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1518567629
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489956756}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &1518567634 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1518567623}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489956756}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -56756,7 +56474,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -56773,7 +56491,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 962465218}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -56866,10 +56584,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2066283930}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!1 &1530642025
 GameObject:
@@ -58145,6 +57860,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1553595830}
   m_CullTransparentMesh: 1
+--- !u!114 &1557109950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 862492157}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1557200529
 GameObject:
   m_ObjectHideFlags: 0
@@ -60126,6 +59852,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7615307736927630094, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
@@ -62733,11 +62463,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1683489728}
   m_CullTransparentMesh: 1
---- !u!1 &1684089635 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 1756084703}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1686436845
 GameObject:
   m_ObjectHideFlags: 0
@@ -66044,7 +65769,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -66061,7 +65786,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1847052252}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -66154,10 +65879,7 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2091458293}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!1 &1756436386
 GameObject:
@@ -70783,6 +70505,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1845007830}
   m_CullTransparentMesh: 1
+--- !u!114 &1847052252 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 1756084703}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1848948926
 GameObject:
   m_ObjectHideFlags: 0
@@ -71306,86 +71039,12 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2716067841963529442, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1186887324}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1865202013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 610174538}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &1865202018 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1186887324}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 610174538}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -73386,6 +73045,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1922030982}
   m_CullTransparentMesh: 1
+--- !u!114 &1925096418 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1787352376890222485, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+  m_PrefabInstance: {fileID: 988810009}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1931576057
 GameObject:
   m_ObjectHideFlags: 0
@@ -74404,7 +74074,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -74421,7 +74091,7 @@ PrefabInstance:
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: distanceText
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 575076654}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: questManager
       value: 
@@ -74514,96 +74184,19 @@ PrefabInstance:
     - {fileID: 213865668597724448, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1957246517}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
 --- !u!224 &1957246512 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2716067841963529442, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1957246511}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1957246517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1009229856}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &1957246522 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1957246511}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1009229856}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -78239,91 +77832,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2062311979}
   m_CullTransparentMesh: 1
---- !u!1 &2066283929 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2659922364924344018, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
-  m_PrefabInstance: {fileID: 1522339011}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2066283930
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2066283929}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &2066283935 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1522339011}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2066283929}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -79793,86 +79307,12 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2716067841963529442, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1756084703}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2091458293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684089635}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tagPaddingX: 12
-  tagMinWidth: 40
-  tagMaxWidth: 220
-  nameText: {fileID: 0}
-  nameTextVisible: {fileID: 0}
-  portraitImage: {fileID: 0}
-  questTitleText: {fileID: 0}
-  questDescriptionText: {fileID: 0}
-  distanceText: {fileID: 0}
-  creditsRewardText: {fileID: 0}
-  reputationRewardText: {fileID: 0}
-  expectedDeliveryTimeText: {fileID: 0}
-  rowButton: {fileID: 0}
-  deliveryTypePillRoot: {fileID: 0}
-  deliveryTypePillImage: {fileID: 0}
-  deliveryTypePillText: {fileID: 0}
-  deliveryTypeVisuals:
-  - deliveryType: 1
-    label: Urgent
-    color: {r: 1, g: 0.3, b: 0.22, a: 1}
-  - deliveryType: 0
-    label: Standard
-    color: {r: 0.42, g: 0.76, b: 1, a: 1}
-  - deliveryType: 2
-    label: Relaxed
-    color: {r: 0.48, g: 0.92, b: 0.58, a: 1}
-  deliveryTypePillOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyBars: []
-  difficultyBarOffColor: {r: 0.16, g: 0.16, b: 0.18, a: 0.65}
-  difficultyVisuals:
-  - label: Very Easy
-    color: {r: 0.4, g: 1, b: 0.72, a: 1}
-  - label: Easy
-    color: {r: 0.34, g: 0.92, b: 0.42, a: 1}
-  - label: Standard
-    color: {r: 0.95, g: 0.88, b: 0.32, a: 1}
-  - label: Moderate
-    color: {r: 1, g: 0.66, b: 0.28, a: 1}
-  - label: Hard
-    color: {r: 1, g: 0.38, b: 0.24, a: 1}
-  - label: Very Hard
-    color: {r: 0.88, g: 0.26, b: 0.86, a: 1}
-  - label: Extreme
-    color: {r: 0.55, g: 0.32, b: 1, a: 1}
-  tagSlots:
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  - root: {fileID: 0}
-    background: {fileID: 0}
-    label: {fileID: 0}
-    cover: {fileID: 0}
-  defaultPortrait: {fileID: 0}
 --- !u!114 &2091458298 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
   m_PrefabInstance: {fileID: 1756084703}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684089635}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0b0969570dca1241b2ed440ff33e718, type: 3}
@@ -82046,6 +81486,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7615307736927630094, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
       propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7730116936415313025, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7776437583354276173, guid: bdfc32093a416dd4aba6ffd7f9f1236b, type: 3}

@@ -151,8 +151,7 @@ public class FamilyReputationManager : MonoBehaviour
 
         if (rankIndex >= GetMaxRankIndex())
         {
-            reputationExp = Mathf.Max(0, reputationExp);
-            _pendingChange = Mathf.Max(0, _pendingChange);
+            reputationExp = Mathf.Max(0, reputationExp);    
         }
     }
 

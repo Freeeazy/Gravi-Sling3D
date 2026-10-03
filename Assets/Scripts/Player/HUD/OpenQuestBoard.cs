@@ -7,6 +7,7 @@ public class OpenQuestBoard : MonoBehaviour
     private static readonly HashSet<OpenQuestBoard> cursorOwners = new HashSet<OpenQuestBoard>();
     private static CursorLockMode previousCursorLock;
     private static bool previousCursorVisible;
+    private static int lastToggleHandledFrame = -1;
 
     [Header("Refs (scene objects)")]
     public SimpleMove move;
@@ -20,8 +21,7 @@ public class OpenQuestBoard : MonoBehaviour
 
     [Header("Disable While Open")]
     public List<GameObject> disableWhileOpen = new List<GameObject>();
-    private readonly Dictionary<GameObject, bool> previousStates =
-        new Dictionary<GameObject, bool>();
+    private readonly Dictionary<GameObject, bool> previousStates = new Dictionary<GameObject, bool>();
 
     [Header("Input")]
     [Tooltip("Set to None to open this panel only through buttons or other scripts.")]
@@ -58,6 +58,7 @@ public class OpenQuestBoard : MonoBehaviour
     {
         openBoards.Clear();
         cursorOwners.Clear();
+        lastToggleHandledFrame = -1;
         UIBlock.IsUIOpen = false;
     }
 
@@ -80,8 +81,26 @@ public class OpenQuestBoard : MonoBehaviour
         if (!CanUseBoard && isOpen)
             ForceClose();
 
-        if (toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey))
-            ToggleBoard();
+        if (toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey) && lastToggleHandledFrame != Time.frameCount)
+        {
+            // Consume this press before closing/opening anything.
+            lastToggleHandledFrame = Time.frameCount;
+            
+            if (openBoards.Count > 0)
+            {
+                // ForceClose modifies openBoards, so iterate a snapshot.
+                var boardsToClose = new List<OpenQuestBoard>(openBoards);
+                foreach (var board in boardsToClose)
+                {
+                    if (board != null)
+                        board.ForceClose();
+                }
+            }
+            else
+            {
+                OpenBoard();
+            }
+        }
 
         // Radial menus still run the input/orbit logic above,
         // but never run the rotation logic below.

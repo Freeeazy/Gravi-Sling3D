@@ -26,6 +26,14 @@ public class PoliceChaseManager : MonoBehaviour
     [SerializeField, Min(0.1f)] private float escapeDuration = 8f;
     [SerializeField] private bool logChaseEvents = true;
 
+    [Header("Capture")]
+    [SerializeField, Min(0f)] private float captureSpeedThreshold = 0.5f;
+    [SerializeField, Min(0.1f)] private float captureDuration = 2f;
+    [SerializeField, Min(0)] private int captureReputationPenalty = 500;
+    [SerializeField, Min(0f)] private float captureCreditPenalty = 5000f;
+
+    private float captureTimer;
+
     [Header("Runtime Debug")]
     [SerializeField] private List<PoliceShipAI> activePoliceShips = new List<PoliceShipAI>();
     [SerializeField] private int targetPoliceCount;
@@ -154,7 +162,10 @@ public class PoliceChaseManager : MonoBehaviour
 
         var movement = SimpleMove.Instance;
         if (movement == null)
+        {
+            captureTimer = 0f;
             return;
+        }
 
         int beamCount = 0;
         if (wantedManager != null && wantedManager.IsWanted &&
@@ -167,10 +178,63 @@ public class PoliceChaseManager : MonoBehaviour
                     beamCount++;
             }
         }
+
         movement.SetTractorBeamCount(beamCount);
+        UpdateCaptureTimer(beamCount);
     }
 
-    private void SharePoliceSightings()
+    private void UpdateCaptureTimer(int beamCount)
+    {
+        if (wantedManager == null || !wantedManager.IsWanted || playerBody == null || !playerBody.gameObject.activeInHierarchy || beamCount <= 0)
+        {
+            captureTimer = 0f;
+            return;
+        }
+
+        Vector3 velocity = playerBody.linearVelocity;
+
+        float threshold = Mathf.Max(0f, captureSpeedThreshold);
+
+        if (velocity.sqrMagnitude > threshold * threshold)
+        {
+            captureTimer = 0f;
+            return;
+        }
+
+        captureTimer += Time.fixedDeltaTime;
+
+        if (captureTimer >= Mathf.Max(0.1f, captureDuration))
+            CapturePlayer();
+    }
+
+    public void CapturePlayer()
+    {
+            if (wantedManager == null || !wantedManager.IsWanted)
+                   return;
+    
+            // Clear first so repeated calls cannot charge another penalty.
+            // The wanted-level event calls EndChase(), releasing all beams.
+            wantedManager.ClearWantedLevel();
+    
+            if (FamilyReputationManager.Instance != null)
+            {
+                FamilyReputationManager.Instance.AddReputationExp(-Mathf.Max(0, captureReputationPenalty));
+            }
+    
+            var inventory = ModuleInventoryManager.Instance;
+
+            if (inventory != null)
+                {
+                    // Take whatever they can pay, capped at the configured fine.
+                    float fine = Mathf.Min(Mathf.Max(0f, inventory.credits), Mathf.Max(0f, captureCreditPenalty));
+                    
+                    inventory.TrySpendCredits(fine);
+                }
+    
+            if (logChaseEvents)
+                Debug.Log("Player captured: penalties applied and chase reset.", this);
+        }
+private void SharePoliceSightings()
     {
         if (wantedManager == null || !wantedManager.IsWanted ||
             playerBody == null || !playerBody.gameObject.activeInHierarchy)
@@ -310,6 +374,7 @@ public class PoliceChaseManager : MonoBehaviour
 
     private void EndChase()
     {
+        captureTimer = 0f;
         targetPoliceCount = 0;
         ResetEscapeTimer();
         DespawnAllPolice();

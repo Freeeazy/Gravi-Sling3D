@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
@@ -18,6 +19,9 @@ public class GraviSaveData
     // Lifetime delivery payouts, separate from spendable credits.
     public double creditsEarned;
     public float walletCredits;
+
+    public List<SavedModuleData> modules = new List<SavedModuleData>();
+    public List<SavedModuleData> equippedModules = new List<SavedModuleData>();
 
     public int reputationExp;
     public int rankIndex;
@@ -57,13 +61,13 @@ public class SaveManager : MonoBehaviour
     // or the global PlayerPrefs until a new game starts.
     public bool NewGameTutorialEnabled { get; private set; } = true;
 
-    public string SaveFolder =>
-        Path.Combine(Application.persistentDataPath, "Saves");
+    public string SaveFolder => Path.Combine(Application.persistentDataPath, "Saves");
 
     private readonly System.Random seedRandom = new System.Random();
 
     private ModuleInventoryManager inventory;
     private FamilyReputationManager reputation;
+    private ModuleLoadoutManager loadout;
     private float autosaveTimer;
     private int previousRolledSeed;
 
@@ -194,8 +198,7 @@ public class SaveManager : MonoBehaviour
                 data.rankIndex < 0 ||
                 data.deliveriesCompleted < 0)
             {
-                throw new InvalidDataException(
-                    "Invalid or unsupported save data.");
+                throw new InvalidDataException("Invalid or unsupported save data.");
             }
 
             return true;
@@ -279,6 +282,7 @@ public class SaveManager : MonoBehaviour
         Current = data;
         inventory = null;
         reputation = null;
+        loadout = null;
         autosaveTimer = 0f;
 
         // These are the exact keys used by your existing scripts.
@@ -340,6 +344,7 @@ public class SaveManager : MonoBehaviour
 
         inventory = null;
         reputation = null;
+        loadout = null;
 
         if (scene.name != tutorialScene && scene.name != mainScene)
         {
@@ -353,9 +358,16 @@ public class SaveManager : MonoBehaviour
 
         inventory = ModuleInventoryManager.Instance;
         reputation = FamilyReputationManager.Instance;
+        loadout = ModuleLoadoutManager.Instance;
 
         if (inventory != null)
+        {
             inventory.RestoreSavedCredits(Current.walletCredits);
+            inventory.RestoreSavedModules(Current.modules);
+
+            if (loadout != null)
+                loadout.RestoreSavedLoadout(Current.equippedModules);
+        }
 
         if (reputation != null)
         {
@@ -387,7 +399,22 @@ public class SaveManager : MonoBehaviour
         CaptureTutorialFlags();
 
         if (inventory != null)
+        {
             Current.walletCredits = inventory.credits;
+
+            if (Current.modules == null)
+                Current.modules = new List<SavedModuleData>();
+
+            inventory.CaptureSavedModules(Current.modules);
+        }
+
+        if (loadout != null && inventory != null)
+        {
+            if (Current.equippedModules == null)
+                Current.equippedModules = new List<SavedModuleData>();
+
+            loadout.CaptureSavedLoadout(Current.equippedModules);
+        }
 
         if (reputation != null)
         {

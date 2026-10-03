@@ -23,6 +23,15 @@ public class ModuleInventoryManager : MonoBehaviour
 
     public bool saveGeneratedRewardAssetsInEditor = true;
 
+    [Header("Saved Module Icons")]
+    [Tooltip("Assign every sprite used by modules. Sprite names must be unique and remain unchanged between saves.")]
+    [SerializeField] private Sprite[] savedModuleIcons;
+
+    // Own only the ScriptableObjects recreated by this manager.
+    // Remember unresolved icon names so a later save does not erase them.
+    private readonly Dictionary<ModuleData, string> restoredModules =
+        new Dictionary<ModuleData, string>();
+
     [Header("Currency")]
     public float credits = 0f;
     public TMP_Text creditsText;
@@ -88,6 +97,13 @@ public class ModuleInventoryManager : MonoBehaviour
     }
     private void OnDestroy()
     {
+        foreach (var pair in restoredModules)
+        {
+            if (pair.Key != null)
+                Destroy(pair.Key);
+        }
+        restoredModules.Clear();
+
         if (Instance == this)
             Instance = null;
     }
@@ -759,6 +775,101 @@ public class ModuleInventoryManager : MonoBehaviour
             return;
 
         text.text = message;
+    }
+
+    /// <summary>
+    /// Capture exact module values and stack counts into the slot's list.
+    /// Reuses entries because SaveManager captures runtime state every frame.
+    /// This method does not write to disk.
+    /// </summary>
+    public void CaptureSavedModules(List<SavedModuleData> destination)
+    {
+        if (destination == null)
+            throw new System.ArgumentNullException(nameof(destination));
+
+        int index = 0;
+
+        foreach (var pair in ownedModules)
+        {
+            if (pair.Key == null || pair.Value <= 0)
+                continue;
+
+            if (index == destination.Count)
+                destination.Add(new SavedModuleData());
+            else if (destination[index] == null)
+                destination[index] = new SavedModuleData();
+
+            destination[index].Capture(
+                pair.Key, pair.Value, GetSavedIconName(pair.Key));
+            index++;
+        }
+
+        if (destination.Count > index)
+            destination.RemoveRange(index, destination.Count - index);
+    }
+
+    /// <summary>
+    /// Replace inventory with an exact saved snapshot, without rerolling stats.
+    /// Null/empty snapshots clear inventory, including for older save slots.
+    /// Call after this manager has run Awake (SaveManager uses sceneLoaded).
+    /// </summary>
+    public void RestoreSavedModules(List<SavedModuleData> savedModules)
+    {
+        ownedModules.Clear();
+
+        // Keep old recreated objects alive until OnDestroy, since other UI or
+        // equipment components may still reference them during this frame.
+        if (savedModules != null)
+        {
+            foreach (SavedModuleData saved in savedModules)
+            {
+                if (saved == null || saved.amount <= 0)
+                    continue;
+
+                ModuleData module = RecreateSavedModule(saved);
+                ownedModules.Add(module, saved.amount);
+            }
+        }
+
+        RequestInventoryRefresh();
+    }
+    public string GetSavedIconName(ModuleData module)
+    {
+        if (module.icon != null)
+            return module.icon.name;
+
+        return restoredModules.TryGetValue(module, out string savedName)
+            ? savedName
+            : "";
+    }
+    public ModuleData RecreateSavedModule(SavedModuleData saved)
+    {
+        if (saved == null)
+            return null;
+
+        ModuleData module = saved.Recreate(ResolveSavedIcon(saved.iconName));
+
+        restoredModules.Add(module, saved.iconName ?? "");
+
+        return module;
+    }
+
+    private Sprite ResolveSavedIcon(string iconName)
+    {
+        if (string.IsNullOrEmpty(iconName))
+            return null;
+
+        if (savedModuleIcons != null)
+        {
+            foreach (Sprite sprite in savedModuleIcons)
+            {
+                if (sprite != null && sprite.name == iconName)
+                    return sprite;
+            }
+        }
+
+        Debug.LogWarning($"[Inventory] Saved module icon '{iconName}' is missing. Assign it in Saved Module Icons.");
+        return null;
     }
     public void RestoreSavedCredits(float amount)
     {

@@ -189,4 +189,12 @@ public class ModuleSlotUI : MonoBehaviour,
         currentDragged.TryDrop(eventData);
         currentDragged = null;
     }
+    public void RestoreSavedModule(ModuleData data)
+    {
+        EquippedModule = data;
+        RefreshDisplay();
+
+        if (ModuleTooltipUI.Instance != null)
+            ModuleTooltipUI.Instance.Hide();
+    }
 }

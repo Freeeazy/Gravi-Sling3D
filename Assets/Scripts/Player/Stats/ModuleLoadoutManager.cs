@@ -166,4 +166,106 @@ public class ModuleLoadoutManager : MonoBehaviour
 
         return false;
     }
+    public void CaptureSavedLoadout(List<SavedModuleData> destination)
+    {
+        if (destination == null)
+            throw new System.ArgumentNullException(nameof(destination));
+
+        ModuleInventoryManager inventory = ModuleInventoryManager.Instance;
+
+        int entryIndex = 0;
+
+        for (int slotIndex = 0; slotIndex < slots.Count; slotIndex++)
+        {
+            ModuleSlotUI slot = slots[slotIndex];
+
+            if (slot == null || slot.EquippedModule == null)
+                continue;
+
+            ModuleData module = slot.EquippedModule;
+
+            if (entryIndex == destination.Count)
+                destination.Add(new SavedModuleData());
+            else if (destination[entryIndex] == null)
+                destination[entryIndex] = new SavedModuleData();
+
+            string iconName = inventory != null
+                ? inventory.GetSavedIconName(module)
+                : module.icon != null ? module.icon.name : "";
+
+            SavedModuleData saved = destination[entryIndex];
+
+            saved.Capture(module, 1, iconName);
+            saved.slotIndex = slotIndex;
+
+            entryIndex++;
+        }
+
+        if (destination.Count > entryIndex)
+        {
+            destination.RemoveRange(
+                entryIndex,
+                destination.Count - entryIndex);
+        }
+    }
+
+    public void RestoreSavedLoadout(List<SavedModuleData> savedModules)
+    {
+        ModuleInventoryManager inventory = ModuleInventoryManager.Instance;
+
+        if (inventory == null)
+        {
+            Debug.LogWarning(
+                "[Loadout] Cannot restore equipment without ModuleInventoryManager.");
+            return;
+        }
+
+        // Clear equipment without returning anything to inventory.
+        foreach (ModuleSlotUI slot in slots)
+        {
+            if (slot != null)
+                slot.RestoreSavedModule(null);
+        }
+
+        if (savedModules != null)
+        {
+            foreach (SavedModuleData saved in savedModules)
+            {
+                if (saved == null || saved.amount <= 0)
+                    continue;
+
+                ModuleData module = inventory.RecreateSavedModule(saved);
+
+                bool validSlot =
+                    saved.slotIndex >= 0 &&
+                    saved.slotIndex < slots.Count &&
+                    slots[saved.slotIndex] != null &&
+                    slots[saved.slotIndex].IsEmpty;
+
+                if (validSlot)
+                {
+                    slots[saved.slotIndex].RestoreSavedModule(module);
+                }
+                else
+                {
+                    // Preserve the item if its original slot no longer exists
+                    // or another saved entry already occupied that slot.
+                    inventory.AddModule(module, 1);
+
+                    Debug.LogWarning(
+                        $"[Loadout] Saved slot {saved.slotIndex} is unavailable. " +
+                        $"Returned '{module.moduleName}' to inventory.");
+                }
+            }
+        }
+
+        // Apply bonuses once, after the entire loadout is restored.
+        RecalculateStats();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
 }

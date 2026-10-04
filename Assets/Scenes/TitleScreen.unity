@@ -2013,6 +2013,7 @@ GameObject:
   - component: {fileID: 222418677}
   - component: {fileID: 222418679}
   - component: {fileID: 222418678}
+  - component: {fileID: 222418680}
   m_Layer: 5
   m_Name: ContinueGameButton
   m_TagString: Untagged
@@ -2106,6 +2107,19 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &222418680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 222418676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00bdbff04e5b6fd42b0b1f0d632c88b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  continueButton: {fileID: 222418679}
 --- !u!1 &224222442
 GameObject:
   m_ObjectHideFlags: 0
@@ -7055,7 +7069,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}

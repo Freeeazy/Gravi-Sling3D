@@ -70,8 +70,8 @@ MonoBehaviour:
   playerTag: Player
   directionReference: {fileID: 5292917342818286785}
   reverseXDirection: 0
-  boostDuration: 2
-  addedSpeed: 1000
+  boostDuration: 1
+  addedSpeed: 750
   rearmDelay: 2
   clearancePadding: 2
 --- !u!1 &4587354464768552145
@@ -144,8 +144,8 @@ MonoBehaviour:
   playerTag: Player
   directionReference: {fileID: 2326601832828387780}
   reverseXDirection: 0
-  boostDuration: 2
-  addedSpeed: 1000
+  boostDuration: 1
+  addedSpeed: 750
   rearmDelay: 2
   clearancePadding: 2
 --- !u!1 &4745260347029585283

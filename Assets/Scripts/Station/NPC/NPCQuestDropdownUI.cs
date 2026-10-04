@@ -19,6 +19,14 @@ public class NPCQuestDropdownUI : MonoBehaviour
         public Color color;
     }
 
+    [System.Serializable]
+    public struct CargoEffectVisual
+    {
+        public CargoEffectType cargoEffectType;
+        public string label;
+        public Color color;
+    }
+
     [Header("Refs")]
     public NPCQuestManager questManager;
 
@@ -45,13 +53,35 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public TMP_Text deliveryTypePillText;
 
     public DeliveryTypeVisual[] deliveryTypeVisuals =
-{
+    {
         new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Urgent, label = "Urgent", color = new Color(1.00f, 0.30f, 0.22f, 1f) },
         new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Standard, label = "Standard", color = new Color(0.42f, 0.76f, 1.00f, 1f) },
         new DeliveryTypeVisual { deliveryType = NPCQuestManager.DeliveryType.Relaxed, label = "Relaxed", color = new Color(0.48f, 0.92f, 0.58f, 1f) }
     };
 
     public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
+
+    [Header("Cargo Effect Pill")]
+    public GameObject cargoEffectPillRoot;
+    public Image cargoEffectPillImage;
+    public TMP_Text cargoEffectPillText;
+
+    public CargoEffectVisual[] cargoEffectVisuals =
+    {
+        new CargoEffectVisual
+        {
+            cargoEffectType = CargoEffectType.UltraLight,
+            label = "Ultra Light",
+            color = new Color(0.35f, 0.90f, 1.00f, 1f)
+        },
+
+        new CargoEffectVisual
+        {
+            cargoEffectType = CargoEffectType.SuperHeavy,
+            label = "Super Heavy",
+            color = new Color(1.00f, 0.55f, 0.25f, 1f)
+        }
+    };
 
     [Header("Difficulty")]
     public TMP_Text difficultyText;
@@ -83,6 +113,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             UpdateRewardDisplay(offer);
             UpdateDifficultyDisplay(offer.difficulty);
             UpdateDeliveryTypeDisplay(offer);
+            UpdateCargoEffectDisplay(offer);
             UpdateTimerDisplay(offer);
             UpdateQuestFlavorDisplay(offer);
         }
@@ -94,6 +125,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             UpdateRewardDisplay(default);
             UpdateDifficultyDisplay(0);
             UpdateDeliveryTypeDisplay(default);
+            UpdateCargoEffectDisplay(default);
             UpdateTimerDisplay(default);
             UpdateQuestFlavorDisplay(default);
         }
@@ -150,6 +182,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
         UpdateRewardDisplay(default);
         UpdateDifficultyDisplay(0);
         UpdateDeliveryTypeDisplay(default);
+        UpdateCargoEffectDisplay(default);
         UpdateTimerDisplay(default);
         UpdateQuestFlavorDisplay(default);
     }
@@ -332,7 +365,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
         if (questTitleText)
         {
             questTitleText.text = !string.IsNullOrWhiteSpace(offer.questTitle)
-                ? offer.questTitle
+                ? (offer.questTitle.Length > 2 ? offer.questTitle.Substring(2) : offer.questTitle)
                 : fallbackQuestTitle;
         }
 
@@ -369,5 +402,53 @@ public class NPCQuestDropdownUI : MonoBehaviour
         }
 
         return string.Join(" ", words);
+    }
+    private void UpdateCargoEffectDisplay(NPCQuestManager.QuestOffer offer)
+    {
+        bool hasEffect =
+            offer.valid &&
+            offer.cargoEffectType != CargoEffectType.None;
+
+        if (cargoEffectPillRoot)
+            cargoEffectPillRoot.SetActive(hasEffect);
+
+        if (!hasEffect)
+            return;
+
+        CargoEffectVisual visual = GetCargoEffectVisual(offer.cargoEffectType);
+
+        if (cargoEffectPillText)
+        {
+            cargoEffectPillText.text = visual.label;
+            cargoEffectPillText.color = Color.white;
+        }
+
+        if (cargoEffectPillImage)
+            cargoEffectPillImage.color = visual.color;
+    }
+    private CargoEffectVisual GetCargoEffectVisual(CargoEffectType cargoEffectType)
+    {
+        if (cargoEffectVisuals != null)
+        {
+            for (int i = 0; i < cargoEffectVisuals.Length; i++)
+            {
+                if (cargoEffectVisuals[i].cargoEffectType == cargoEffectType)
+                {
+                    CargoEffectVisual visual = cargoEffectVisuals[i];
+
+                    if (string.IsNullOrEmpty(visual.label))
+                        visual.label = cargoEffectType.ToString();
+
+                    return visual;
+                }
+            }
+        }
+
+        return new CargoEffectVisual
+        {
+            cargoEffectType = cargoEffectType,
+            label = cargoEffectType.ToString(),
+            color = Color.white
+        };
     }
 }

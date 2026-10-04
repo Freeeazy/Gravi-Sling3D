@@ -513,4 +513,68 @@ public class SaveManager : MonoBehaviour
     {
         SaveCurrent();
     }
+    public bool TryGetMostRecentSave(out int mostRecentSlot)
+    {
+        mostRecentSlot = -1;
+
+        DateTime mostRecentTime = DateTime.MinValue;
+        bool foundSave = false;
+
+        for (int slot = 1; slot <= SlotCount; slot++)
+        {
+            if (!TryReadSlot(slot, out GraviSaveData data, out string error))
+            {
+                Debug.LogWarning($"[SaveManager] Couldn't inspect slot {slot}: {error}");
+                continue;
+            }
+
+            // Empty slot
+            if (data == null)
+                continue;
+
+            DateTime playedTime = DateTime.MinValue;
+
+            if (!string.IsNullOrWhiteSpace(data.lastPlayedUtc))
+            {
+                DateTime.TryParse(
+                    data.lastPlayedUtc,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out playedTime
+                );
+            }
+
+            // First valid save OR newer than our current newest save
+            if (!foundSave || playedTime > mostRecentTime)
+            {
+                foundSave = true;
+                mostRecentTime = playedTime;
+                mostRecentSlot = slot;
+            }
+        }
+
+        return foundSave;
+    }
+
+    public bool HasAnySave()
+    {
+        return TryGetMostRecentSave(out _);
+    }
+
+    public void ContinueMostRecentSave()
+    {
+        if (!TryGetMostRecentSave(out int slot))
+        {
+            Debug.Log("[SaveManager] No save slots available to continue.");
+            return;
+        }
+
+        // Existing saves ignore these creation fields inside StartSlot().
+        StartSlot(
+            slot,
+            "",
+            "",
+            ""
+        );
+    }
 }

@@ -172,6 +172,8 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (OpenQuestBoardPopUp.Instance)
             OpenQuestBoardPopUp.Instance.OpenQuestBoard();
 
+        RadialMenuManager.Instance?.RefreshQuestLists();
+
         cachedRb = rb;
         cachedMoveScript = moveScript;
 

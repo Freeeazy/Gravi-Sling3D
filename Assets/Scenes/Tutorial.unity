@@ -5175,6 +5175,7 @@ MonoBehaviour:
   uniformScaleRange: {x: 3, y: 5}
   randomRotation: 1
   angularSpeedRangeDeg: {x: 0, y: 35}
+  enableRotationDrift: 1
   enablePositionDrift: 1
   driftSpeedRange: {x: 4, y: 10}
   driftDirectionalBias: 0
@@ -8166,6 +8167,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fpsText: {fileID: 204939327}
   updateInterval: 0.1
+  toggleKey: 105
 --- !u!114 &204939326
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11735,6 +11737,7 @@ MonoBehaviour:
   uniformScaleRange: {x: 1, y: 2}
   randomRotation: 1
   angularSpeedRangeDeg: {x: 0, y: 35}
+  enableRotationDrift: 1
   enablePositionDrift: 1
   driftSpeedRange: {x: 4, y: 10}
   driftDirectionalBias: 0
@@ -48928,7 +48931,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fieldData: {fileID: 0}
   simpleMove: {fileID: 1616803245}
-  shieldObject: {fileID: 0}
+  shieldMaterial: {fileID: 0}
   playerRb: {fileID: 1616803247}
   playerBox: {fileID: 1616803248}
   cellSize: 20
@@ -82303,6 +82306,7 @@ MonoBehaviour:
   uniformScaleRange: {x: 200, y: 300}
   randomRotation: 0
   angularSpeedRangeDeg: {x: -5, y: 5}
+  enableRotationDrift: 1
   enablePositionDrift: 1
   driftSpeedRange: {x: 2, y: 8}
   driftDirectionalBias: 0
@@ -150981,6 +150985,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1876932849}
     m_Modifications:
+    - target: {fileID: 1390103570962788759, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
+      propertyPath: tutorialPanel
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5261814041542225523, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -151066,7 +151074,8 @@ PrefabInstance:
       value: PausePanel
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 6344404550296909943, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
@@ -165422,6 +165431,9 @@ MonoBehaviour:
   acceleration: 50
   damping: 1
   normalizeInput: 1
+  speedReductionPerBeam: 0.1
+  tractorBraking: 200
+  activeTractorBeamCount: 0
   boostMaxSpeed: 600
   boostRampUp: 1.2
   boostRampDown: 1
@@ -165639,6 +165651,7 @@ MonoBehaviour:
   disableWhileOpen: []
   toggleKey: 102
   onlyAllowWhenOrbiting: 1
+  manageCursor: 1
   closedXAngle: 180
   openXAngle: 0
   rotateSpeed: 6
@@ -165676,6 +165689,7 @@ MonoBehaviour:
   disableWhileOpen: []
   toggleKey: 118
   onlyAllowWhenOrbiting: 0
+  manageCursor: 1
   closedXAngle: 180
   openXAngle: 0
   rotateSpeed: 6
@@ -193333,7 +193347,12 @@ MonoBehaviour:
   shieldCharge: 0
   shieldChargeText: {fileID: 0}
   shieldVisual: {fileID: 0}
-  shieldPhysicalVisual: {fileID: 0}
+  shieldMaterial: {fileID: 0}
+  shieldOffColor: {r: 0, g: 0, b: 0, a: 1}
+  shieldOnColor: {r: 0, g: 1, b: 1, a: 1}
+  shieldHurtColor: {r: 1, g: 0, b: 0, a: 1}
+  shieldHitDuration: 0.45
+  shieldFlickerSpeed: 30
   packagePlating: 0
   packagePlatingText: {fileID: 0}
   cargoMaxSpeedMultiplier: 1

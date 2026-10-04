@@ -76,7 +76,6 @@ public class MainGameTutorialManager : MonoBehaviour
     [SerializeField] private bool allowSkipTutorial = true;
     [SerializeField] private KeyCode skipKey = KeyCode.F;
     [SerializeField] private float skipHoldDuration = 2f;
-    [SerializeField] private MonoBehaviour simpleMove;
 
     [Header("Tap To Fast Type")]
     [SerializeField] private bool allowTapToFastType = true;
@@ -283,9 +282,6 @@ public class MainGameTutorialManager : MonoBehaviour
             tutorialPanel.SetActive(false);
 
         StopNpcTalkAnimation();
-
-        if (simpleMove != null)
-            simpleMove.enabled = true;
 
         gameObject.SetActive(false);
     }

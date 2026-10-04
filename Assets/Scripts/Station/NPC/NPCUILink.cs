@@ -43,7 +43,12 @@ public class NPCUILink : MonoBehaviour
     [Header("Row UI")]
     public TMP_Text nameText;
     public TMP_Text nameTextVisible;
+    public Image NameBackground;
+    public Graphic NameCover;
+    [NonSerialized] private Material runtimeNameCoverMaterial;
+    
     public Image portraitImage;
+    public Image PortraitBkRnd;
     public TMP_Text questTitleText;
     public TMP_Text questDescriptionText; 
     public TMP_Text distanceText;
@@ -151,6 +156,23 @@ public class NPCUILink : MonoBehaviour
 
         int slotCount = tagSlots.Length;
         int count = Mathf.Min(tags?.Length ?? 0, slotCount);
+
+        // Tint portrait background using the NPC's first assigned tag.
+        if (count > 0)
+        {
+            Color primaryTagColor = tags[0].color;
+
+            // Portrait gets the full faction/flavor color.
+            if (PortraitBkRnd)
+                PortraitBkRnd.color = primaryTagColor;
+
+            // Name hologram uses the full color.
+            ApplyNameCoverColor(primaryTagColor);
+
+            // Name background uses a washed-out version.
+            if (NameBackground)
+                NameBackground.color = GetWashedOutColor(primaryTagColor, 0.5f);
+        }
 
         for (int i = 0; i < count; i++)
         {
@@ -402,20 +424,67 @@ public class NPCUILink : MonoBehaviour
             slot.runtimeCoverMaterial.SetColor(HologramColorID, color);
         }
     }
-    private void OnDestroy()
+    private void ApplyNameCoverColor(Color color)
     {
-        if (tagSlots == null)
+        if (NameCover == null)
             return;
 
-        for (int i = 0; i < tagSlots.Length; i++)
+        // Create a unique material instance for this NPC row.
+        if (runtimeNameCoverMaterial == null)
         {
-            TagSlot slot = tagSlots[i];
+            Material sourceMaterial = NameCover.material;
 
-            if (slot == null || slot.runtimeCoverMaterial == null)
-                continue;
+            if (sourceMaterial == null)
+                return;
 
-            Destroy(slot.runtimeCoverMaterial);
-            slot.runtimeCoverMaterial = null;
+            runtimeNameCoverMaterial = new Material(sourceMaterial)
+            {
+                name = sourceMaterial.name + " (Name Runtime Instance)"
+            };
+
+            NameCover.material = runtimeNameCoverMaterial;
+        }
+
+        if (runtimeNameCoverMaterial.HasProperty(HologramColorID))
+        {
+            runtimeNameCoverMaterial.SetColor(HologramColorID, color);
+        }
+    }
+    private Color GetWashedOutColor(Color color, float washAmount)
+    {
+        washAmount = Mathf.Clamp01(washAmount);
+
+        Color.RGBToHSV(color, out float h, out float s, out float v);
+
+        // 0 = original saturation
+        // 1 = completely desaturated
+        s *= 1f - washAmount;
+
+        Color washedColor = Color.HSVToRGB(h, s, v);
+        washedColor.a = color.a;
+
+        return washedColor;
+    }
+    private void OnDestroy()
+    {
+        if (tagSlots != null)
+        {
+            for (int i = 0; i < tagSlots.Length; i++)
+            {
+                TagSlot slot = tagSlots[i];
+
+                if (slot == null || slot.runtimeCoverMaterial == null)
+                    continue;
+
+                Destroy(slot.runtimeCoverMaterial);
+                slot.runtimeCoverMaterial = null;
+            }
+        }
+
+        if (runtimeNameCoverMaterial != null)
+        {
+            Destroy(runtimeNameCoverMaterial);
+            runtimeNameCoverMaterial = null;
         }
     }
 }

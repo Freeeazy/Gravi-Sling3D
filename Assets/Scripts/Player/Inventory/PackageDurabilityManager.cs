@@ -162,9 +162,7 @@ public class PackageDurabilityManager : MonoBehaviour
             ? StatManager.Instance.GetPackagePlating()
             : 0f;
 
-        CargoEffectType cargoEffectType = _packagesByQuestId.Count == 0
-            ? CargoEffectType.None
-            : CargoEffectType.None;
+        CargoEffectType cargoEffectType = quest.cargoEffectType;
 
         var package = new TrackedPackage
         {

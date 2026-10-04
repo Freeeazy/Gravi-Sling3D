@@ -233,6 +233,8 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
 
+        public CargoEffectType cargoEffectType;
+
         public string questTitle;
         public string shortDescription;
         public string fullDescription;
@@ -256,6 +258,8 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryTimeMultiplier;
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
+
+        public CargoEffectType cargoEffectType;
 
         public string questTitle;
         public string shortDescription;
@@ -334,6 +338,28 @@ public class NPCQuestManager : MonoBehaviour
             Debug.LogWarning($"[NPCQuestManager] GenerateOfferForNpc returned INVALID for npcId={npcId} (from={_currentStationCoord}).");
 
         return offer.valid;
+    }
+    public void GetCurrentAvailableOffers(List<QuestOffer> results)
+    {
+        if (results == null)
+            return;
+
+        results.Clear();
+
+        if (!_hasStationContext)
+            return;
+
+        foreach (var pair in _currentNpcDataById)
+        {
+            int npcId = pair.Key;
+
+            // Don't show quests we've already accepted.
+            if (HasActiveQuestFromNpc(npcId))
+                continue;
+
+            if (TryGetOffer(npcId, out QuestOffer offer) && offer.valid)
+                results.Add(offer);
+        }
     }
     public float GetPreviewCreditReward(QuestOffer offer)
     {
@@ -465,6 +491,7 @@ public class NPCQuestManager : MonoBehaviour
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
             deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
             expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds,
+            cargoEffectType = offer.cargoEffectType,
             questTitle = offer.questTitle,
             shortDescription = offer.shortDescription,
             fullDescription = offer.fullDescription,
@@ -752,6 +779,8 @@ public class NPCQuestManager : MonoBehaviour
         offer.shortDescription = flavor.shortDescription;
         offer.fullDescription = flavor.fullDescription;
         offer.deliveryItemName = flavor.deliveryItemName;
+
+        offer.cargoEffectType = flavor.cargoEffectType;
 
         offer.valid = true;
         return offer;

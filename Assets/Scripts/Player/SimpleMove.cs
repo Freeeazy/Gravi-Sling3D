@@ -233,7 +233,12 @@ public class SimpleMove : MonoBehaviour
             v = Input.GetAxisRaw("Vertical");
 
             if (Input.GetKey(KeyCode.Space)) ud += 1f;
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) ud -= 1f;
+
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) ||
+                Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+            {
+                ud -= 1f;
+            }
 
             if (Input.GetKey(KeyCode.Q)) roll += 1f;
             if (Input.GetKey(KeyCode.E)) roll -= 1f;

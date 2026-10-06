@@ -76,6 +76,7 @@ public class MainGameTutorialManager : MonoBehaviour
     [SerializeField] private bool allowSkipTutorial = true;
     [SerializeField] private KeyCode skipKey = KeyCode.F;
     [SerializeField] private float skipHoldDuration = 2f;
+    [SerializeField] private SimpleMove PlayerMovement;
 
     [Header("Tap To Fast Type")]
     [SerializeField] private bool allowTapToFastType = true;
@@ -109,6 +110,7 @@ public class MainGameTutorialManager : MonoBehaviour
         if (useTutorialSeenPlayerPref && HasSeenMainGameTutorial())
         {
             FinishTutorial(false);
+            PlayerMovement.enabled = true;
             return;
         }
 

@@ -8,14 +8,20 @@ public class PauseManager : MonoBehaviour
     [Header("Scripts To Disable When Paused")]
     [SerializeField] private MonoBehaviour[] scriptsToDisable;
 
-    private bool isPaused = false;
+    public static bool IsPaused { get; private set; }
 
     private void Start()
     {
+        IsPaused = false;
         SetPauseUI(false);
     }
 
-    void Update()
+    private void OnDestroy()
+    {
+        IsPaused = false;
+    }
+
+void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
@@ -25,7 +31,7 @@ public class PauseManager : MonoBehaviour
 
     public void TogglePause()
     {
-        if (isPaused)
+        if (IsPaused)
             Resume();
         else
             Pause();
@@ -33,7 +39,7 @@ public class PauseManager : MonoBehaviour
 
     public void Pause()
     {
-        isPaused = true;
+        IsPaused = true;
 
         SetPauseUI(true);
 
@@ -53,7 +59,7 @@ public class PauseManager : MonoBehaviour
 
     public void Resume()
     {
-        isPaused = false;
+        IsPaused = false;
 
         SetPauseUI(false);
 

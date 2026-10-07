@@ -257,9 +257,19 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         while (true)
         {
-            bool held = UIBlock.IsUIOpen ? false : IsBoostHeld();
+            bool inputBlocked = PauseManager.IsPaused || UIBlock.IsUIOpen;
+            bool held = IsBoostHeld();
 
-            if (enableBoosting)
+            if (inputBlocked)
+            {
+                // Stop charging without treating the menu as a launch release.
+                charging = false;
+                isCharging = false;
+
+                // Require a release followed by a new press after UI closes.
+                wasHeldOnCapture = true;
+            }
+            else if (enableBoosting)
             {
                 // Require a fresh press after capture.
                 if (!wasHeldOnCapture && held) charging = true;
@@ -319,7 +329,7 @@ public class SlingshotPlanet3D : MonoBehaviour
             }
 
             // --- Plane steering: rotate the orbit "slice" around the current radial direction ---
-            if (enablePlaneSteering)
+            if (enablePlaneSteering && !inputBlocked)
             {
                 bool left = Input.GetKey(planeLeftKey);
                 bool right = Input.GetKey(planeRightKey);

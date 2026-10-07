@@ -81,7 +81,7 @@ public class OpenQuestBoard : MonoBehaviour
         if (!CanUseBoard && isOpen)
             ForceClose();
 
-        if (toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey) && lastToggleHandledFrame != Time.frameCount)
+        if (!PauseManager.IsPaused && (!UIBlock.IsUIOpen || IsOpen) && toggleKey != KeyCode.None && Input.GetKeyDown(toggleKey) && lastToggleHandledFrame != Time.frameCount)
         {
             // Consume this press before closing/opening anything.
             lastToggleHandledFrame = Time.frameCount;

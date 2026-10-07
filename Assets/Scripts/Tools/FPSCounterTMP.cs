@@ -4,6 +4,12 @@ using UnityEngine.InputSystem;
 
 public class FPSCounterTMP : MonoBehaviour
 {
+    public static FPSCounterTMP Instance { get; private set; }
+
+    public const string FPS_PREF_KEY = "TargetFPS";
+    public const int DEFAULT_FPS = 120;
+    public const int UNLIMITED_FPS = -1;
+
     [Header("UI")]
     public TMP_Text fpsText;
 
@@ -18,19 +24,34 @@ public class FPSCounterTMP : MonoBehaviour
     private int _frames;
     private float _accumulatedTime;
 
+    public int CurrentTargetFPS { get; private set; } = DEFAULT_FPS;
+
     private void Awake()
     {
-        // Uncapped framerate (as much as possible)
-        Application.targetFrameRate = -1;
+        // Prevent duplicate FPS managers between scenes.
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-        // Optional: disable v-sync so targetFrameRate actually matters.
-        // If v-sync is enabled in Quality settings, it will still cap.
+        Instance = this;
+
+        // Keep this object alive between scene changes.
+        DontDestroyOnLoad(gameObject);
+
+        // Disable V-Sync so Application.targetFrameRate controls the cap.
         QualitySettings.vSyncCount = 0;
+
+        // Load saved FPS setting.
+        int savedFPS = PlayerPrefs.GetInt(FPS_PREF_KEY, DEFAULT_FPS);
+
+        SetTargetFPS(savedFPS, false);
     }
 
     private void Update()
     {
-        // Toggle FPS display with F12
+        // Toggle FPS display with F12.
         if (Keyboard.current != null &&
             Keyboard.current[toggleKey].wasPressedThisFrame)
         {
@@ -38,7 +59,7 @@ public class FPSCounterTMP : MonoBehaviour
                 fpsText.gameObject.SetActive(!fpsText.gameObject.activeSelf);
         }
 
-        // Don't bother calculating/updating text while hidden.
+        // Don't calculate FPS while hidden.
         if (fpsText == null || !fpsText.gameObject.activeSelf)
             return;
 
@@ -50,14 +71,51 @@ public class FPSCounterTMP : MonoBehaviour
 
         if (_timer >= updateInterval)
         {
-            float fps = (_accumulatedTime > 0f) ? (_frames / _accumulatedTime) : 0f;
+            float fps = (_accumulatedTime > 0f)
+                ? (_frames / _accumulatedTime)
+                : 0f;
 
-            if (fpsText)
-                fpsText.text = $"{fps:0} FPS";
+            fpsText.text = $"{fps:0} FPS";
 
             _timer = 0f;
             _frames = 0;
             _accumulatedTime = 0f;
         }
+    }
+
+    /// <summary>
+    /// Changes the application's FPS cap.
+    /// Use -1 for unlimited.
+    /// </summary>
+    public void SetTargetFPS(int fps, bool save = true)
+    {
+        CurrentTargetFPS = fps;
+
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = fps;
+
+        if (save)
+        {
+            PlayerPrefs.SetInt(FPS_PREF_KEY, fps);
+            PlayerPrefs.Save();
+        }
+    }
+
+    /// <summary>
+    /// Returns the currently selected FPS cap.
+    /// </summary>
+    public int GetTargetFPS()
+    {
+        return CurrentTargetFPS;
+    }
+
+    /// <summary>
+    /// Returns a nice display string for the current setting.
+    /// </summary>
+    public string GetTargetFPSLabel()
+    {
+        return CurrentTargetFPS == UNLIMITED_FPS
+            ? "Unlimited"
+            : $"{CurrentTargetFPS} FPS";
     }
 }

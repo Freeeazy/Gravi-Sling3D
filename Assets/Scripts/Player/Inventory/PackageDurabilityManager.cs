@@ -23,6 +23,7 @@ public class PackageDurabilityManager : MonoBehaviour
         public float timeRemaining;
         public ActiveContractCardUI card;
         public CargoEffectType cargoEffectType;
+        public Color deliveryItemColor;
     }
 
     [Header("Refs")]
@@ -171,7 +172,8 @@ public class PackageDurabilityManager : MonoBehaviour
             integrity = startingIntegrity + plating,
             timeRemaining = startingTime,
             card = card,
-            cargoEffectType = cargoEffectType
+            cargoEffectType = cargoEffectType,
+            deliveryItemColor = QuestColorUtil.GetCargoColor(quest.cargoEffectType, quest.sourceFaction)
         };
 
         _packagesByQuestId.Add(quest.questId, package);
@@ -353,12 +355,15 @@ public class PackageDurabilityManager : MonoBehaviour
             ? package.quest.destinationName
             : "Target Station";
 
+        string coloredItemName = QuestColorUtil.Colorize(package.deliveryItem, package.deliveryItemColor);
+
         package.card.SetInfo(
-            package.deliveryItem,
+            coloredItemName,
             destinationName,
             distance,
             package.integrity,
-            FormatPackageTimer(package.timeRemaining)
+            FormatPackageTimer(package.timeRemaining),
+            package.deliveryItemColor
         );
     }
 

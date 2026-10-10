@@ -32,11 +32,15 @@ public class ActiveContractCardUI : MonoBehaviour
     [SerializeField] private float damageTextHoldTime = 1f;
     [SerializeField] private string damageColor = "#FF3D3D";
 
+    [Header("Package Colors")]
+    [SerializeField] private Color fallbackPackageColor = Color.white;
+
     private string currentDeliveryItem;
     private string currentDestinationName;
     private float currentDistance;
     private float currentIntegrity;
     private string currentTimeBonusText = "--:--";
+    private Color currentPackageColor = Color.white;
 
     private string integrityExtraText = "";
     private Coroutine damageTextRoutine;
@@ -47,17 +51,30 @@ public class ActiveContractCardUI : MonoBehaviour
 
         if (OvershieldIntegritySlider)
             overshieldIntegritySliderFullWidth = OvershieldIntegritySlider.rectTransform.rect.width;
+
+        currentPackageColor = fallbackPackageColor;
+        RefreshPackageColors();
     }
     public void SetInfo(
         string deliveryItem,
         string destinationName,
         float distance,
         float integrity,
-        string timeBonusText = "--:--")
+        string timeBonusText = "--:--",
+        Color? packageColor = null)
     {
         currentDeliveryItem = deliveryItem;
         currentDestinationName = destinationName;
         currentDistance = distance;
+        currentTimeBonusText = timeBonusText;
+
+        Color newPackageColor = packageColor ?? fallbackPackageColor;
+
+        if (currentPackageColor != newPackageColor)
+        {
+            currentPackageColor = newPackageColor;
+            RefreshPackageColors();
+        }
 
         if (!initializedIntegrityDisplay)
         {
@@ -75,7 +92,6 @@ public class ActiveContractCardUI : MonoBehaviour
         }
 
         currentIntegrity = integrity;
-        currentTimeBonusText = timeBonusText;
 
         RefreshText();
     }
@@ -100,6 +116,27 @@ public class ActiveContractCardUI : MonoBehaviour
         }
     }
 
+    // -------------------------------------------------
+    // PACKAGE / FACTION COLORS
+    // -------------------------------------------------
+
+    private void RefreshPackageColors()
+    {
+        // Only the base integrity fill inherits
+        // the faction or Weird cargo color.
+        if (DefaultIntegritySlider != null)
+        {
+            DefaultIntegritySlider.color = currentPackageColor;
+        }
+
+        // Overshield and damage bars intentionally
+        // retain their prefab/Inspector colors.
+    }
+
+    // -------------------------------------------------
+    // DAMAGE TEXT
+    // -------------------------------------------------
+
     public void ShowIntegrityDamage(float damageAmount)
     {
         if (damageAmount <= 0f)
@@ -109,6 +146,7 @@ public class ActiveContractCardUI : MonoBehaviour
             StopCoroutine(damageTextRoutine);
 
         integrityExtraText = $" <color={damageColor}>-{damageAmount:0}%</color>";
+
         RefreshText();
 
         damageTextRoutine = StartCoroutine(ClearDamageTextAfterDelay());
@@ -129,10 +167,12 @@ public class ActiveContractCardUI : MonoBehaviour
         if (!contractTitleText || !contractDistanceText || !contractIntegrityText || !contractTimeText)
             return;
 
+        string hex = QuestColorUtil.GetHex(currentPackageColor);
+
         contractTitleText.text =
-            $"───────────────────────\n" +
+            $"<color={hex}>───────────────────────</color>\n" +
             $"Deliver {currentDeliveryItem} to {currentDestinationName}\n" +
-            $"───────────────────────\n";
+            $"<color={hex}>───────────────────────</color>\n";
 
         contractDistanceText.text = $"{currentDistance:0} Units\n";
         contractIntegrityText.text = $"{currentIntegrity:0}%{integrityExtraText}\n";

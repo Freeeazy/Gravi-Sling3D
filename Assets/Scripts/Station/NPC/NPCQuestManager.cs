@@ -234,6 +234,7 @@ public class NPCQuestManager : MonoBehaviour
         public float expectedDeliveryTimeSeconds;
 
         public CargoEffectType cargoEffectType;
+        public NPCFaction sourceFaction;
 
         public string questTitle;
         public string shortDescription;
@@ -260,6 +261,7 @@ public class NPCQuestManager : MonoBehaviour
         public float expectedDeliveryTimeSeconds;
 
         public CargoEffectType cargoEffectType;
+        public NPCFaction sourceFaction;
 
         public string questTitle;
         public string shortDescription;
@@ -492,6 +494,7 @@ public class NPCQuestManager : MonoBehaviour
             deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
             expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds,
             cargoEffectType = offer.cargoEffectType,
+            sourceFaction = offer.sourceFaction,
             questTitle = offer.questTitle,
             shortDescription = offer.shortDescription,
             fullDescription = offer.fullDescription,
@@ -781,6 +784,7 @@ public class NPCQuestManager : MonoBehaviour
         offer.deliveryItemName = flavor.deliveryItemName;
 
         offer.cargoEffectType = flavor.cargoEffectType;
+        offer.sourceFaction = flavor.sourceFaction;
 
         offer.valid = true;
         return offer;

@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -362,6 +363,8 @@ public class NPCQuestDropdownUI : MonoBehaviour
             return;
         }
 
+        Color packageColor = QuestColorUtil.GetCargoColor(offer.cargoEffectType, offer.sourceFaction);
+
         if (questTitleText)
         {
             questTitleText.text = !string.IsNullOrWhiteSpace(offer.questTitle)
@@ -371,18 +374,18 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
         if (questDescriptionText)
         {
-            questDescriptionText.text = !string.IsNullOrWhiteSpace(offer.fullDescription)
-                ? offer.fullDescription
-                : !string.IsNullOrWhiteSpace(offer.shortDescription)
-                    ? offer.shortDescription
-                    : fallbackQuestDescription;
+            string description = !string.IsNullOrWhiteSpace(offer.fullDescription)
+                    ? offer.fullDescription : !string.IsNullOrWhiteSpace(offer.shortDescription)
+                        ? offer.shortDescription : fallbackQuestDescription;
+
+            questDescriptionText.text = QuestColorUtil.ColorizeDescription(description, offer.deliveryItemName, packageColor);
         }
 
         if (questDescriptionBonusText)
         {
             questDescriptionBonusText.text = !string.IsNullOrWhiteSpace(offer.deliveryItemName)
-                ? ToTitleCase(offer.deliveryItemName)
-                : "";
+                    ? QuestColorUtil.Colorize(ToTitleCase(offer.deliveryItemName), packageColor)
+                    : "";
         }
     }
     private static string ToTitleCase(string text)
@@ -424,7 +427,12 @@ public class NPCQuestDropdownUI : MonoBehaviour
         }
 
         if (cargoEffectPillImage)
-            cargoEffectPillImage.color = visual.color;
+        {
+            cargoEffectPillImage.color = QuestColorUtil.GetCargoColor(
+                offer.cargoEffectType,
+                offer.sourceFaction
+            );
+        }
     }
     private CargoEffectVisual GetCargoEffectVisual(CargoEffectType cargoEffectType)
     {

@@ -49,7 +49,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9fe58a1c23e30e45a993f48951382fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  contractText: {fileID: 8525428528828782931}
+  contractTitleText: {fileID: 0}
+  contractDistanceText: {fileID: 0}
+  contractIntegrityText: {fileID: 0}
+  contractTimeText: {fileID: 0}
+  DefaultIntegritySlider: {fileID: 0}
+  OvershieldIntegritySlider: {fileID: 0}
+  DefaultIntegrityDamageSlider: {fileID: 0}
+  OvershieldIntegrityDamageSlider: {fileID: 0}
+  damageHoldTime: 0.25
+  damageDrainSpeed: 35
+  damageTextHoldTime: 1
+  damageColor: '#FF3D3D'
 --- !u!1001 &5122456162421550373
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -68,7 +79,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5288226569012644892, guid: f611ef9a372f1fc4c874619554262e51, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 340
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5288226569012644892, guid: f611ef9a372f1fc4c874619554262e51, type: 3}
       propertyPath: m_SizeDelta.y
@@ -181,14 +192,3 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6169237721678702462, guid: f611ef9a372f1fc4c874619554262e51, type: 3}
   m_PrefabInstance: {fileID: 5122456162421550373}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &8525428528828782931 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3550796586239374454, guid: f611ef9a372f1fc4c874619554262e51, type: 3}
-  m_PrefabInstance: {fileID: 5122456162421550373}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

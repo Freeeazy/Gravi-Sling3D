@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public struct QuestFlavor
 {
@@ -8,11 +9,46 @@ public struct QuestFlavor
     public string deliveryItemName;
 
     public CargoEffectType cargoEffectType;
+
+    // Faction responsible for this delivery.
+    public NPCFaction sourceFaction;
+
+    // Shared visual color.
+    public Color DeliveryItemColor => QuestColorUtil.GetCargoColor(cargoEffectType, sourceFaction);
+
+    // Colored package name for TextMeshPro.
+    public string ColoredItemName => QuestColorUtil.Colorize(deliveryItemName, DeliveryItemColor);
+
+    // Description with package name highlighted.
+    public string ColoredFullDescription => QuestColorUtil.ColorizeDescription(fullDescription, deliveryItemName, DeliveryItemColor);
+    public string ColoredShortDescription => QuestColorUtil.ColorizeDescription(shortDescription, deliveryItemName, DeliveryItemColor);
 }
 
 public static class QuestFlavorUtil
 {
     public static QuestFlavor Generate(
+    NPCData npc,
+    NPCQuestManager.QuestOffer offer,
+    string destinationName,
+    int seed)
+    {
+        QuestFlavor flavor = GenerateRaw(
+            npc,
+            offer,
+            destinationName,
+            seed
+        );
+
+        NPCProfile profile =
+            npc.profile.npcId == npc.npcId
+                ? npc.profile
+                : NPCProfileUtil.GenerateProfile(npc.npcId);
+
+        flavor.sourceFaction = profile.primaryFaction;
+
+        return flavor;
+    }
+    public static QuestFlavor GenerateRaw(
         NPCData npc,
         NPCQuestManager.QuestOffer offer,
         string destinationName,

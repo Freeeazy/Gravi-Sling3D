@@ -81,6 +81,13 @@ public class NPCQuestDropdownUI : MonoBehaviour
             cargoEffectType = CargoEffectType.SuperHeavy,
             label = "Super Heavy",
             color = new Color(1.00f, 0.55f, 0.25f, 1f)
+        },
+
+        new CargoEffectVisual
+        {
+            cargoEffectType = CargoEffectType.OverchargedBoost,
+            label = "Overcharged Boost",
+            color = new Color(0.33f, 1.00f, 0.52f, 1f)
         }
     };
 

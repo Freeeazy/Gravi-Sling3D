@@ -71,6 +71,15 @@ public class BoostManager : MonoBehaviour
     public float Energy => _energy;
     public float Energy01 => (capacity <= 0.0001f) ? 0f : Mathf.Clamp01(_energy / capacity);
 
+    [Header("Cargo Boost Override")]
+    [SerializeField] private bool _forcedBoostActive = false;
+    public bool IsForcedBoostActive => _forcedBoostActive;
+
+    public void SetForcedBoost(bool active)
+    {
+        _forcedBoostActive = active;
+    }
+
     /// <summary>Use this in SimpleMove instead of its private boostCharge.</summary>
     public float Boost01 => _boost01;
     public void SetCapacity(float value)
@@ -122,47 +131,59 @@ public class BoostManager : MonoBehaviour
     {
         float dt = Time.fixedDeltaTime;
 
-        // Decide if we *want* boosting this tick (only in free flight, with input)
         bool canBoostState = (_mode == Mode.FreeFlight);
         bool hasEnergy = _energy > 0.0001f;
-        bool boostingWanted = canBoostState && _boostHeld && _hasMoveInput && hasEnergy;
 
-        // Smooth Boost01 up/down (so SimpleMove keeps same feel)
+        // Cargo override only operates during FreeFlight.
+        bool forcedBoosting = canBoostState && _forcedBoostActive;
+
+        // Normal boosting still requires energy and movement input.
+        bool normalBoosting = canBoostState && _boostHeld && _hasMoveInput && hasEnergy;
+
+        bool boostingWanted = forcedBoosting || normalBoosting;
+
+        // Smooth boost intensity normally, including forced boost.
         float delta = boostingWanted ? boostRampUp : -boostRampDown;
+
         _boost01 = Mathf.Clamp01(_boost01 + delta * dt);
 
-        // Drain energy ONLY while boostingWanted (optionally scale by boost01)
-        if (boostingWanted && !dontDrain && drainPerSecond > 0f)
+        // Forced boost bypasses energy drain without changing dontDrain.
+        if (normalBoosting && !forcedBoosting && !dontDrain && drainPerSecond > 0f)
         {
             _energy -= drainPerSecond * _boost01 * dt;
+
             if (_energy <= 0f)
             {
                 _energy = 0f;
-                _boost01 = 0f; // hard drop if empty
+                _boost01 = 0f;
             }
         }
 
-        // Hardcoded idle orbit regen: 1% of max capacity per second
+        // Forced Boost automatically recharges our energy.
+        if (forcedBoosting && capacity > 0f)
+        {
+            _energy = Mathf.MoveTowards(_energy, capacity,  regenPerSecond * dt);
+        }
+
+        // Existing idle orbit regeneration.
         if (_mode == Mode.OrbitIdle && capacity > 0f)
         {
             _energy += capacity * 0.005f * dt;
-
-            if (_energy > capacity)
-                _energy = capacity;
+            _energy = Mathf.Min(_energy, capacity);
         }
 
-        // Regen ONLY during orbit charging
+        // Existing charging regeneration.
         if (_mode == Mode.OrbitCharging && regenPerSecond > 0f)
         {
             _energy += regenPerSecond * dt;
-            if (_energy > capacity) _energy = capacity;
+            _energy = Mathf.Min(_energy, capacity);
         }
 
-        // --- Cheat: Ctrl + B = refill energy ---
+        // Existing debug refill.
         if (Input.GetKeyDown(KeyCode.B))
         {
             _energy = capacity;
-            _boost01 = 0f; // optional: prevents weird instant boost spike
+            _boost01 = 0f;
 
             Debug.Log("[BoostManager] Cheat refill activated.");
         }

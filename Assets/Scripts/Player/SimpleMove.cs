@@ -246,6 +246,12 @@ public class SimpleMove : MonoBehaviour
             boostHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift) || Input.GetMouseButton(0);
         }
 
+        // Forced cargo boost behaves as if boost is permanently held.
+        if (!inputBlocked && BoostManager.Instance != null && BoostManager.Instance.IsForcedBoostActive)
+        {
+            boostHeld = true;
+        }
+
         Vector3 input = new Vector3(h, ud, v);
 
         if (normalizeInput && input.sqrMagnitude > 1f)

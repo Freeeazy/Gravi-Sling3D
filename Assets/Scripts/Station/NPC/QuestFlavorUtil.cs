@@ -208,7 +208,7 @@ public static class QuestFlavorUtil
 
         if (Has(profile, NPCPersonalityTrait.Weird))
         {
-            int weirdRoll = rng.Next(0, 4);
+            int weirdRoll = rng.Next(0, 3);
 
             if (weirdRoll == 0)
             {
@@ -232,21 +232,12 @@ public static class QuestFlavorUtil
                 );
             }
 
-            if (weirdRoll == 2)
-            {
-                return Make(
-                    "Please Don't Feed It",
-                    "Contained Space Slug",
-                    $"{npcName} gives you a sealed habitat containing something wet and judgmental.",
-                    $"Deliver the Contained Space Slug to {destinationName}. {npcName} says it already ate today. Probably."
-                );
-            }
-
             return Make(
-                "Perfectly Ordinary Rock",
-                "Suspicious Rock",
-                $"{npcName} insists this is an extremely important rock.",
-                $"Deliver the Suspicious Rock to {destinationName}. It is warm, faintly vibrating, and supposedly \"does that sometimes.\""
+                "Runaway Reactor",
+                "Unstable Fusion Cell",
+                $"{npcName} hands you an Unstable Fusion Cell that's practically overflowing with energy.",
+                $"Deliver the Unstable Fusion Cell to {destinationName}. Its excess energy continuously overcharges your ship's boost systems, whether you like it or not.",
+                CargoEffectType.OverchargedBoost
             );
         }
 
@@ -256,7 +247,7 @@ public static class QuestFlavorUtil
 
         if (profile.primaryFaction == NPCFaction.Mechanic)
         {
-            int mechanicRoll = rng.Next(0, 5);
+            int mechanicRoll = rng.Next(0, 7);
 
             if (mechanicRoll == 0)
             {
@@ -295,6 +286,28 @@ public static class QuestFlavorUtil
                     "Used Reactor Pump",
                     $"{npcName} has a replacement reactor pump with only minor cosmetic damage.",
                     $"Deliver the Used Reactor Pump to {destinationName}. {npcName} asks that you ignore the scorch marks."
+                );
+            }
+
+            if (mechanicRoll == 4)
+            {
+                return Make(
+                    "Heavy Hauling",
+                    "Capital Ship Engine",
+                    $"{npcName} needs a massive ship engine transported. Your cargo hold groans at the thought.",
+                    $"Deliver the Capital Ship Engine to {destinationName}. Its immense weight will significantly reduce your ship's maneuverability.",
+                    CargoEffectType.SuperHeavy
+                );
+            }
+
+            if (mechanicRoll == 5)
+            {
+                return Make(
+                    "Faulty Power Coupler",
+                    "Overloaded Power Coupler",
+                    $"{npcName} hands you a power coupler that's still crackling with excess energy.",
+                    $"Deliver the Overloaded Power Coupler to {destinationName}. Its unstable discharge is feeding directly into your ship's boost systems.",
+                    CargoEffectType.OverchargedBoost
                 );
             }
 
@@ -398,7 +411,7 @@ public static class QuestFlavorUtil
 
         if (profile.primaryFaction == NPCFaction.Scientist)
         {
-            int scientistRoll = rng.Next(0, 7);
+            int scientistRoll = rng.Next(0, 9);
 
             if (scientistRoll == 0)
             {
@@ -457,6 +470,28 @@ public static class QuestFlavorUtil
                     "Alien Tissue Sample",
                     $"{npcName} has a specimen nobody in the lab can confidently identify.",
                     $"Deliver the Alien Tissue Sample to {destinationName}. It has grown slightly since being packaged."
+                );
+            }
+
+            if (scientistRoll == 6)
+            {
+                return Make(
+                    "Critical Containment",
+                    "Leaking Fusion Reactor",
+                    $"{npcName} needs a damaged reactor transported before its containment completely fails.",
+                    $"Deliver the Leaking Fusion Reactor to {destinationName}. Its energy leakage is continuously overcharging your propulsion systems.",
+                    CargoEffectType.OverchargedBoost
+                );
+            }
+
+            if (scientistRoll == 7)
+            {
+                return Make(
+                    "Mass Reduction Trial",
+                    "Experimental Mass Reducer",
+                    $"{npcName} presents a prototype that appears to weigh considerably less than it should.",
+                    $"Deliver the Experimental Mass Reducer to {destinationName}. Its active mass-reduction field may drastically improve your ship's responsiveness.",
+                    CargoEffectType.UltraLight
                 );
             }
 
@@ -531,6 +566,128 @@ public static class QuestFlavorUtil
                 "Adopted Station Cat",
                 $"{npcName} has found a permanent home for a remarkably unimpressed cat.",
                 $"Deliver the Adopted Station Cat to {destinationName}. The carrier is secure. Your dignity may not be."
+            );
+        }
+
+        // -------------------------------------------------
+        // SCRAPPER
+        // -------------------------------------------------
+
+        if (profile.primaryFaction == NPCFaction.Scrapper)
+        {
+            int scrapperRoll = rng.Next(0, 4);
+
+            if (scrapperRoll == 0)
+            {
+                return Make(
+                    "Scrap Metal Mountain",
+                    "Compressed Scrap Block",
+                    $"{npcName} has compressed several tons of salvaged metal into one extremely inconvenient package.",
+                    $"Deliver the Compressed Scrap Block to {destinationName}. Don't expect your ship to handle the additional weight gracefully.",
+                    CargoEffectType.SuperHeavy
+                );
+            }
+
+            if (scrapperRoll == 1)
+            {
+                return Make(
+                    "Salvaged and Sparking",
+                    "Unstable Salvage Battery",
+                    $"{npcName} recovered an old battery that refuses to stop producing energy.",
+                    $"Deliver the Unstable Salvage Battery to {destinationName}. Its exposed connections are overloading your ship's boost systems.",
+                    CargoEffectType.OverchargedBoost
+                );
+            }
+
+            if (scrapperRoll == 2)
+            {
+                return Make(
+                    "Parts Worth Saving",
+                    "Recovered Engine Parts",
+                    $"{npcName} has sorted through a wreck and salvaged a few components worth keeping.",
+                    $"Deliver the Recovered Engine Parts to {destinationName}. {npcName} would prefer they arrive in better shape than the original ship."
+                );
+            }
+
+            return Make(
+                "One Ship's Trash",
+                "Salvaged Circuit Boards",
+                $"{npcName} found a stack of circuit boards that might still be useful to someone.",
+                $"Deliver the Salvaged Circuit Boards to {destinationName}. Their previous owners aren't asking for them back."
+            );
+        }
+
+        // -------------------------------------------------
+        // MERCHANT
+        // -------------------------------------------------
+
+        if (profile.primaryFaction == NPCFaction.Merchant)
+        {
+            int merchantRoll = rng.Next(0, 3);
+
+            if (merchantRoll == 0)
+            {
+                return Make(
+                    "Bulk Freight Contract",
+                    "Industrial Freight Container",
+                    $"{npcName} needs an oversized commercial shipment moved without paying for a dedicated freighter.",
+                    $"Deliver the Industrial Freight Container to {destinationName}. The cargo's excessive mass will noticeably impair your ship's handling.",
+                    CargoEffectType.SuperHeavy
+                );
+            }
+
+            if (merchantRoll == 1)
+            {
+                return Make(
+                    "Restock the Shelves",
+                    "Retail Supply Crates",
+                    $"{npcName} has a shipment of retail stock that needs to reach another station.",
+                    $"Deliver the Retail Supply Crates to {destinationName}. {npcName} insists these are the season's most popular items."
+                );
+            }
+
+            return Make(
+                "Invoice Included",
+                "Trade Goods",
+                $"{npcName} needs a routine shipment moved before the next trade cycle.",
+                $"Deliver the Trade Goods to {destinationName}. The paperwork has more pages than the cargo has boxes."
+            );
+        }
+
+        // -------------------------------------------------
+        // ARCHIVIST
+        // -------------------------------------------------
+
+        if (profile.primaryFaction == NPCFaction.Archivist)
+        {
+            int archivistRoll = rng.Next(0, 3);
+
+            if (archivistRoll == 0)
+            {
+                return Make(
+                    "Weight of History",
+                    "Ancient Gravity Relic",
+                    $"{npcName} has acquired an ancient artifact that seems to exert its own gravitational pull.",
+                    $"Deliver the Ancient Gravity Relic to {destinationName}. Its unusual gravitational field dramatically increases your ship's effective mass.",
+                    CargoEffectType.SuperHeavy
+                );
+            }
+
+            if (archivistRoll == 1)
+            {
+                return Make(
+                    "Lost Records",
+                    "Historical Data Archive",
+                    $"{npcName} recovered a long-missing collection of station records.",
+                    $"Deliver the Historical Data Archive to {destinationName}. {npcName} asks you to avoid rewriting history on the way."
+                );
+            }
+
+            return Make(
+                "Handle With History",
+                "Preserved Star Charts",
+                $"{npcName} needs a fragile set of original star charts transferred for restoration.",
+                $"Deliver the Preserved Star Charts to {destinationName}. The routes are outdated, but the originals are irreplaceable."
             );
         }
 

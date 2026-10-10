@@ -48569,6 +48569,7 @@ MonoBehaviour:
   pegUnlitMat: {fileID: 2100000, guid: 5897151048a1cfc4f82f8e6a4350f9c9, type: 2}
   reversePegOrder: 0
   pegCount: 15
+  _forcedBoostActive: 0
 --- !u!4 &1352119091
 Transform:
   m_ObjectHideFlags: 0
@@ -71836,9 +71837,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -90, y: -90}
+  m_AnchoredPosition: {x: -10, y: -90.000244}
   m_SizeDelta: {x: 0, y: 40}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &1907569746
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77434,9 +77435,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -90, y: -45}
+  m_AnchoredPosition: {x: -10, y: -45.000244}
   m_SizeDelta: {x: 0, y: 40}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 1, y: 0.5}
 --- !u!114 &2061077931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82997,6 +82998,9 @@ MonoBehaviour:
   - cargoEffectType: 1
     label: Super Heavy
     color: {r: 1, g: 0.55, b: 0.25, a: 1}
+  - cargoEffectType: 3
+    label: Overcharged Boost
+    color: {r: 0.32941177, g: 1, b: 0.52156866, a: 1}
   difficultyText: {fileID: 72031246}
   difficultyBars:
   - {fileID: 213293299}

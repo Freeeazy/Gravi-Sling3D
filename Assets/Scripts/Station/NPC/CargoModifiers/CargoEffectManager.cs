@@ -40,6 +40,18 @@ public class CargoEffectManager : MonoBehaviour
         TrySubscribeToPackageManager();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F8))
+        {
+            bool current = BoostManager.Instance.IsForcedBoostActive;
+
+            BoostManager.Instance.SetForcedBoost(!current);
+
+            Debug.Log($"Forced Boost: {!current}");
+        }
+    }
+
     private void TrySubscribeToPackageManager()
     {
         if (_subscribedToPackageManager)
@@ -69,6 +81,9 @@ public class CargoEffectManager : MonoBehaviour
 
         if (StatManager.Instance != null)
             StatManager.Instance.ClearCargoStatMultipliers();
+
+        if (BoostManager.Instance != null)
+            BoostManager.Instance.SetForcedBoost(false);
     }
 
     private void OnDestroy()
@@ -102,6 +117,8 @@ public class CargoEffectManager : MonoBehaviour
         float drainPerSecondMultiplier = 1f;
         float regenPerSecondMultiplier = 1f;
 
+        bool forceBoost = false;
+
         foreach (CargoEffectType effectType in _activeCargoEffects.Values)
         {
             switch (effectType)
@@ -121,6 +138,10 @@ public class CargoEffectManager : MonoBehaviour
                     boostMaxSpeedMultiplier *= ultraLightBoostMaxSpeedMultiplier;
                     drainPerSecondMultiplier *= ultraLightBoostDrainMultiplier;
                     break;
+
+                case CargoEffectType.OverchargedBoost:
+                    forceBoost = true;
+                    break;
             }
         }
 
@@ -135,6 +156,12 @@ public class CargoEffectManager : MonoBehaviour
                 drainPerSecondMultiplier,
                 regenPerSecondMultiplier
             );
+        }
+
+        // Apply our special boost override separately.
+        if (BoostManager.Instance != null)
+        {
+            BoostManager.Instance.SetForcedBoost(forceBoost);
         }
     }
 }

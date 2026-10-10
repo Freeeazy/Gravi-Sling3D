@@ -31,6 +31,10 @@ public class ModuleGenerator : MonoBehaviour
         public string moduleType = "Engine";
         public Sprite icon;
 
+        [Header("Primary Stat")]
+        [Tooltip("Always include the stat matching this module's type when possible.")]
+        public bool guaranteePrimaryStat = true;
+
         [Header("Possible Stats For This Type")]
         public List<StatRollRange> possibleStats = new List<StatRollRange>();
     }
@@ -186,63 +190,101 @@ public class ModuleGenerator : MonoBehaviour
         return generatedModules;
     }
 
-    private string RollStats(ModuleData module, ModuleTypeConfig typeConfig, TierConfig tierConfig)
+
+private string RollStats(ModuleData module, ModuleTypeConfig typeConfig, TierConfig tierConfig)
+{
+    if (typeConfig.possibleStats == null || typeConfig.possibleStats.Count == 0)
     {
-        if (typeConfig.possibleStats == null || typeConfig.possibleStats.Count == 0)
-        {
-            Debug.LogWarning($"[ModuleGenerator] Module type {typeConfig.moduleType} has no possible stats.");
-            return "Empty";
-        }
-
-        int statCount = Random.Range(tierConfig.minStats, tierConfig.maxStats + 1);
-        statCount = Mathf.Clamp(statCount, 1, typeConfig.possibleStats.Count);
-
-        List<StatRollRange> availableStats = new List<StatRollRange>(typeConfig.possibleStats);
-        List<string> statSignatureParts = new List<string>();
-
-        for (int i = 0; i < statCount; i++)
-        {
-            if (availableStats.Count == 0)
-                break;
-
-            int randomIndex = Random.Range(0, availableStats.Count);
-            StatRollRange chosenStat = availableStats[randomIndex];
-            availableStats.RemoveAt(randomIndex);
-
-            bool rollPercent =
-                chosenStat.canRollPercent &&
-                Random.value <= tierConfig.percentRollChance;
-
-            if (rollPercent)
-            {
-                float percentValue = Random.Range(chosenStat.percentRange.x, chosenStat.percentRange.y);
-                percentValue *= tierConfig.percentMultiplier;
-
-                // Optional: keeps percent naming more consistent/readable.
-                percentValue = Mathf.Round(percentValue * 100f) / 100f;
-
-                ApplyStat(module, chosenStat.statName, percentValue, true);
-
-                statSignatureParts.Add($"{chosenStat.statName}_{Mathf.RoundToInt(percentValue * 100f)}P");
-            }
-            else if (chosenStat.canRollFlat)
-            {
-                float flatValue = Random.Range(chosenStat.flatRange.x, chosenStat.flatRange.y);
-                flatValue *= tierConfig.flatMultiplier;
-
-                // Keeps flat values clean like +5, +10, +50 instead of +7.3842.
-                flatValue = Mathf.Round(flatValue);
-
-                ApplyStat(module, chosenStat.statName, flatValue, false);
-
-                statSignatureParts.Add($"{chosenStat.statName}_{Mathf.RoundToInt(flatValue)}F");
-            }
-        }
-
-        statSignatureParts.Sort();
-
-        return string.Join("_", statSignatureParts);
+        Debug.LogWarning($"[ModuleGenerator] Module type {typeConfig.moduleType} has no possible stats.");
+        return "Empty";
     }
+
+    int statCount = Random.Range(tierConfig.minStats, tierConfig.maxStats + 1);
+    statCount = Mathf.Clamp(statCount, 1, typeConfig.possibleStats.Count);
+
+    List<StatRollRange> availableStats = new List<StatRollRange>(typeConfig.possibleStats);
+    List<string> statSignatureParts = new List<string>();
+
+    // Match names like "Max Speed" -> "MaxSpeed".
+    string normalizedType = typeConfig.moduleType.Replace(" ", "").ToLowerInvariant();
+
+    for (int i = 0; i < statCount; i++)
+    {
+        if (availableStats.Count == 0)
+            break;
+
+        int chosenIndex = -1;
+
+        // First roll: guarantee the matching primary stat when available.
+        if (i == 0 && typeConfig.guaranteePrimaryStat)
+        {
+            for (int j = 0; j < availableStats.Count; j++)
+            {
+                string normalizedStat = availableStats[j].statName.Replace(" ", "").ToLowerInvariant();
+
+                if (normalizedStat == normalizedType)
+                {
+                    chosenIndex = j;
+                    break;
+                }
+            }
+        }
+
+        // All remaining rolls are random.
+        if (chosenIndex < 0)
+            chosenIndex = Random.Range(0, availableStats.Count);
+
+        StatRollRange chosenStat = availableStats[chosenIndex];
+        availableStats.RemoveAt(chosenIndex);
+
+        // Determine whether to roll a percentage bonus.
+        bool rollPercent =
+            chosenStat.canRollPercent &&
+            Random.value <= tierConfig.percentRollChance;
+
+        if (rollPercent)
+        {
+            float percentValue = Random.Range(
+                chosenStat.percentRange.x,
+                chosenStat.percentRange.y
+            );
+
+            percentValue *= tierConfig.percentMultiplier;
+
+            // Round to two decimal places.
+            percentValue = Mathf.Round(percentValue * 100f) / 100f;
+
+            ApplyStat(module, chosenStat.statName, percentValue, true);
+
+            statSignatureParts.Add(
+                $"{chosenStat.statName}_{Mathf.RoundToInt(percentValue * 100f)}P"
+            );
+        }
+        else if (chosenStat.canRollFlat)
+        {
+            float flatValue = Random.Range(
+                chosenStat.flatRange.x,
+                chosenStat.flatRange.y
+            );
+
+            flatValue *= tierConfig.flatMultiplier;
+
+            // Round flat values to whole numbers.
+            flatValue = Mathf.Round(flatValue);
+
+            ApplyStat(module, chosenStat.statName, flatValue, false);
+
+            statSignatureParts.Add(
+                $"{chosenStat.statName}_{Mathf.RoundToInt(flatValue)}F"
+            );
+        }
+    }
+
+    statSignatureParts.Sort();
+
+    return string.Join("_", statSignatureParts);
+}
+
 
     private void ApplyStat(ModuleData module, string statName, float value, bool isPercent)
     {

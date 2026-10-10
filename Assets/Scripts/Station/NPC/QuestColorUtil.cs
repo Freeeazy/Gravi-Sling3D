@@ -15,6 +15,9 @@ public static class QuestColorUtil
             case CargoEffectType.SuperHeavy:
                 return new Color(1.00f, 0.55f, 0.25f, 1f);
 
+            case CargoEffectType.OverchargedBoost:
+                return new Color(0.33f, 1.00f, 0.52f, 1f);
+
             default:
                 return NPCProfileUtil.GetFactionColor(faction);
         }

@@ -25665,9 +25665,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: OpenPanel, Assembly-CSharp
-        m_MethodName: TogglePanel
+      - m_Target: {fileID: 668884286}
+        m_TargetAssemblyTypeName: OpenPanelActive, Assembly-CSharp
+        m_MethodName: Open
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -28367,7 +28367,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -37.5}
+  m_AnchoredPosition: {x: 0, y: -37.500015}
   m_SizeDelta: {x: 30, y: -45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &757982694
@@ -34059,7 +34059,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -25}
+  m_AnchoredPosition: {x: 0, y: -25.000015}
   m_SizeDelta: {x: 0, y: -50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &934912449
@@ -66815,6 +66815,7 @@ MonoBehaviour:
   moduleTypes:
   - moduleType: Max Speed
     icon: {fileID: 21300000, guid: ec106872c5d53d2439d052de55f557b9, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: MaxSpeed
       canRollFlat: 1
@@ -66828,6 +66829,7 @@ MonoBehaviour:
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Acceleration
     icon: {fileID: 21300000, guid: 77e9ad1d34e9ecf42835f84d867fa330, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: MaxSpeed
       canRollFlat: 1
@@ -66841,6 +66843,7 @@ MonoBehaviour:
       percentRange: {x: 0.05, y: 0.2}
   - moduleType: Boost Acceleration
     icon: {fileID: 21300000, guid: 88e203f7a4403d24aa8babb560690b5a, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
@@ -66859,6 +66862,7 @@ MonoBehaviour:
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Boost Max Speed
     icon: {fileID: 21300000, guid: cdae1058a7b1c6f49af48adf5f39ac3a, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
@@ -66877,6 +66881,7 @@ MonoBehaviour:
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Boost Capacity
     icon: {fileID: 21300000, guid: 2496bc538b5b28945a42d6d953e19dcf, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
@@ -66895,6 +66900,7 @@ MonoBehaviour:
       percentRange: {x: 0.05, y: 0.2}
   - moduleType: Boost Drain
     icon: {fileID: 21300000, guid: f363fe2851f778644a7c842f1e5b650c, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
@@ -66913,6 +66919,7 @@ MonoBehaviour:
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Boost Regen
     icon: {fileID: 21300000, guid: 7c2e4b53f5c8b5d4fa686692262c5275, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
@@ -66931,6 +66938,7 @@ MonoBehaviour:
       percentRange: {x: 0.05, y: 0.2}
   - moduleType: Charge Rate
     icon: {fileID: 21300000, guid: 6ff4521097433f340b5fe7c97becfade, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: ChargeRate
       canRollFlat: 1
@@ -66944,6 +66952,7 @@ MonoBehaviour:
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Launch Speed
     icon: {fileID: 21300000, guid: 864b5ee03735045418e3c2d5854427cd, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: ChargeRate
       canRollFlat: 1
@@ -66957,6 +66966,7 @@ MonoBehaviour:
       percentRange: {x: 0.05, y: 0.2}
   - moduleType: Shield
     icon: {fileID: 21300000, guid: fae31d9386dfdba438b2aca1c2413b4d, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: ShieldCharge
       canRollFlat: 1
@@ -66965,6 +66975,7 @@ MonoBehaviour:
       percentRange: {x: 0, y: 0}
   - moduleType: Package Plating
     icon: {fileID: 21300000, guid: a3cf6ae50ee06db40bd12b5d2d9eaf1d, type: 3}
+    guaranteePrimaryStat: 1
     possibleStats:
     - statName: PackagePlating
       canRollFlat: 1
@@ -69117,7 +69128,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2124904281}
   m_HandleRect: {fileID: 2124904280}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -69836,8 +69847,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 0.999999
-  m_Size: 0.35624883
+  m_Value: 0.99999857
+  m_Size: 0.35570508
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -80567,7 +80578,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -20, y: -30}
+  m_AnchoredPosition: {x: -20, y: -30.000015}
   m_SizeDelta: {x: -80, y: -140}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2132218681

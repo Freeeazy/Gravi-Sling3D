@@ -1,219 +1,180 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// Maps ship speed to the RetroPegMeter_UI and supplies a continuous redline effect.
+/// Keeps the original orbit API: Instance, SetSpeed and ClearExternalSpeed.
+[DefaultExecutionOrder(-100)] // Supply targets before the meter's Update.
 public class SpeedometerHUD : MonoBehaviour
 {
     public static SpeedometerHUD Instance { get; private set; }
 
-    [Header("Meter Root")]
-    public RectTransform meterRoot;
-
+    [Header("Meter")]
+    [SerializeField] private RetroPegMeter_UI pegMeter;
     [SerializeField] private Rigidbody shipRb;
 
-    [Header("Materials")]
-    public Material greenOn;
-    public Material greenOff;
-    public Material redOn;
-    public Material redOff;
-
     [Header("Speed Mapping (m/s)")]
-    public float freeFlightMaxSpeed = 200f;          // fills first chunk
+    public float freeFlightMaxSpeed = 200f;
     [Range(0f, 1f)] public float freeFlightFillPortion = 0.25f;
+    public float redlineSpeed = 800f;
+    public float maxSpeed = 1100f;
 
-    public float redlineSpeed = 800f;               // "full" at this speed
-    public float maxSpeed = 1100f;                  // overspeed scaling (flicker)
+    [Header("Height input")]
+    [Tooltip("Temporary approximation until SetEngineLoad is connected. Speed is not engine effort.")]
+    [SerializeField] private bool useSpeedAsLoadFallback = true;
+    [SerializeField, Range(0f, 1f)] private float fallbackLoad01;
 
-    [Header("Redline Visual Region")]
-    [Range(0f, 1f)] public float redlineStart01 = 0.78f; // last ~22% of columns are red
+    [Header("Redline region")]
+    [Range(0f, 1f)] public float redlineStart01 = 0.78f;
 
-    [Header("Overspeed Flicker")]
-    public float flickerHzMin = 3f;   // at just over redline
-    public float flickerHzMax = 18f;  // near max speed
-    [Range(0f, 1f)] public float flickerDuty = 0.75f; // higher = looks "more full" while flickering
-    [Range(0f, 1f)] public float overspeedFillBias = 0.35f; // makes overspeed look more full
+    [Header("Redline pulse - continuous, never fully black")]
+    [SerializeField] private bool animateRedline = true;
+    [SerializeField, Min(0f)] private float pulseHzMin = 2.2f;
+    [SerializeField, Min(0f)] private float pulseHzMax = 5.0f;
+    [Tooltip("At maximum overspeed, warning lamps dip by this fraction. Green stays steady.")]
+    [SerializeField, Range(0f, 0.8f)] private float maximumDim = 0.45f;
+    [Tooltip("Fraction of the full width. 0.035 is about 1.7 columns on a 48-column meter.")]
+    [SerializeField, Range(0f, 0.1f)] private float maximumTipRetraction = 0.035f;
+    [Tooltip("Seconds to approach 95% of a new overspeed effect strength.")]
+    [SerializeField, Min(0f)] private float redlineAttack = 0.18f;
+    [SerializeField, Min(0f)] private float redlineRelease = 0.45f;
 
-    [Header("Smoothing")]
+    [Header("Speed smoothing")]
+    [Tooltip("Legacy exponential response rate. 0 means immediate. Set meter Sweep Attack/Release to 0 to avoid double smoothing.")]
     public float speedSmooth = 12f;
+    [SerializeField] private bool useUnscaledTime = true;
 
-    // Internal data: columns -> ordered peg renderers
-    private readonly List<List<Graphic>> _columns = new();
-    private float _currentSpeed;
-    private float _externalSpeed;
-    private bool _hasExternalSpeed;
+    public float CurrentSpeed { get; private set; }
+    private float externalSpeed;
+    private bool hasExternalSpeed;
+    private float engineLoad;
+    private bool hasEngineLoad;
+    private float redlineStrength;
+    private float pulsePhase;
 
-    void Awake()
+    private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
-
-        CacheColumns();
-    }
-
-    void OnEnable()
-    {
-        // In case builder rebuilds at runtime
-        if (_columns.Count == 0) CacheColumns();
-    }
-
-    void CacheColumns()
-    {
-        _columns.Clear();
-        if (!meterRoot)
+        if (Instance != null && Instance != this)
         {
-            Debug.LogError("SpeedometerHUD: meterRoot not assigned.");
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        if (!pegMeter)
+            Debug.LogError("SpeedometerHUD: Assign the RetroPegMeter_UI component.", this);
+    }
+
+    private void Update()
+    {
+        if (Instance != this) return;
+        float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+        float targetSpeed = GetTargetSpeed();
+        float rate = NonNegative(speedSmooth);
+        float speedBlend = rate <= 0f ? 1f : 1f - Mathf.Exp(-rate * dt);
+        CurrentSpeed = Mathf.Lerp(CurrentSpeed, targetSpeed, speedBlend);
+        if (Mathf.Abs(CurrentSpeed - targetSpeed) < 0.001f) CurrentSpeed = targetSpeed;
+
+        float fill = SpeedToFill01(CurrentSpeed);
+        float load = hasEngineLoad ? engineLoad :
+            (useSpeedAsLoadFallback ? fill : Safe01(fallbackLoad01));
+        if (!pegMeter) return;
+        pegMeter.SetTelemetry(load, fill);
+        UpdateRedline(dt);
+    }
+
+    private float GetTargetSpeed()
+    {
+        if (hasExternalSpeed) return externalSpeed;
+        if (!shipRb) return 0f;
+#if UNITY_6000_0_OR_NEWER
+        return NonNegative(shipRb.linearVelocity.magnitude);
+#else
+        return NonNegative(shipRb.velocity.magnitude);
+#endif
+    }
+
+    private float SpeedToFill01(float speed)
+    {
+        float end = NonNegative(redlineSpeed);
+        if (end <= 0f) return 0f;
+        float split = NonNegative(freeFlightMaxSpeed);
+        // Invalid/collapsed split gets a well-defined linear mapping.
+        if (split <= 0f || split >= end) return Mathf.Clamp01(speed / end);
+        float portion = Safe01(freeFlightFillPortion);
+        return speed <= split
+            ? Mathf.Lerp(0f, portion, Mathf.Clamp01(speed / split))
+            : Mathf.Lerp(portion, 1f, Mathf.InverseLerp(split, end, speed));
+    }
+
+    private void UpdateRedline(float dt)
+    {
+        float start = NonNegative(redlineSpeed);
+        float end = Mathf.Max(start + 0.01f, NonNegative(maxSpeed));
+        float targetStrength = animateRedline && start > 0f
+            ? Mathf.InverseLerp(start, end, CurrentSpeed) : 0f;
+        float duration = NonNegative(targetStrength > redlineStrength ? redlineAttack : redlineRelease);
+        if (dt > 0f)
+        {
+            float blend = duration <= 0f ? 1f : 1f - Mathf.Exp(-3f * dt / duration);
+            redlineStrength = Mathf.Lerp(redlineStrength, targetStrength, blend);
+            if (Mathf.Abs(redlineStrength - targetStrength) < 0.0001f)
+                redlineStrength = targetStrength;
+        }
+
+        if (!animateRedline || redlineStrength <= 0f)
+        {
+            pulsePhase = 0f;
+            redlineStrength = 0f;
+            pegMeter.SetWarningEffect(redlineStart01, 1f, 0f);
             return;
         }
 
-        // Grab PEG_Column_* children in hierarchy order
-        for (int i = 0; i < meterRoot.childCount; i++)
-        {
-            var col = meterRoot.GetChild(i) as RectTransform;
-            if (!col) continue;
-
-            // Collect ONLY active peg children with a Graphic (RawImage or Image).
-            var pegs = new List<Graphic>();
-            for (int p = 0; p < col.childCount; p++)
-            {
-                var pegGO = col.GetChild(p).gameObject;
-                if (!pegGO.activeInHierarchy) continue;
-
-                var g = pegGO.GetComponent<Graphic>(); // RawImage / Image both inherit Graphic
-                if (!g) continue;
-
-                pegs.Add(g);
-            }
-
-            // Sort bottom -> top by anchoredPosition.y (works because each peg is a RectTransform)
-            pegs.Sort((a, b) =>
-            {
-                var ra = a.rectTransform.anchoredPosition.y;
-                var rb = b.rectTransform.anchoredPosition.y;
-                return ra.CompareTo(rb);
-            });
-
-            if (pegs.Count > 0)
-                _columns.Add(pegs);
-        }
-
-        if (_columns.Count == 0)
-            Debug.LogWarning("SpeedometerHUD: No active peg Graphics found under meterRoot.");
+        float minHz = NonNegative(pulseHzMin);
+        float maxHz = Mathf.Max(minHz, NonNegative(pulseHzMax));
+        float hz = Mathf.Lerp(minHz, maxHz, redlineStrength);
+        // Integrate frequency: a speed change never jumps the oscillator phase.
+        pulsePhase = Mathf.Repeat(pulsePhase + hz * dt, 1f);
+        float wave = 0.5f - 0.5f * Mathf.Cos(pulsePhase * Mathf.PI * 2f);
+        float dip = wave * wave * wave * redlineStrength;
+        float brightness = 1f - Mathf.Clamp(maximumDim, 0f, 0.8f) * dip;
+        float retraction = Mathf.Clamp(maximumTipRetraction, 0f, 0.1f) * dip;
+        pegMeter.SetWarningEffect(redlineStart01, brightness, retraction);
     }
 
-    void Update()
-    {
-        float targetSpeed = GetTargetSpeed();
-        _currentSpeed = Mathf.Lerp(_currentSpeed, targetSpeed, 1f - Mathf.Exp(-speedSmooth * Time.unscaledDeltaTime));
-
-        float fill01 = SpeedToFill01(_currentSpeed);
-        ApplyFill(fill01, _currentSpeed);
-    }
-
-    float GetTargetSpeed()
-    {
-        if (_hasExternalSpeed)
-            return _externalSpeed;
-
-        if (shipRb)
-            return shipRb.linearVelocity.magnitude; // Unity 6
-
-        return 0f;
-    }
-
-    float SpeedToFill01(float speed)
-    {
-        // Piecewise mapping:
-        // 0..freeFlightMaxSpeed -> 0..freeFlightFillPortion
-        // freeFlightMaxSpeed..redlineSpeed -> freeFlightFillPortion..1
-        if (redlineSpeed <= 0f) return 0f;
-
-        if (speed <= freeFlightMaxSpeed)
-        {
-            float t = Mathf.InverseLerp(0f, Mathf.Max(0.01f, freeFlightMaxSpeed), speed);
-            return Mathf.Lerp(0f, freeFlightFillPortion, t);
-        }
-        else
-        {
-            float t = Mathf.InverseLerp(freeFlightMaxSpeed, Mathf.Max(freeFlightMaxSpeed + 0.01f, redlineSpeed), speed);
-            return Mathf.Lerp(freeFlightFillPortion, 1f, t);
-        }
-    }
-
-    void ApplyFill(float baseFill01, float speed)
-    {
-        if (_columns.Count == 0) return;
-
-        int colCount = _columns.Count;
-
-        // Overspeed effects
-        bool overspeed = speed > redlineSpeed;
-        float over01 = Mathf.InverseLerp(redlineSpeed, Mathf.Max(redlineSpeed + 0.01f, maxSpeed), speed);
-
-        // Flicker phase: faster as over01 rises
-        float hz = Mathf.Lerp(flickerHzMin, flickerHzMax, over01);
-        float phase = Mathf.Repeat(Time.unscaledTime * hz, 1f);
-        bool flickerOn = phase < flickerDuty;
-
-        // Fill bias: make it look “more full” when overspeeding even if flicker drops some pegs
-        float biasedFill01 = baseFill01;
-        if (overspeed)
-            biasedFill01 = Mathf.Clamp01(Mathf.Max(baseFill01, 1f - (1f - over01) * overspeedFillBias));
-
-        // Determine how many columns are considered filled overall
-        // (column-based fill; then peg-based within each column)
-        float filledColsF = biasedFill01 * colCount;
-
-        for (int c = 0; c < colCount; c++)
-        {
-            var pegs = _columns[c];
-            int pegCount = pegs.Count;
-
-            // How filled is this column (0..1), based on global fill
-            // Example: if filledColsF = 10.5, columns < 10 are full, column 10 is half, rest off
-            float colFill01 = Mathf.Clamp01(filledColsF - c);
-
-            int pegsOn = Mathf.RoundToInt(colFill01 * pegCount);
-
-            bool isRedColumn = (c / (float)(colCount - 1)) >= redlineStart01;
-
-            // If overspeed, only the red region flickers (looks like a redline bounce)
-            bool applyFlickerHere = overspeed && isRedColumn;
-
-            for (int p = 0; p < pegCount; p++)
-            {
-                bool shouldBeOn = p < pegsOn;
-
-                if (applyFlickerHere)
-                {
-                    // In overspeed, keep most red pegs on, but let them flicker
-                    shouldBeOn = shouldBeOn && flickerOn;
-                }
-
-                SetPegMaterial(pegs[p], isRedColumn, shouldBeOn);
-            }
-        }
-    }
-
-    void SetPegMaterial(Graphic g, bool redRegion, bool on)
-    {
-        if (!g) return;
-
-        if (redRegion)
-            g.material = on ? redOn : redOff;
-        else
-            g.material = on ? greenOn : greenOff;
-    }
-
-    // Call this from orbit code (SlingshotPlanet3D) when orbiting.
+    // Existing orbit/slingshot callers can keep using these unchanged.
     public void SetSpeed(float speed)
     {
-        _externalSpeed = Mathf.Max(0f, speed);
-        _hasExternalSpeed = true;
+        externalSpeed = NonNegative(speed);
+        hasExternalSpeed = true;
     }
 
-    // Call when leaving orbit so we go back to Rigidbody speed.
-    public void ClearExternalSpeed()
+    public void ClearExternalSpeed() { hasExternalSpeed = false; }
+
+    // Supply actual normalized engine effort independently of ship speed.
+    // This override persists until explicitly cleared, just like SetSpeed.
+    public void SetEngineLoad(float load01)
     {
-        _hasExternalSpeed = false;
+        engineLoad = Safe01(load01);
+        hasEngineLoad = true;
     }
+
+    public void ClearEngineLoad() { hasEngineLoad = false; }
+
+    private void OnDisable()
+    {
+        if (Instance != this) return;
+        redlineStrength = 0f;
+        pulsePhase = 0f;
+        if (pegMeter) pegMeter.SetWarningEffect(redlineStart01, 1f, 0f);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    private static float NonNegative(float value)
+    {
+        return float.IsNaN(value) || float.IsInfinity(value) ? 0f : Mathf.Max(0f, value);
+    }
+
+    private static float Safe01(float value) { return Mathf.Clamp01(NonNegative(value)); }
 }

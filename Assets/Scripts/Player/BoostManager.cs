@@ -1,14 +1,7 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Central boost/energy manager (singleton).
-/// - Drains energy while in FreeFlight AND boost is held AND player has movement input.
-/// - Does NOT drain or regen while OrbitIdle.
-/// - Regens ONLY while OrbitCharging (holding charge in SlingshotPlanet3D).
-/// - Exposes Boost01 (0..1) for SimpleMove's additive boost logic.
-/// - Drives a UI RectTransform bar by changing its width (sizeDelta.x) 0..maxWidth.
-/// </summary>
 public class BoostManager : MonoBehaviour
 {
     public static BoostManager Instance { get; private set; }
@@ -27,127 +20,165 @@ public class BoostManager : MonoBehaviour
     public float capacity = 100f;
     public bool startFull = true;
     public float startEnergy = 100f;
-
-    [Tooltip("Energy drained per second at Boost01 = 1 (FreeFlight).")]
     public float drainPerSecond = 18f;
-
     public bool dontDrain = false;
-
-    [Tooltip("Energy regenerated per second (ONLY during OrbitCharging).")]
     public float regenPerSecond = 35f;
 
-    [Header("Boost Smoothing (matches old boostCharge feel)")]
-    [Tooltip("How fast Boost01 rises when boosting (per second).")]
+    [Header("Boost Smoothing")]
     public float boostRampUp = 1.2f;
-
-    [Tooltip("How fast Boost01 falls when not boosting (per second).")]
     public float boostRampDown = 2.0f;
 
-    [Header("UI Pegs (Material Swap)")]
-    [Tooltip("Parent that contains 10 peg Images as children (can be under a VerticalLayoutGroup).")]
+    [Header("UI Pegs")]
     public Transform pegsParent;
-
-    [Tooltip("Material used for a lit peg.")]
     public Material pegLitMat;
-
-    [Tooltip("Material used for an unlit peg.")]
     public Material pegUnlitMat;
-
-    [Tooltip("If true, peg index order is reversed (useful if your layout fills top->bottom or bottom->top).")]
     public bool reversePegOrder = false;
-
-    [Tooltip("How many pegs to use. Default 10.")]
     [Min(1)] public int pegCount = 10;
 
-    private float _energy;
-    private float _boost01;            // smoothed boost intensity 0..1
+    [Header("Peg Recharge Animation")]
+    [SerializeField] private bool animateRecharge = true;
 
-    // Inputs from SimpleMove each FixedUpdate
-    private bool _boostHeld;
-    private bool _hasMoveInput;
+    [Tooltip("Tint applied to unlit pegs during the passing recharge wave.")]
+    [SerializeField] private Color rechargeTint = new Color(0.3f, 0.9f, 1f, 1f);
 
-    // Cached peg Images
-    private Image[] _pegImages;
-    public float Energy => _energy;
-    public float Energy01 => (capacity <= 0.0001f) ? 0f : Mathf.Clamp01(_energy / capacity);
+    [Tooltip("Time for one recharge wave to cross all pegs.")]
+    [Min(0.1f)]
+    [SerializeField] private float rechargeWaveDuration = 0.85f;
+
+    [Tooltip("How much the recharge wave enlarges each peg.")]
+    [Range(0f, 0.5f)]
+    [SerializeField] private float rechargeScale = 0.12f;
+
+    [Tooltip("How wide the passing wave appears.")]
+    [Range(0.05f, 0.5f)]
+    [SerializeField] private float rechargeWaveWidth = 0.22f;
+
+    [Header("Peg Overcharge Animation")]
+    [SerializeField] private bool animateOvercharge = true;
+
+    [Tooltip("Time for one overcharge wave to cross all pegs.")]
+    [Min(0.1f)]
+    [SerializeField] private float overchargeWaveDuration = 0.65f;
+
+    [Tooltip("Maximum scale increase of a peg during overcharge.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float overchargeScale = 0.3f;
+
+    [SerializeField]
+    private Color overchargeTint = new Color(0.5f, 1f, 1f, 1f);
+
+    [Range(0.05f, 0.5f)]
+    [SerializeField] private float overchargeWaveWidth = 0.20f;
 
     [Header("Cargo Boost Override")]
     [SerializeField] private bool _forcedBoostActive = false;
+
+    [Header("Boost Light")]
+    [SerializeField] private Image boostLight;
+
+    [Tooltip("Optional red material for the draining state. Falls back to pegLitMat.")]
+    [SerializeField] private Material boostDrainMat;
+
+    [Header("Boost Light Animation")]
+    [SerializeField] private float rechargePulseSpeed = 2.5f;
+    [SerializeField] private float drainPulseSpeed = 8f;
+    [SerializeField] private float overchargePulseSpeed = 12f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float minimumPulseBrightness = 0.4f;
+
+    private Color _boostLightBaseColor;
+    private bool _isDraining;
     public bool IsForcedBoostActive => _forcedBoostActive;
 
-    public void SetForcedBoost(bool active)
-    {
-        _forcedBoostActive = active;
-    }
+    public GameObject OverchargeParticle;
 
-    /// <summary>Use this in SimpleMove instead of its private boostCharge.</summary>
+    private float _energy;
+    private float _boost01;
+
+    private bool _boostHeld;
+    private bool _hasMoveInput;
+    private bool _isRecharging;
+
+    private Image[] _pegImages;
+    private Vector3[] _pegBaseScales;
+    private Color[] _pegBaseColors;
+
+    private float _rechargeWaveTimer;
+    private float _overchargeWaveTimer;
+
+    public float Energy => _energy;
+
+    public float Energy01 =>
+        capacity <= 0.0001f
+            ? 0f
+            : Mathf.Clamp01(_energy / capacity);
+
     public float Boost01 => _boost01;
-    public void SetCapacity(float value)
-    {
-        float oldCapacity = capacity;
-        capacity = Mathf.Max(0f, value);
-        _energy = Mathf.Clamp(_energy + capacity - oldCapacity, 0f, capacity);
-        ApplyPegMats(force: true);
-    }
-
-    public float GetCapacity() => capacity;
-
-    public void SetDrainPerSecond(float value)
-    {
-        drainPerSecond = value;
-    }
-
-    public float GetDrainPerSecond() => drainPerSecond;
-
-    public void SetRegenPerSecond(float value)
-    {
-        regenPerSecond = value;
-    }
-
-    public float GetRegenPerSecond() => regenPerSecond;
 
     private void Awake()
     {
-        // Singleton
         if (Instance && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
 
-        _energy = startFull ? capacity : Mathf.Clamp(startEnergy, 0f, capacity);
+        _energy = startFull
+            ? capacity
+            : Mathf.Clamp(startEnergy, 0f, capacity);
 
         CachePegImages();
+
+        if (boostLight != null)
+        {
+            _boostLightBaseColor = boostLight.color;
+            boostLight.material = null;
+        }
+
         ApplyPegMats(force: true);
+        SyncOverchargeParticle();
     }
 
     private void OnDestroy()
     {
-        if (Instance == this) Instance = null;
+        if (Instance == this)
+            Instance = null;
+    }
+
+    private void OnDisable()
+    {
+        ResetPegVisuals();
+
+        if (boostLight != null)
+        {
+            boostLight.material = null;
+            boostLight.color = _boostLightBaseColor;
+        }
     }
 
     private void FixedUpdate()
     {
         float dt = Time.fixedDeltaTime;
+        float previousEnergy = _energy;
+        _isDraining = false;
 
-        bool canBoostState = (_mode == Mode.FreeFlight);
+        bool canBoostState = _mode == Mode.FreeFlight;
         bool hasEnergy = _energy > 0.0001f;
 
-        // Cargo override only operates during FreeFlight.
         bool forcedBoosting = canBoostState && _forcedBoostActive;
 
-        // Normal boosting still requires energy and movement input.
         bool normalBoosting = canBoostState && _boostHeld && _hasMoveInput && hasEnergy;
 
         bool boostingWanted = forcedBoosting || normalBoosting;
 
-        // Smooth boost intensity normally, including forced boost.
         float delta = boostingWanted ? boostRampUp : -boostRampDown;
 
         _boost01 = Mathf.Clamp01(_boost01 + delta * dt);
 
-        // Forced boost bypasses energy drain without changing dontDrain.
+        // Normal energy drain.
         if (normalBoosting && !forcedBoosting && !dontDrain && drainPerSecond > 0f)
         {
             _energy -= drainPerSecond * _boost01 * dt;
@@ -159,124 +190,450 @@ public class BoostManager : MonoBehaviour
             }
         }
 
-        // Forced Boost automatically recharges our energy.
+        // Forced boost energy regeneration.
         if (forcedBoosting && capacity > 0f)
         {
-            _energy = Mathf.MoveTowards(_energy, capacity,  regenPerSecond * dt);
+            _energy = Mathf.MoveTowards(
+                _energy,
+                capacity,
+                regenPerSecond * dt
+            );
         }
 
-        // Existing idle orbit regeneration.
+        // Orbit idle regeneration.
         if (_mode == Mode.OrbitIdle && capacity > 0f)
         {
             _energy += capacity * 0.005f * dt;
             _energy = Mathf.Min(_energy, capacity);
         }
 
-        // Existing charging regeneration.
+        // Orbit charging regeneration.
         if (_mode == Mode.OrbitCharging && regenPerSecond > 0f)
         {
             _energy += regenPerSecond * dt;
             _energy = Mathf.Min(_energy, capacity);
         }
 
-        // Existing debug refill.
+        // Detect actual energy regeneration.
+        _isRecharging = _energy > previousEnergy + 0.000001f && _energy < capacity - 0.0001f;
+
+        // Debug refill.
         if (Input.GetKeyDown(KeyCode.B))
         {
             _energy = capacity;
             _boost01 = 0f;
+            _isRecharging = false;
 
             Debug.Log("[BoostManager] Cheat refill activated.");
         }
 
+        // Detect actual energy consumption.
+        _isDraining = _energy < previousEnergy - 0.000001f;
+
         ApplyPegMats();
     }
+
+    private void Update()
+    {
+        UpdatePegAnimations(Time.deltaTime);
+        UpdateBoostLight();
+    }
+
     private void CachePegImages()
     {
-        if (pegsParent == null) return;
+        if (pegsParent == null)
+            return;
 
-        // Grab Images from children (including inactive, since UI often starts disabled)
-        _pegImages = pegsParent.GetComponentsInChildren<Image>(includeInactive: true);
+        Image[] found =
+            pegsParent.GetComponentsInChildren<Image>(true);
 
-        // If parent itself has an Image, it will be included; we usually only want children.
-        // Remove the parent's Image if present.
-        var parentImg = pegsParent.GetComponent<Image>();
-        if (parentImg != null && _pegImages != null && _pegImages.Length > 0)
+        Image parentImage = pegsParent.GetComponent<Image>();
+
+        int count = 0;
+
+        foreach (Image img in found)
         {
-            // Filter out the parent's Image
-            int count = 0;
-            for (int i = 0; i < _pegImages.Length; i++)
-                if (_pegImages[i] != parentImg) count++;
+            if (img != parentImage)
+                count++;
+        }
 
-            if (count != _pegImages.Length)
-            {
-                var filtered = new Image[count];
-                int idx = 0;
-                for (int i = 0; i < _pegImages.Length; i++)
-                {
-                    if (_pegImages[i] == parentImg) continue;
-                    filtered[idx++] = _pegImages[i];
-                }
-                _pegImages = filtered;
-            }
+        _pegImages = new Image[count];
+        _pegBaseScales = new Vector3[count];
+        _pegBaseColors = new Color[count];
+
+        int index = 0;
+
+        foreach (Image img in found)
+        {
+            if (img == parentImage)
+                continue;
+
+            _pegImages[index] = img;
+            _pegBaseScales[index] = img.rectTransform.localScale;
+            _pegBaseColors[index] = img.color;
+
+            index++;
         }
     }
+
     private void ApplyPegMats(bool force = false)
     {
-        if (_pegImages == null || _pegImages.Length == 0 || pegLitMat == null || pegUnlitMat == null)
+        if (_pegImages == null ||
+            pegLitMat == null ||
+            pegUnlitMat == null)
             return;
 
         int n = Mathf.Min(pegCount, _pegImages.Length);
 
-        // Hard bucket logic:
-        // - 0..(just under 10%) => 0
-        // - 10..(just under 20%) => 1
-        // - ...
-        // - 90..(just under 100%) => 9
-        // - exactly 100% => 10
-        float e01 = Energy01;
+        if (n <= 0)
+            return;
 
-        int lit = Mathf.FloorToInt(e01 * n);
-        if (_energy >= capacity - 0.0001f) lit = n;  // allow full only when truly full
+        int lit = Mathf.FloorToInt(Energy01 * n);
+
+        if (capacity > 0f &&
+            _energy >= capacity - 0.0001f)
+        {
+            lit = n;
+        }
+
         lit = Mathf.Clamp(lit, 0, n);
 
         for (int i = 0; i < n; i++)
         {
-            int pegIndex = reversePegOrder ? (n - 1 - i) : i;
-            var img = _pegImages[pegIndex];
-            if (img == null) continue;
+            int index = reversePegOrder
+                ? n - 1 - i
+                : i;
 
-            Material target = (i < lit) ? pegLitMat : pegUnlitMat;
+            Image img = _pegImages[index];
 
-            // Use material (not sharedMaterial) so we don't accidentally affect prefabs/other UI.
+            if (img == null)
+                continue;
+
+            Material target =
+                i < lit ? pegLitMat : pegUnlitMat;
+
             if (force || img.material != target)
                 img.material = target;
         }
     }
-    /// <summary>
-    /// Called by SimpleMove each FixedUpdate (or Update) to tell BoostManager current input state.
-    /// </summary>
-    public void SetBoostInput(bool boostHeld, bool hasMoveInput)
+
+    private void UpdatePegAnimations(float dt)
+    {
+        if (_pegImages == null)
+            return;
+
+        int n = Mathf.Min(pegCount, _pegImages.Length);
+
+        if (n <= 0)
+            return;
+
+        bool overcharging =
+            _forcedBoostActive && animateOvercharge;
+
+        bool recharging =
+            _isRecharging &&
+            animateRecharge &&
+            !overcharging;
+
+        // Keep wave timing independent.
+        if (overcharging)
+        {
+            _overchargeWaveTimer += dt;
+        }
+        else
+        {
+            _overchargeWaveTimer = 0f;
+        }
+
+        if (recharging)
+        {
+            _rechargeWaveTimer += dt;
+        }
+        else
+        {
+            _rechargeWaveTimer = 0f;
+        }
+
+        int lit = Mathf.Clamp(
+            Mathf.FloorToInt(Energy01 * n),
+            0,
+            n
+        );
+
+        if (capacity > 0f &&
+            _energy >= capacity - 0.0001f)
+        {
+            lit = n;
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            int index = reversePegOrder
+                ? n - 1 - i
+                : i;
+
+            Image img = _pegImages[index];
+
+            if (img == null)
+                continue;
+
+            float intensity = 0f;
+            float scaleAmount = 0f;
+            Color targetTint = _pegBaseColors[index];
+
+            // Normalized position within the stack.
+            // i = 0 is the first filled/bottom peg.
+            float pegPosition = (i + 0.5f) / n;
+
+            if (overcharging)
+            {
+                intensity = CalculateWave(
+                    _overchargeWaveTimer,
+                    overchargeWaveDuration,
+                    pegPosition,
+                    overchargeWaveWidth
+                );
+
+                scaleAmount = overchargeScale;
+
+                targetTint = Color.Lerp(
+                    _pegBaseColors[index],
+                    overchargeTint,
+                    intensity
+                );
+            }
+            else if (recharging && i >= lit)
+            {
+                // Animate only unlit pegs.
+                intensity = CalculateWave(
+                    _rechargeWaveTimer,
+                    rechargeWaveDuration,
+                    pegPosition,
+                    rechargeWaveWidth
+                );
+
+                scaleAmount = rechargeScale;
+
+                targetTint = Color.Lerp(
+                    _pegBaseColors[index],
+                    rechargeTint,
+                    intensity
+                );
+            }
+
+            img.rectTransform.localScale =
+                _pegBaseScales[index] *
+                (1f + intensity * scaleAmount);
+
+            img.color = targetTint;
+        }
+    }
+
+    private float CalculateWave(
+        float timer,
+        float duration,
+        float pegPosition,
+        float width)
+    {
+        duration = Mathf.Max(0.1f, duration);
+        width = Mathf.Max(0.01f, width);
+
+        // Move from 0 to 1, then repeat.
+        float wavePosition =
+            Mathf.Repeat(timer / duration, 1f);
+
+        // Shortest wrapped distance to wave.
+        float distance = Mathf.Abs(
+            pegPosition - wavePosition
+        );
+
+        distance = Mathf.Min(
+            distance,
+            1f - distance
+        );
+
+        // Convert distance into a smooth pulse.
+        float t = Mathf.Clamp01(
+            1f - distance / width
+        );
+
+        return t * t * (3f - 2f * t);
+    }
+
+    private void ResetPegVisuals()
+    {
+        if (_pegImages == null)
+            return;
+
+        for (int i = 0; i < _pegImages.Length; i++)
+        {
+            if (_pegImages[i] == null)
+                continue;
+
+            _pegImages[i].rectTransform.localScale =
+                _pegBaseScales[i];
+
+            _pegImages[i].color =
+                _pegBaseColors[i];
+        }
+    }
+
+    private void SyncOverchargeParticle()
+    {
+        if (OverchargeParticle != null)
+        {
+            OverchargeParticle.SetActive(
+                _forcedBoostActive
+            );
+        }
+    }
+
+    public void SetForcedBoost(bool active)
+    {
+        _forcedBoostActive = active;
+        SyncOverchargeParticle();
+    }
+
+    public void SetBoostInput(
+        bool boostHeld,
+        bool hasMoveInput)
     {
         _boostHeld = boostHeld;
         _hasMoveInput = hasMoveInput;
     }
 
-    /// <summary>
-    /// Called by SlingshotPlanet3D to tell BoostManager the orbit/charging state.
-    /// </summary>
     public void SetMode(Mode m)
     {
         _mode = m;
 
-        // If we left FreeFlight, drop boost intensity so we never "carry" boost into orbit
         if (_mode != Mode.FreeFlight)
             _boost01 = 0f;
     }
 
-    // Optional helper if you want manual refills later
+    public void SetCapacity(float value)
+    {
+        float oldCapacity = capacity;
+
+        capacity = Mathf.Max(0f, value);
+
+        _energy = Mathf.Clamp(
+            _energy + capacity - oldCapacity,
+            0f,
+            capacity
+        );
+
+        ApplyPegMats(force: true);
+    }
+
+    public float GetCapacity() => capacity;
+
+    public void SetDrainPerSecond(float value)
+    {
+        drainPerSecond = value;
+    }
+
+    public float GetDrainPerSecond() =>
+        drainPerSecond;
+
+    public void SetRegenPerSecond(float value)
+    {
+        regenPerSecond = value;
+    }
+
+    public float GetRegenPerSecond() =>
+        regenPerSecond;
+
     public void AddEnergy(float amount)
     {
-        _energy = Mathf.Clamp(_energy + amount, 0f, capacity);
+        _energy = Mathf.Clamp(
+            _energy + amount,
+            0f,
+            capacity
+        );
+
         ApplyPegMats();
     }
+
+    private void UpdateBoostLight()
+    {
+        if (boostLight == null)
+            return;
+
+        // Priority: Overcharge > Drain > Recharge > Idle
+        bool overcharging = _forcedBoostActive;
+        bool draining = _isDraining && !overcharging;
+        bool recharging = _isRecharging && !overcharging && !draining;
+
+        Material targetMaterial = null;
+        float brightness = 1f;
+
+        if (overcharging)
+        {
+            targetMaterial = pegLitMat;
+
+            // Fast, energetic pulse.
+            float pulse = Mathf.Sin(
+                Time.time * overchargePulseSpeed
+            );
+
+            brightness = Mathf.Lerp(
+                minimumPulseBrightness,
+                1f,
+                (pulse + 1f) * 0.5f
+            );
+        }
+        else if (draining)
+        {
+            targetMaterial = boostDrainMat != null
+                ? boostDrainMat
+                : pegLitMat;
+
+            // Faster, somewhat irregular flickering.
+            float pulse = Mathf.Sin(
+                Time.time * drainPulseSpeed
+            );
+
+            float flicker = Mathf.Sin(
+                Time.time * drainPulseSpeed * 2.7f
+            ) * 0.15f;
+
+            float intensity = Mathf.Clamp01(
+                (pulse + 1f) * 0.5f + flicker
+            );
+
+            brightness = Mathf.Lerp(
+                minimumPulseBrightness,
+                1f,
+                intensity
+            );
+        }
+        else if (recharging)
+        {
+            targetMaterial = pegLitMat;
+
+            // Slower, gentler breathing animation.
+            float pulse = Mathf.Sin(
+                Time.time * rechargePulseSpeed
+            );
+
+            brightness = Mathf.Lerp(
+                minimumPulseBrightness,
+                1f,
+                (pulse + 1f) * 0.5f
+            );
+        }
+
+        // Swap only when the material needs changing.
+        if (boostLight.material != targetMaterial)
+            boostLight.material = targetMaterial;
+
+        // Tint intensity while preserving original color.
+        Color targetColor = _boostLightBaseColor;
+        targetColor.r *= brightness;
+        targetColor.g *= brightness;
+        targetColor.b *= brightness;
+
+        boostLight.color = targetColor;
+    }
+
 }

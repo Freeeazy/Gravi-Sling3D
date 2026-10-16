@@ -75828,8 +75828,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 0.99999917
-  m_Size: 0.3557051
+  m_Value: 0.999999
+  m_Size: 0.35612306
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -89250,6 +89250,90 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1876932849}
     m_Modifications:
+    - target: {fileID: 25136912946182206, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_text
+      value: "Orbit a station to access its <b>Delivery Menu [F]</b>.\n\nFrom there,
+        choose the type of job you\u2019re looking for and accept a package. Your
+        destination will be marked once the delivery begins.\n\nDeliver the package
+        successfully to earn <b>credits</b> and improve your standing as a courier.\n\n<size=85%><color=#20843E>Good
+        and Perfect deliveries have a chance to reward <b>bonus</b> upgrade modules</size></color>"
+      objectReference: {fileID: 0}
+    - target: {fileID: 25136912946182206, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.49803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 25136912946182206, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 25136912946182206, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.2784314
+      objectReference: {fileID: 0}
+    - target: {fileID: 25136912946182206, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 2524970823
+      objectReference: {fileID: 0}
+    - target: {fileID: 319707375383547292, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 319707375383547292, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 654971924516233640, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 973693938210220991, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1913153284075186120, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1913153284075186120, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636418418823871894, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.24313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636418418823871894, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.5176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636418418823871894, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.1254902
+      objectReference: {fileID: 0}
+    - target: {fileID: 2644261882346003367, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3042444613032572805, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3111145781504989670, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.24313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 3111145781504989670, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.5176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 3111145781504989670, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.1254902
+      objectReference: {fileID: 0}
+    - target: {fileID: 3577933762464405426, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_text
+      value: '[ 1 / 7 ]'
+      objectReference: {fileID: 0}
     - target: {fileID: 5803922226038143720, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -89330,6 +89414,51 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5837695269776270494, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 154.36
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837695269776270494, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5837695269776270494, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -25
+      objectReference: {fileID: 0}
+    - target: {fileID: 5901865040914857141, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5901865040914857141, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7056684399976027325, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_text
+      value: "<b><color=#00FFFF>SAFE</b></color>\nStraightforward courier work. Lower
+        risk and generally predictable cargo.\n\n<b>RISKY</b>\nQuestionable clients,
+        suspicious cargo, and jobs more likely to attract unwanted attention.\n\n<b>WEIRD</b>\nUnusual
+        requests, strange cargo, and deliveries where you may not know exactly what
+        you\u2019re getting yourself into.\n\n\n<size=85%>Pick whatever sounds interesting.
+        There\u2019s no single \u201Ccorrect\u201D way to play.</size>"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7056684399976027325, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.24313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 7056684399976027325, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.5176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 7056684399976027325, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.1254902
+      objectReference: {fileID: 0}
+    - target: {fileID: 7056684399976027325, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 2520679456
+      objectReference: {fileID: 0}
     - target: {fileID: 7118399541417655328, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
       propertyPath: scriptToDisable
       value: 
@@ -89342,9 +89471,49 @@ PrefabInstance:
       propertyPath: scriptToDisable3
       value: 
       objectReference: {fileID: 330585548}
+    - target: {fileID: 7171377577227371525, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.24313726
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171377577227371525, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.5176471
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171377577227371525, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.1254902
+      objectReference: {fileID: 0}
     - target: {fileID: 7359721007848571458, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
       propertyPath: m_Name
       value: TutorialPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7359721007848571458, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923751138560750793, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_text
+      value: "You\u2019re an independent courier working your way across the system.\n\nTake
+        delivery jobs from strangers, sling yourself between stations, earn credits,
+        and decide how much trouble you\u2019re willing to get into along the way.\n\n\n<size=85%><color=#20843E>Flight
+        School covers the basics of piloting your ship. This guide covers everything
+        else.</size></color>"
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923751138560750793, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.49803922
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923751138560750793, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923751138560750793, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.2784314
+      objectReference: {fileID: 0}
+    - target: {fileID: 7923751138560750793, guid: 0fe78255669ecdf458fdf468d9d05a4f, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 2524970823
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

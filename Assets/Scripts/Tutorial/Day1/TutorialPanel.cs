@@ -187,6 +187,6 @@ public class TutorialPanel : MonoBehaviour
             closeButton.gameObject.SetActive(isLastPage);
 
         if (pageCounterText != null)
-            pageCounterText.text = $"({currentPageIndex + 1}/{pages.Count})";
+            pageCounterText.text = $"[ {currentPageIndex + 1} / {pages.Count} ]";
     }
 }

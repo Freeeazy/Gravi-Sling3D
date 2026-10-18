@@ -169,6 +169,9 @@ public class SlingshotPlanet3D : MonoBehaviour
         if (PlayerThrustManager.Instance)
             PlayerThrustManager.Instance.SetOrbiting(0.5f);
 
+        if (SlingshotEngineLight.Instance)
+            SlingshotEngineLight.Instance.SetOrbiting(true);
+
         if (OpenQuestBoardPopUp.Instance)
             OpenQuestBoardPopUp.Instance.OpenQuestBoard();
 
@@ -389,6 +392,9 @@ public class SlingshotPlanet3D : MonoBehaviour
 
         if (WormholeConeTether.Instance)
             WormholeConeTether.Instance.StopTether();
+
+        if (SlingshotEngineLight.Instance)
+            SlingshotEngineLight.Instance.SetOrbiting(false);
 
         isCharging = false;
 

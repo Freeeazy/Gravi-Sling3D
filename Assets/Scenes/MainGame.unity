@@ -924,6 +924,10 @@ MonoBehaviour:
   maximumTipRetraction: 0.035
   redlineAttack: 0.18
   redlineRelease: 0.45
+  indicatorGraphic: {fileID: 0}
+  indicatorOnMaterial: {fileID: 0}
+  indicatorRedlineMaterial: {fileID: 0}
+  indicatorOffSpeed: 0.1
   speedSmooth: 12
   useUnscaledTime: 1
 --- !u!1 &24120655
@@ -21747,6 +21751,10 @@ MonoBehaviour:
   maximumTipRetraction: 0.035
   redlineAttack: 0.18
   redlineRelease: 0.45
+  indicatorGraphic: {fileID: 1552722394}
+  indicatorOnMaterial: {fileID: 2100000, guid: a1838d5354a69c947b8d529238163497, type: 2}
+  indicatorRedlineMaterial: {fileID: 2100000, guid: 768e66ee0c1a5d34aadef41cce8469ac, type: 2}
+  indicatorOffSpeed: 50
   speedSmooth: 12
   useUnscaledTime: 1
 --- !u!222 &445200195
@@ -33839,8 +33847,8 @@ MonoBehaviour:
     lod1Mesh: {fileID: -4105537433108580021, guid: 6ca4df58eabf6324194fb271851bd832, type: 3}
     lod2Mesh: {fileID: 6797020291627772500, guid: d43bc23bf1ec7334faabb49e09c172e7, type: 3}
     baseRadius: 1
-  lod0Distance: 140
-  lod1Distance: 300
+  lod0Distance: 250
+  lod1Distance: 500
   shadowCasting: 0
   receiveShadows: 0
   renderLayer: 0
@@ -75197,6 +75205,7 @@ GameObject:
   - component: {fileID: 1827333736}
   - component: {fileID: 1827333738}
   - component: {fileID: 1827333737}
+  - component: {fileID: 1827333739}
   m_Layer: 5
   m_Name: GravityLight
   m_TagString: Untagged
@@ -75261,6 +75270,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1827333735}
   m_CullTransparentMesh: 1
+--- !u!114 &1827333739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827333735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac7f92ff98e67a44fb858187aba9156c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  engineLight: {fileID: 1827333737}
+  orbitingMaterial: {fileID: 2100000, guid: a1838d5354a69c947b8d529238163497, type: 2}
 --- !u!1 &1830398920
 GameObject:
   m_ObjectHideFlags: 0

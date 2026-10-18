@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// Maps ship speed to the RetroPegMeter_UI and supplies a continuous redline effect.
 /// Keeps the original orbit API: Instance, SetSpeed and ClearExternalSpeed.
@@ -37,6 +38,14 @@ public class SpeedometerHUD : MonoBehaviour
     [SerializeField, Min(0f)] private float redlineAttack = 0.18f;
     [SerializeField, Min(0f)] private float redlineRelease = 0.45f;
 
+    [Header("Material Indicator")]
+    [SerializeField] private Graphic indicatorGraphic;
+    [SerializeField] private Material indicatorOnMaterial;
+    [SerializeField] private Material indicatorRedlineMaterial;
+
+    [Tooltip("At or below this speed, the indicator uses no custom material.")]
+    [SerializeField, Min(0f)] private float indicatorOffSpeed = 0.1f;
+
     [Header("Speed smoothing")]
     [Tooltip("Legacy exponential response rate. 0 means immediate. Set meter Sweep Attack/Release to 0 to avoid double smoothing.")]
     public float speedSmooth = 12f;
@@ -58,6 +67,7 @@ public class SpeedometerHUD : MonoBehaviour
             return;
         }
         Instance = this;
+        SetIndicatorMaterial(null);
         if (!pegMeter)
             Debug.LogError("SpeedometerHUD: Assign the RetroPegMeter_UI component.", this);
     }
@@ -108,9 +118,9 @@ public class SpeedometerHUD : MonoBehaviour
     {
         float start = NonNegative(redlineSpeed);
         float end = Mathf.Max(start + 0.01f, NonNegative(maxSpeed));
-        float targetStrength = animateRedline && start > 0f
-            ? Mathf.InverseLerp(start, end, CurrentSpeed) : 0f;
+        float targetStrength = animateRedline && start > 0f ? Mathf.InverseLerp(start, end, CurrentSpeed) : 0f;
         float duration = NonNegative(targetStrength > redlineStrength ? redlineAttack : redlineRelease);
+
         if (dt > 0f)
         {
             float blend = duration <= 0f ? 1f : 1f - Mathf.Exp(-3f * dt / duration);
@@ -124,6 +134,7 @@ public class SpeedometerHUD : MonoBehaviour
             pulsePhase = 0f;
             redlineStrength = 0f;
             pegMeter.SetWarningEffect(redlineStart01, 1f, 0f);
+            UpdateMaterialIndicator();
             return;
         }
 
@@ -137,6 +148,43 @@ public class SpeedometerHUD : MonoBehaviour
         float brightness = 1f - Mathf.Clamp(maximumDim, 0f, 0.8f) * dip;
         float retraction = Mathf.Clamp(maximumTipRetraction, 0f, 0.1f) * dip;
         pegMeter.SetWarningEffect(redlineStart01, brightness, retraction);
+        UpdateMaterialIndicator(wave);
+    }
+
+    private void UpdateMaterialIndicator(float wave = 0f)
+    {
+        Material nextMaterial = null;
+
+        if (CurrentSpeed > NonNegative(indicatorOffSpeed))
+        {
+            if (redlineStrength > 0f)
+            {
+                // Red material during the bright half of the meter's pulse.
+                // No custom material during the dim half.
+                nextMaterial = wave < 0.5f
+                    ? indicatorRedlineMaterial
+                    : null;
+            }
+            else
+            {
+                nextMaterial = indicatorOnMaterial;
+            }
+        }
+
+        SetIndicatorMaterial(nextMaterial);
+    }
+
+    private void SetIndicatorMaterial(Material nextMaterial)
+    {
+        if (!indicatorGraphic) return;
+
+        // Unity's material getter returns the default material when none is assigned.
+        Material effectiveMaterial = nextMaterial
+            ? nextMaterial
+            : indicatorGraphic.defaultMaterial;
+
+        if (indicatorGraphic.material != effectiveMaterial)
+            indicatorGraphic.material = nextMaterial;
     }
 
     // Existing orbit/slingshot callers can keep using these unchanged.
@@ -164,6 +212,7 @@ public class SpeedometerHUD : MonoBehaviour
         redlineStrength = 0f;
         pulsePhase = 0f;
         if (pegMeter) pegMeter.SetWarningEffect(redlineStart01, 1f, 0f);
+        SetIndicatorMaterial(null);
     }
 
     private void OnDestroy()

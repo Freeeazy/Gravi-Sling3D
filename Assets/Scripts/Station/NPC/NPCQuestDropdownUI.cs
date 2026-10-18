@@ -51,6 +51,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
     [Header("Delivery Type Pill")]
     public Image deliveryTypePillImage;
+    public Image deliveryTypePillBorderImage;
     public TMP_Text deliveryTypePillText;
 
     public DeliveryTypeVisual[] deliveryTypeVisuals =
@@ -65,6 +66,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
     [Header("Cargo Effect Pill")]
     public GameObject cargoEffectPillRoot;
     public Image cargoEffectPillImage;
+    public Image cargoEffectPillBorderImage;
     public TMP_Text cargoEffectPillText;
 
     public CargoEffectVisual[] cargoEffectVisuals =
@@ -108,6 +110,83 @@ public class NPCQuestDropdownUI : MonoBehaviour
     };
 
     private int _currentNpcId = -1;
+
+    private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+    private Material _deliveryBorderMaterial;
+    private Material _cargoBorderMaterial;
+    private Material _deliveryBorderOriginal;
+    private Material _cargoBorderOriginal;
+
+    private void Awake()
+    {
+        EnsureBorderMaterials();
+    }
+
+    private void EnsureBorderMaterials()
+    {
+        CreateBorderMaterial(deliveryTypePillBorderImage, ref _deliveryBorderMaterial, ref _deliveryBorderOriginal);
+        CreateBorderMaterial(cargoEffectPillBorderImage, ref _cargoBorderMaterial, ref _cargoBorderOriginal);
+    }
+
+    private void CreateBorderMaterial(Image border, ref Material instance, ref Material original)
+    {
+        if (!border || instance)
+            return;
+
+        original = border.material;
+        if (!original)
+            return;
+
+        // Copies all starting properties, keywords, and render settings.
+        // Only this runtime copy will receive emission color changes.
+        instance = new Material(original)
+        {
+            name = original.name + " (" + border.name + " Instance)"
+        };
+        border.material = instance;
+
+        if (!instance.HasProperty(EmissionColorId))
+            Debug.LogWarning("[NPCQuestDropdownUI] Border shader is missing _EmissionColor: " + border.name, border);
+    }
+
+    private static void UpdateBorderEmission(Image border, Material instance,
+        Color pillColor, bool fullBrightness = true)
+    {
+        if (!border || !instance || !instance.HasProperty(EmissionColorId))
+            return;
+
+        Color.RGBToHSV(pillColor, out float hue, out float saturation, out float value);
+        Color emission = Color.HSVToRGB(hue, saturation, fullBrightness ? 1f : value);
+        // Preserve the material's emission alpha; do not inherit the cover's opacity.
+        emission.a = instance.GetColor(EmissionColorId).a;
+        instance.SetColor(EmissionColorId, emission);
+
+        // A UI Mask can render a stencil copy of our material. Keep that copy in sync.
+        Material renderedMaterial = border.materialForRendering;
+        if (renderedMaterial && renderedMaterial != instance && renderedMaterial.HasProperty(EmissionColorId))
+            renderedMaterial.SetColor(EmissionColorId, emission);
+    }
+
+    private void OnDestroy()
+    {
+        ReleaseBorderMaterial(deliveryTypePillBorderImage,
+            ref _deliveryBorderMaterial, _deliveryBorderOriginal);
+        ReleaseBorderMaterial(cargoEffectPillBorderImage,
+            ref _cargoBorderMaterial, _cargoBorderOriginal);
+    }
+
+    private void ReleaseBorderMaterial(Image border, ref Material instance, Material original)
+    {
+        if (!instance)
+            return;
+
+        if (border && border.material == instance)
+            border.material = original;
+
+        Destroy(instance);
+        instance = null;
+    }
+
 
     public void ShowForNpc(int npcId)
     {
@@ -237,6 +316,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
     }
     private void UpdateDeliveryTypeDisplay(NPCQuestManager.QuestOffer offer)
     {
+        EnsureBorderMaterials();
         if (!offer.valid)
         {
             if (deliveryTypePillText)
@@ -247,6 +327,10 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
             if (deliveryTypePillImage)
                 deliveryTypePillImage.color = deliveryTypePillOffColor;
+
+            // Keep the empty/off state dim instead of raising its brightness.
+            UpdateBorderEmission(deliveryTypePillBorderImage, _deliveryBorderMaterial,
+                deliveryTypePillOffColor, false);
 
             return;
         }
@@ -261,6 +345,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
         if (deliveryTypePillImage)
             deliveryTypePillImage.color = visual.color;
+
+        UpdateBorderEmission(deliveryTypePillBorderImage, _deliveryBorderMaterial,
+            deliveryTypePillImage ? deliveryTypePillImage.color : visual.color);
     }
 
     private void UpdateTimerDisplay(NPCQuestManager.QuestOffer offer)
@@ -433,13 +520,17 @@ public class NPCQuestDropdownUI : MonoBehaviour
             cargoEffectPillText.color = Color.white;
         }
 
+        Color pillColor = QuestColorUtil.GetCargoColor(
+            offer.cargoEffectType,
+            offer.sourceFaction
+        );
+
         if (cargoEffectPillImage)
-        {
-            cargoEffectPillImage.color = QuestColorUtil.GetCargoColor(
-                offer.cargoEffectType,
-                offer.sourceFaction
-            );
-        }
+            cargoEffectPillImage.color = pillColor;
+
+        EnsureBorderMaterials();
+        UpdateBorderEmission(cargoEffectPillBorderImage, _cargoBorderMaterial,
+            cargoEffectPillImage ? cargoEffectPillImage.color : pillColor);
     }
     private CargoEffectVisual GetCargoEffectVisual(CargoEffectType cargoEffectType)
     {

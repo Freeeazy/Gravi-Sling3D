@@ -19593,7 +19593,7 @@ MonoBehaviour:
   followDistance: 30
   arrivalTolerance: 0.15
   resumeDistanceBuffer: 1
-  holdingRange: 10
+  holdingRange: 20
   springStrength: 5
   springDamping: 2.5
   velocityResponseTime: 0.45

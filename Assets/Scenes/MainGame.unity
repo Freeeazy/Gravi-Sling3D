@@ -1744,8 +1744,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 37039263}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -1765,7 +1765,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -13309,8 +13309,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 357119300}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -13330,7 +13330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -22057,8 +22057,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 469606857}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -22078,7 +22078,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -25514,8 +25514,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 597000783}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -25535,7 +25535,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -45445,7 +45445,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -45484,8 +45484,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 1158176811}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -53076,8 +53076,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 1352936393}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -53097,7 +53097,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -61602,8 +61602,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 1534689216}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -61623,7 +61623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -65500,9 +65500,10 @@ MonoBehaviour:
   acceleration: 100
   damping: 1
   normalizeInput: 1
-  speedReductionPerBeam: 0.1
+  tractorStrengthRecoveryPerSecond: 6
   tractorBraking: 1000
   activeTractorBeamCount: 0
+  currentTractorStrength: 0
   boostMaxSpeed: 500
   boostRampUp: 1.2
   boostRampDown: 1
@@ -68280,8 +68281,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 1690490887}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -68301,7 +68302,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -73118,12 +73119,12 @@ MonoBehaviour:
     possibleStats:
     - statName: MaxSpeed
       canRollFlat: 1
-      flatRange: {x: 20, y: 100}
+      flatRange: {x: 20, y: 50}
       canRollPercent: 1
-      percentRange: {x: 0, y: 0.2}
+      percentRange: {x: 0.08, y: 0.16}
     - statName: Acceleration
       canRollFlat: 1
-      flatRange: {x: 5, y: 50}
+      flatRange: {x: 4, y: 10}
       canRollPercent: 1
       percentRange: {x: 0.03, y: 0.08}
   - moduleType: Acceleration
@@ -73132,144 +73133,144 @@ MonoBehaviour:
     possibleStats:
     - statName: MaxSpeed
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 5, y: 15}
       canRollPercent: 1
-      percentRange: {x: 0.01, y: 0.1}
+      percentRange: {x: 0.02, y: 0.05}
     - statName: Acceleration
       canRollFlat: 1
-      flatRange: {x: 10, y: 100}
+      flatRange: {x: 12, y: 30}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.10, y: 0.20}
   - moduleType: Boost Acceleration
     icon: {fileID: 21300000, guid: 88e203f7a4403d24aa8babb560690b5a, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
-      flatRange: {x: 10, y: 100}
+      flatRange: {x: 8, y: 20}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.12, y: 0.25}
     - statName: BoostMaxSpeed
       canRollFlat: 1
-      flatRange: {x: 5, y: 75}
+      flatRange: {x: 10, y: 30}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
     - statName: BoostCapacity
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 2, y: 5}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
   - moduleType: Boost Max Speed
     icon: {fileID: 21300000, guid: cdae1058a7b1c6f49af48adf5f39ac3a, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
-      flatRange: {x: 5, y: 50}
+      flatRange: {x: 3, y: 8}
       canRollPercent: 1
       percentRange: {x: 0.03, y: 0.08}
     - statName: BoostMaxSpeed
       canRollFlat: 1
-      flatRange: {x: 50, y: 200}
+      flatRange: {x: 40, y: 100}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.06, y: 0.12}
     - statName: BoostCapacity
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 2, y: 5}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
   - moduleType: Boost Capacity
     icon: {fileID: 21300000, guid: 2496bc538b5b28945a42d6d953e19dcf, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostAcceleration
       canRollFlat: 1
-      flatRange: {x: 5, y: 50}
+      flatRange: {x: 3, y: 8}
       canRollPercent: 1
       percentRange: {x: 0.03, y: 0.08}
     - statName: BoostMaxSpeed
       canRollFlat: 1
-      flatRange: {x: 5, y: 75}
+      flatRange: {x: 10, y: 30}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
     - statName: BoostCapacity
       canRollFlat: 1
-      flatRange: {x: 5, y: 50}
+      flatRange: {x: 5, y: 15}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.05, y: 0.15}
   - moduleType: Boost Drain
     icon: {fileID: 21300000, guid: f363fe2851f778644a7c842f1e5b650c, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
-      flatRange: {x: 0, y: -5}
+      flatRange: {x: -0.20, y: -0.10}
       canRollPercent: 1
-      percentRange: {x: -0.05, y: -0.2}
+      percentRange: {x: -0.025, y: -0.015}
     - statName: BoostCapacity
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 2, y: 5}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
     - statName: BoostRegen
       canRollFlat: 1
-      flatRange: {x: 0, y: 3}
+      flatRange: {x: 1, y: 1}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.10, y: 0.20}
   - moduleType: Boost Regen
     icon: {fileID: 21300000, guid: 7c2e4b53f5c8b5d4fa686692262c5275, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
-      flatRange: {x: 0, y: -3}
+      flatRange: {x: -0.20, y: -0.10}
       canRollPercent: 1
-      percentRange: {x: -0.03, y: -0.08}
+      percentRange: {x: -0.025, y: -0.015}
     - statName: BoostCapacity
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 2, y: 5}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.05}
     - statName: BoostRegen
       canRollFlat: 1
-      flatRange: {x: 0, y: 5}
+      flatRange: {x: 1, y: 2}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.20, y: 0.40}
   - moduleType: Charge Rate
     icon: {fileID: 21300000, guid: 6ff4521097433f340b5fe7c97becfade, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: ChargeRate
       canRollFlat: 1
-      flatRange: {x: 5, y: 50}
+      flatRange: {x: 1, y: 2}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.10, y: 0.20}
     - statName: LaunchSpeed
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 1, y: 2}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.02, y: 0.04}
   - moduleType: Launch Speed
     icon: {fileID: 21300000, guid: 864b5ee03735045418e3c2d5854427cd, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: ChargeRate
       canRollFlat: 1
-      flatRange: {x: 2, y: 20}
+      flatRange: {x: 1, y: 1}
       canRollPercent: 1
-      percentRange: {x: 0.03, y: 0.08}
+      percentRange: {x: 0.03, y: 0.06}
     - statName: LaunchSpeed
       canRollFlat: 1
-      flatRange: {x: 10, y: 100}
+      flatRange: {x: 3, y: 6}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.2}
+      percentRange: {x: 0.05, y: 0.10}
   - moduleType: Shield
     icon: {fileID: 21300000, guid: fae31d9386dfdba438b2aca1c2413b4d, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: ShieldCharge
       canRollFlat: 1
-      flatRange: {x: 1, y: 1}
+      flatRange: {x: 0, y: 1}
       canRollPercent: 0
       percentRange: {x: 0, y: 0}
   - moduleType: Package Plating
@@ -73290,40 +73291,40 @@ MonoBehaviour:
     percentRollChance: 0
   - tier: 1
     minStats: 1
+    maxStats: 1
+    flatMultiplier: 1.2
+    percentMultiplier: 1.1
+    percentRollChance: 0.05
+  - tier: 2
+    minStats: 1
     maxStats: 2
     flatMultiplier: 1.5
-    percentMultiplier: 1
-    percentRollChance: 0
-  - tier: 2
-    minStats: 2
-    maxStats: 2
-    flatMultiplier: 2
     percentMultiplier: 1.25
     percentRollChance: 0.1
   - tier: 3
     minStats: 2
     maxStats: 2
     flatMultiplier: 2
-    percentMultiplier: 1.25
-    percentRollChance: 0.2
+    percentMultiplier: 1.5
+    percentRollChance: 0.15
   - tier: 4
     minStats: 2
     maxStats: 3
-    flatMultiplier: 3
-    percentMultiplier: 1.5
-    percentRollChance: 0.35
+    flatMultiplier: 2.8
+    percentMultiplier: 1.8
+    percentRollChance: 0.2
   - tier: 5
     minStats: 3
-    maxStats: 4
-    flatMultiplier: 4.5
-    percentMultiplier: 2
-    percentRollChance: 0.5
+    maxStats: 3
+    flatMultiplier: 4
+    percentMultiplier: 2.2
+    percentRollChance: 0.25
   - tier: 6
-    minStats: 4
-    maxStats: 5
-    flatMultiplier: 6
-    percentMultiplier: 2.75
-    percentRollChance: 0.7
+    minStats: 3
+    maxStats: 3
+    flatMultiplier: 5.5
+    percentMultiplier: 2.7
+    percentRollChance: 0.3
   prefixes:
   - Jury-Rigged
   - Ion-Bent
@@ -74383,8 +74384,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 1808441558}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -74404,7 +74405,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
@@ -76386,8 +76387,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 0.999999
-  m_Size: 0.35612306
+  m_Value: 0.99999917
+  m_Size: 0.3557051
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -85874,8 +85875,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowImage: {fileID: 2078194821}
-  normalColor: {r: 1, g: 1, b: 1, a: 0.39215687}
-  highlightColor: {r: 0, g: 0.92156863, b: 1, a: 0.39215687}
+  normalMaterial: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: b5e0eccd216a45b42ba39389c507d541, type: 2}
   ellipseFrac: {x: 0.42, y: 0.3}
   ellipsePaddingPx: {x: 40, y: 40}
   edgeOffsetPx: 18
@@ -85895,7 +85896,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 2100000, guid: 3f138b0a76975b34c9da944a0bdbd129, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}

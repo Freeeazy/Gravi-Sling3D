@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,9 @@ public class QuestPointerMarker : MonoBehaviour
     [Header("Refs")]
     public Image arrowImage;
 
-    [Header("Highlight")]
-    public Color normalColor = Color.white;
-    public Color highlightColor = Color.yellow;
+    [Header("Highlight Materials")]
+    public Material normalMaterial;
+    public Material highlightMaterial;
 
     [Header("Ellipse Dead Zone")]
     public Vector2 ellipseFrac = new Vector2(0.42f, 0.30f);
@@ -37,26 +38,30 @@ public class QuestPointerMarker : MonoBehaviour
     public void SetHighlighted(bool highlighted)
     {
         _highlighted = highlighted;
-        ApplyColor();
+        ApplyMaterial();
     }
 
-    private void ApplyColor()
+    private void ApplyMaterial()
     {
         if (arrowImage)
-            arrowImage.color = _highlighted ? highlightColor : normalColor;
+            arrowImage.material = _highlighted
+                ? highlightMaterial
+                : normalMaterial;
     }
+
     private void Awake()
     {
         _rt = (RectTransform)transform;
 
-        if (!arrowImage) arrowImage = GetComponent<Image>();
+        if (!arrowImage)
+            arrowImage = GetComponent<Image>();
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas) _canvasRt = _canvas.GetComponent<RectTransform>();
+        if (_canvas)
+            _canvasRt = _canvas.GetComponent<RectTransform>();
 
-        ApplyColor();
+        ApplyMaterial();
     }
-
 
     public void SetTarget(Camera cam, Vector3 targetPos, bool hasTarget)
     {
@@ -69,7 +74,7 @@ public class QuestPointerMarker : MonoBehaviour
     {
         if (!on)
             SetHighlighted(false);
-        // Disable whole GO so it stops updating layout / raycast etc
+
         gameObject.SetActive(on);
     }
 
@@ -84,7 +89,9 @@ public class QuestPointerMarker : MonoBehaviour
         if (!_canvasRt)
         {
             _canvas = GetComponentInParent<Canvas>();
-            if (_canvas) _canvasRt = _canvas.GetComponent<RectTransform>();
+            if (_canvas)
+                _canvasRt = _canvas.GetComponent<RectTransform>();
+
             if (!_canvasRt) return;
         }
 
@@ -100,7 +107,7 @@ public class QuestPointerMarker : MonoBehaviour
                 return;
             }
 
-            // Flip so arrow still points “generally” toward it
+            // Flip so arrow still points generally toward target
             vp.x = 1f - vp.x;
             vp.y = 1f - vp.y;
         }
@@ -120,6 +127,7 @@ public class QuestPointerMarker : MonoBehaviour
 
         float nx = (r.x <= 0.0001f) ? 0f : (p.x / r.x);
         float ny = (r.y <= 0.0001f) ? 0f : (p.y / r.y);
+
         bool insideEllipse = (nx * nx + ny * ny) <= 1f;
 
         if (hideWhenInsideEllipse && inFront && insideEllipse)
@@ -130,14 +138,24 @@ public class QuestPointerMarker : MonoBehaviour
 
         SetVisible(true);
 
-        // clamp to ellipse edge
+        // Clamp to ellipse edge
         Vector2 dir = p;
-        if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
+
+        if (dir.sqrMagnitude < 0.0001f)
+            dir = Vector2.right;
+
         dir.Normalize();
 
-        float dx = dir.x, dy = dir.y;
-        float denom = (dx * dx) / (r.x * r.x + 0.0001f) + (dy * dy) / (r.y * r.y + 0.0001f);
-        float t = 1f / Mathf.Sqrt(Mathf.Max(denom, 0.000001f));
+        float dx = dir.x;
+        float dy = dir.y;
+
+        float denom =
+            (dx * dx) / (r.x * r.x + 0.0001f) +
+            (dy * dy) / (r.y * r.y + 0.0001f);
+
+        float t = 1f / Mathf.Sqrt(
+            Mathf.Max(denom, 0.000001f)
+        );
 
         Vector2 edgePoint = dir * t;
         Vector2 arrowPos = edgePoint + dir * edgeOffsetPx;
@@ -147,13 +165,20 @@ public class QuestPointerMarker : MonoBehaviour
         if (rotateArrow)
         {
             float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            _rt.localRotation = Quaternion.Euler(0f, 0f, ang + rotationOffsetDegrees);
+
+            _rt.localRotation = Quaternion.Euler(
+                0f,
+                0f,
+                ang + rotationOffsetDegrees
+            );
         }
     }
 
     private void SetVisible(bool on)
     {
-        if (arrowImage) arrowImage.enabled = on;
-        else gameObject.SetActive(on);
+        if (arrowImage)
+            arrowImage.enabled = on;
+        else
+            gameObject.SetActive(on);
     }
 }

@@ -6065,6 +6065,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 43f19bd847b87634ea35a19badaf1d0d, type: 3}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.b
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.g
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.r
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: 115608d881a52044ca7746daca126bcf, type: 2}
     - target: {fileID: 5131244332541294831, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -8566,6 +8590,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 43f19bd847b87634ea35a19badaf1d0d, type: 3}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.b
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.g
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.r
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: 115608d881a52044ca7746daca126bcf, type: 2}
     - target: {fileID: 5131244332541294831, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -13171,9 +13219,10 @@ MonoBehaviour:
   acceleration: 100
   damping: 2
   normalizeInput: 1
-  speedReductionPerBeam: 0.1
+  tractorStrengthRecoveryPerSecond: 6
   tractorBraking: 200
   activeTractorBeamCount: 0
+  currentTractorStrength: 0
   boostMaxSpeed: 900
   boostRampUp: 1.2
   boostRampDown: 1
@@ -15484,8 +15533,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 115608d881a52044ca7746daca126bcf, type: 2}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.08800997, g: 0.17396893, b: 0.17735851, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -17872,6 +17921,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 43f19bd847b87634ea35a19badaf1d0d, type: 3}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.b
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.g
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Color.r
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 4127885100989518854, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: 115608d881a52044ca7746daca126bcf, type: 2}
     - target: {fileID: 5131244332541294831, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -17967,6 +18040,10 @@ PrefabInstance:
     - target: {fileID: 7562696990769993299, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
       propertyPath: m_Name
       value: SaveSlot
+      objectReference: {fileID: 0}
+    - target: {fileID: 7562696990769993299, guid: 7d492ef71383c5a42bb87892af0abd4f, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

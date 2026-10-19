@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 /// <summary>
 /// Prototype 3D pursuit. Place on the prefab ROOT with one Rigidbody.
@@ -53,6 +54,10 @@ public class PoliceShipAI : MonoBehaviour
     [Tooltip("Extra separation acceleration when cops are moving toward one another.")]
     [SerializeField, Min(0f)] private float separationDamping = 3f;
 
+    [Header("Tractor Beam Strength")]
+    [Tooltip("Strength points added per second while this cop is tethered.")]
+    [SerializeField, Min(0f)] private float beamStrengthAdditivePerSecond = 4f;
+
     [Header("Tractor Beam Visuals")]
     [Tooltip("Assign only beam particle roots on this prefab. Their child particle systems are included. Keep the GameObjects active and enable Looping for a continuous beam.")]
     [SerializeField] private ParticleSystem[] tractorBeamParticles = new ParticleSystem[0];
@@ -96,8 +101,10 @@ public class PoliceShipAI : MonoBehaviour
     public float DistanceToPlayer => distanceToPlayer;
     public float LoseContactDistance => loseContactDistance;
     public Vector3 Velocity => velocity;
-    // Visual state only; this script does not slow or capture the player.
+
+    // Connection state; the manager forwards its strength rate to SimpleMove.
     public bool IsBeamActive => beamActive;
+    public float BeamStrengthAdditivePerSecond => Mathf.Max(0f, beamStrengthAdditivePerSecond);
     public event Action<PoliceShipAI, ChaseState> StateChanged;
 
     // Active cops register here for separation without scene searches or physics queries.
@@ -133,6 +140,7 @@ public class PoliceShipAI : MonoBehaviour
     private float timeWithoutContact;
     private bool initialized;
     private float lastContactRefreshTime = float.NegativeInfinity;
+    private float lastBeamRefreshTime = float.NegativeInfinity;
     private float timeWithoutDirectContact;
     private bool locallySearching;
     private bool receivedSharedSighting;
@@ -158,6 +166,7 @@ public class PoliceShipAI : MonoBehaviour
         lastKnownVelocity = Vector3.zero;
         currentState = ChaseState.Pursuing;
         lastContactRefreshTime = float.NegativeInfinity;
+        lastBeamRefreshTime = float.NegativeInfinity;
         timeWithoutDirectContact = 0f;
         locallySearching = false;
         receivedSharedSighting = false;
@@ -187,10 +196,10 @@ public class PoliceShipAI : MonoBehaviour
         }
 
         float dt = Time.fixedDeltaTime;
-        Vector3 playerPosition = target.position;
         // Normally already sampled by the manager this physics tick. Standalone
         // cops still perform their own detection through this idempotent method.
         RefreshDirectContact();
+        RefreshTractorBeamState();
         if (HasDirectContact || receivedSharedSighting)
         {
             if (IsSearching)
@@ -210,7 +219,6 @@ public class PoliceShipAI : MonoBehaviour
 
         // During the grace period, continue from the remembered velocity too.
         Vector3 pursuitPoint = lastKnownPosition + lastKnownVelocity * timeWithoutContact;
-        UpdateBeamRange(playerPosition);
 
         float responseTime = Mathf.Max(0.01f, velocityResponseTime / responseMultiplier);
         smoothedTargetVelocity = Vector3.Lerp(smoothedTargetVelocity, lastKnownVelocity,
@@ -516,6 +524,25 @@ public class PoliceShipAI : MonoBehaviour
         SetBeamActive(false, true);
     }
 
+    public void RefreshTractorBeamState()
+    {
+        RefreshDirectContact();
+
+        // The manager and this AI can both call this during the same tick.
+        if (lastBeamRefreshTime == Time.fixedTime)
+            return;
+
+        lastBeamRefreshTime = Time.fixedTime;
+
+        if (!HasDirectContact)
+        {
+            SetBeamActive(false);
+            return;
+        }
+
+        UpdateBeamRange(target.position);
+    }
+
     private void UpdateBeamRange(Vector3 playerPosition)
     {
         Vector3 origin = beamRangeOrigin != null ? beamRangeOrigin.position : body.position;
@@ -523,8 +550,10 @@ public class PoliceShipAI : MonoBehaviour
         float activation = Mathf.Max(0f, beamActivationDistance);
         float release = Mathf.Max(activation, beamReleaseDistance);
         float threshold = beamActive ? release : activation;
-        // A cop with no current observation cannot keep a beam lock during grace/search.
-        bool shouldPlay = observedLastStep && !IsSearching && distanceFromBeamOrigin <= threshold;
+
+        // Current direct contact allows immediate reacquisition.
+        // Shared sightings alone cannot establish a beam lock.
+        bool shouldPlay = HasDirectContact && distanceFromBeamOrigin <= threshold;
         SetBeamActive(shouldPlay);
     }
 
@@ -576,6 +605,7 @@ public class PoliceShipAI : MonoBehaviour
     {
         enabledShips.Remove(this);
         lastContactRefreshTime = float.NegativeInfinity;
+        lastBeamRefreshTime = float.NegativeInfinity;
         receivedSharedSighting = false;
         velocity = Vector3.zero;
         observedLastStep = false;

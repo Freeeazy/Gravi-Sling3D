@@ -20,27 +20,63 @@ public class SimpleMove : MonoBehaviour
     public bool normalizeInput = true;
 
     [Header("Tractor Beam")]
-    [Range(0f, 1f)] public float speedReductionPerBeam = 0.10f;
+    [Tooltip("Strength points removed per second when no beams are connected.")]
+    [Min(0f)] public float tractorStrengthRecoveryPerSecond = 6f;
     [Tooltip("How quickly excess speed is removed, in units per second squared.")]
     [Min(0.1f)] public float tractorBraking = 200f;
     [SerializeField] private int activeTractorBeamCount;
+    [SerializeField, Range(0f, 100f)] private float currentTractorStrength;
 
     public int ActiveTractorBeamCount => activeTractorBeamCount;
-    public float TractorSpeedMultiplier => Mathf.Clamp01(1f - activeTractorBeamCount * Mathf.Clamp01(speedReductionPerBeam));
+    public float CurrentTractorStrength => currentTractorStrength;
+    public float TractorSpeedMultiplier => Mathf.Clamp01(1f - currentTractorStrength / 100f);
 
     private float _tractorMomentumReferenceSpeed;
-    public void SetTractorBeamCount(int count)
+    private float _tractorStrengthPerSecond;
+
+    public void SetTractorBeamInput(int count, float strengthPerSecond)
     {
-        count = Mathf.Max(0, count);
+        activeTractorBeamCount = Mathf.Max(0, count);
+        _tractorStrengthPerSecond = activeTractorBeamCount > 0 ? Mathf.Max(0f, strengthPerSecond) : 0f;
+    }
 
-        // Capture incoming momentum when the first beam connects.
-        if (activeTractorBeamCount == 0 && count > 0)
-            _tractorMomentumReferenceSpeed = rb != null ? rb.linearVelocity.magnitude : 0f;
-
-        activeTractorBeamCount = count;
-
-        if (count == 0)
+    private void UpdateTractorStrength(float dt)
+    {
+        float previousStrength = currentTractorStrength;
+    
+        if (activeTractorBeamCount > 0)
+        {
+            currentTractorStrength = Mathf.MoveTowards(
+                currentTractorStrength,
+                100f,
+                _tractorStrengthPerSecond * dt);
+        }
+        else
+        {
+            currentTractorStrength = Mathf.MoveTowards(
+                currentTractorStrength,
+                0f,
+                Mathf.Max(0f, tractorStrengthRecoveryPerSecond) * dt);
+        }
+    
+        currentTractorStrength = Mathf.Clamp(currentTractorStrength, 0f, 100f);
+    
+        // Capture momentum when a new slowdown begins.
+        // Reconnecting during recovery preserves the existing reference.
+        if (previousStrength <= 0f && currentTractorStrength > 0f)
+            _tractorMomentumReferenceSpeed =
+                rb != null ? rb.linearVelocity.magnitude : 0f;
+    
+        if (currentTractorStrength <= 0f)
             _tractorMomentumReferenceSpeed = 0f;
+    }
+
+    public void ResetTractorBeam()
+    {
+        activeTractorBeamCount = 0;
+        _tractorStrengthPerSecond = 0f;
+        currentTractorStrength = 0f;
+        _tractorMomentumReferenceSpeed = 0f;
     }
 
     [Header("Boost (Hold LeftShift) - Additive")]
@@ -174,6 +210,7 @@ public class SimpleMove : MonoBehaviour
         }
 
         Instance = this;
+        ResetTractorBeam();
 
         if (!rb)
         {
@@ -444,6 +481,8 @@ public class SimpleMove : MonoBehaviour
             hasInput = true;
         }
 
+        UpdateTractorStrength(dt);
+
         // --- BOOSTED SPEED/ACCEL (ADDITIVE) ---
         float unmodifiedMaxSpeed = Mathf.Max(0f, maxSpeed + (boostMaxSpeed * boostCharge));
 
@@ -496,7 +535,7 @@ public class SimpleMove : MonoBehaviour
 
         // Apply tractor resistance to excess momentum without repeatedly
         // multiplying the current velocity by the slowdown percentage.
-        if (activeTractorBeamCount > 0 && TractorSpeedMultiplier < 1f)
+        if (currentTractorStrength > 0f)
         {
             // A faster external launch can establish a higher momentum reference.
             _tractorMomentumReferenceSpeed = Mathf.Max(

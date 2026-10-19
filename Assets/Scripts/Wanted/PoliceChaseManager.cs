@@ -168,18 +168,27 @@ public class PoliceChaseManager : MonoBehaviour
         }
 
         int beamCount = 0;
+        float combinedStrengthPerSecond = 0f;
         if (wantedManager != null && wantedManager.IsWanted &&
             playerBody != null && playerBody.gameObject.activeInHierarchy &&
             movement.rb == playerBody)
         {
             foreach (PoliceShipAI police in activePoliceShips)
             {
-                if (police != null && police.isActiveAndEnabled && police.IsBeamActive)
-                    beamCount++;
+                if (police == null || !police.isActiveAndEnabled)
+                    continue;
+
+                police.RefreshTractorBeamState();
+
+                if (!police.IsBeamActive)
+                    continue;
+
+                beamCount++;
+                combinedStrengthPerSecond += police.BeamStrengthAdditivePerSecond;
             }
         }
 
-        movement.SetTractorBeamCount(beamCount);
+        movement.SetTractorBeamInput(beamCount, combinedStrengthPerSecond);
         UpdateCaptureTimer(beamCount);
     }
 
@@ -209,30 +218,33 @@ public class PoliceChaseManager : MonoBehaviour
 
     public void CapturePlayer()
     {
-            if (wantedManager == null || !wantedManager.IsWanted)
-                   return;
-    
-            // Clear first so repeated calls cannot charge another penalty.
-            // The wanted-level event calls EndChase(), releasing all beams.
-            wantedManager.ClearWantedLevel();
-    
-            if (FamilyReputationManager.Instance != null)
-            {
-                FamilyReputationManager.Instance.AddReputationExp(-Mathf.Max(0, captureReputationPenalty));
-            }
-    
-            var inventory = ModuleInventoryManager.Instance;
+        if (wantedManager == null || !wantedManager.IsWanted)
+               return;
+        
+        // Clear first so repeated calls cannot charge another penalty.
+        // The wanted-level event calls EndChase(), releasing all beams.
+        wantedManager.ClearWantedLevel();
+        
+        if (SimpleMove.Instance != null)
+            SimpleMove.Instance.ResetTractorBeam();
 
-            if (inventory != null)
-                {
-                    // Take whatever they can pay, capped at the configured fine.
-                    float fine = Mathf.Min(Mathf.Max(0f, inventory.credits), Mathf.Max(0f, captureCreditPenalty));
-                    
-                    inventory.TrySpendCredits(fine);
-                }
+        if (FamilyReputationManager.Instance != null)
+        {
+            FamilyReputationManager.Instance.AddReputationExp(-Mathf.Max(0, captureReputationPenalty));
+        }
     
-            if (logChaseEvents)
-                Debug.Log("Player captured: penalties applied and chase reset.", this);
+        var inventory = ModuleInventoryManager.Instance;
+        
+        if (inventory != null)
+        {
+            // Take whatever they can pay, capped at the configured fine.
+            float fine = Mathf.Min(Mathf.Max(0f, inventory.credits), Mathf.Max(0f, captureCreditPenalty));
+            
+            inventory.TrySpendCredits(fine);
+        }
+        
+        if (logChaseEvents)
+            Debug.Log("Player captured: penalties applied and chase reset.", this);
         }
 private void SharePoliceSightings()
     {
@@ -366,7 +378,7 @@ private void SharePoliceSightings()
     private void DespawnAllPolice()
     {
         if (SimpleMove.Instance != null)
-            SimpleMove.Instance.SetTractorBeamCount(0);
+            SimpleMove.Instance.SetTractorBeamInput(0, 0f);
         foreach (PoliceShipAI police in activePoliceShips)
             DestroyPolice(police);
         activePoliceShips.Clear();

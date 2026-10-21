@@ -2318,12 +2318,12 @@ MonoBehaviour:
     useGeneratedUniformScale: 1
     localScaleMultiplier: {x: 25, y: 25, z: 25}
   - type: 4
-    prefab: {fileID: -6689036041284674117, guid: 2e030c7b6b6f23c47847893fe9c7443d, type: 3}
+    prefab: {fileID: 6897074761941257779, guid: 54f1855987802c44991072c8be0754d7, type: 3}
     weight: 1
     localPositionOffset: {x: 0, y: 0, z: 0}
     localEulerOffset: {x: 0, y: 0, z: 0}
     useGeneratedUniformScale: 1
-    localScaleMultiplier: {x: 1, y: 1, z: 1}
+    localScaleMultiplier: {x: 30, y: 30, z: 30}
   - type: 4
     prefab: {fileID: 4745260347029585283, guid: 41e4969eb0556e74cb20ca6f5a6e889b, type: 3}
     weight: 1
@@ -73140,7 +73140,7 @@ MonoBehaviour:
       canRollFlat: 1
       flatRange: {x: 12, y: 30}
       canRollPercent: 1
-      percentRange: {x: 0.10, y: 0.20}
+      percentRange: {x: 0.1, y: 0.2}
   - moduleType: Boost Acceleration
     icon: {fileID: 21300000, guid: 88e203f7a4403d24aa8babb560690b5a, type: 3}
     guaranteePrimaryStat: 1
@@ -73204,7 +73204,7 @@ MonoBehaviour:
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
-      flatRange: {x: -0.20, y: -0.10}
+      flatRange: {x: -0.2, y: -0.1}
       canRollPercent: 1
       percentRange: {x: -0.025, y: -0.015}
     - statName: BoostCapacity
@@ -73216,14 +73216,14 @@ MonoBehaviour:
       canRollFlat: 1
       flatRange: {x: 1, y: 1}
       canRollPercent: 1
-      percentRange: {x: 0.10, y: 0.20}
+      percentRange: {x: 0.1, y: 0.2}
   - moduleType: Boost Regen
     icon: {fileID: 21300000, guid: 7c2e4b53f5c8b5d4fa686692262c5275, type: 3}
     guaranteePrimaryStat: 1
     possibleStats:
     - statName: BoostDrain
       canRollFlat: 1
-      flatRange: {x: -0.20, y: -0.10}
+      flatRange: {x: -0.2, y: -0.1}
       canRollPercent: 1
       percentRange: {x: -0.025, y: -0.015}
     - statName: BoostCapacity
@@ -73235,7 +73235,7 @@ MonoBehaviour:
       canRollFlat: 1
       flatRange: {x: 1, y: 2}
       canRollPercent: 1
-      percentRange: {x: 0.20, y: 0.40}
+      percentRange: {x: 0.2, y: 0.4}
   - moduleType: Charge Rate
     icon: {fileID: 21300000, guid: 6ff4521097433f340b5fe7c97becfade, type: 3}
     guaranteePrimaryStat: 1
@@ -73244,7 +73244,7 @@ MonoBehaviour:
       canRollFlat: 1
       flatRange: {x: 1, y: 2}
       canRollPercent: 1
-      percentRange: {x: 0.10, y: 0.20}
+      percentRange: {x: 0.1, y: 0.2}
     - statName: LaunchSpeed
       canRollFlat: 1
       flatRange: {x: 1, y: 2}
@@ -73263,7 +73263,7 @@ MonoBehaviour:
       canRollFlat: 1
       flatRange: {x: 3, y: 6}
       canRollPercent: 1
-      percentRange: {x: 0.05, y: 0.10}
+      percentRange: {x: 0.05, y: 0.1}
   - moduleType: Shield
     icon: {fileID: 21300000, guid: fae31d9386dfdba438b2aca1c2413b4d, type: 3}
     guaranteePrimaryStat: 1
@@ -76387,8 +76387,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 0.99999917
-  m_Size: 0.3557051
+  m_Value: 0.999999
+  m_Size: 0.35612306
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -83902,13 +83902,13 @@ MonoBehaviour:
     candidateModulo: 2
     poiTypeWeights:
     - type: 1
-      weight: 60
+      weight: 62
     - type: 2
       weight: 10
     - type: 3
       weight: 20
     - type: 4
-      weight: 10
+      weight: 8
     excludeNeighborRadius: 0
     borderPadding: 250
     stationOrbitRadius: 140

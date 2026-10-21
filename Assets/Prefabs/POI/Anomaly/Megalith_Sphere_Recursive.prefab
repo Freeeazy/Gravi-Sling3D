@@ -446,6 +446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 801311014144728348}
   - component: {fileID: 7693542355853849853}
+  - component: {fileID: 3969476709897667720}
   m_Layer: 0
   m_Name: Megalith_Sphere_Recursive
   m_TagString: Untagged
@@ -497,6 +498,28 @@ MonoBehaviour:
   verticalBias: 0.4
   horizontalBias: 0.6
   directionJitter: 0.2
+--- !u!114 &3969476709897667720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7874242191665911138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: facc3ee453399d2438078860493a5099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hazardColliders:
+  - {fileID: 5350618396577427475}
+  - {fileID: 95272691282153243}
+  - {fileID: 5793837165146837049}
+  - {fileID: 3634871541204006093}
+  - {fileID: 9130870467937812429}
+  minimumImpactSpeed: 50
+  heavyImpactSpeed: 500
+  impactCooldown: 0.3
+  respectShields: 1
 --- !u!1 &7910855165722283210
 GameObject:
   m_ObjectHideFlags: 0

@@ -109,6 +109,7 @@ public class PoliceShipAI : MonoBehaviour
 
     // Active cops register here for separation without scene searches or physics queries.
     private static readonly List<PoliceShipAI> enabledShips = new List<PoliceShipAI>();
+    public static IReadOnlyList<PoliceShipAI> EnabledShips => enabledShips;
     private int formationSlot = -1;
     private Quaternion formationFrame = Quaternion.identity;
     private Vector3 smoothedTargetVelocity;

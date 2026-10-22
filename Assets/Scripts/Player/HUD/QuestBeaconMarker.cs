@@ -33,6 +33,24 @@ public class QuestBeaconMarker : MonoBehaviour
     private Camera _cam;
     private Vector3 _targetPos;
     private bool _hasTarget;
+    // Runtime opt-out used by police grouping. Regular quests always default to on.
+    private bool _distanceLabelVisible = true;
+    private bool _visible;
+
+    public bool IsBeaconVisible => isActiveAndEnabled && _visible;
+    public Vector2 CanvasPosition => _rt ? _rt.anchoredPosition : Vector2.zero;
+
+    public void SetDistanceLabelVisible(bool visible)
+    {
+        _distanceLabelVisible = visible;
+        if (distanceText) distanceText.enabled = IsBeaconVisible && visible;
+    }
+
+    private void OnDisable()
+    {
+        _visible = false;
+        _distanceLabelVisible = true;
+    }
 
     public void SetHighlighted(bool highlighted)
     {
@@ -158,7 +176,8 @@ public class QuestBeaconMarker : MonoBehaviour
 
     private void SetVisible(bool on)
     {
+        _visible = on;
         if (beaconImage) beaconImage.enabled = on;
-        if (distanceText) distanceText.enabled = on;
+        if (distanceText) distanceText.enabled = on && _distanceLabelVisible;
     }
 }

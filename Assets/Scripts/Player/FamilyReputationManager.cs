@@ -55,7 +55,8 @@ public class FamilyReputationManager : MonoBehaviour
 
     [Header("Debug")]
     public bool enableDebugRankKeys = true;
-    public int debugReputationStep = 25;
+    [Tooltip("Number of full ranks changed immediately by the debug keys/buttons.")]
+    [Min(1)] public int debugRankStep = 1;
 
     private int _pendingChange;
     private Coroutine _animateRoutine;
@@ -82,14 +83,37 @@ public class FamilyReputationManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Minus))
         {
-            AddReputation(-debugReputationStep);
+            DebugDecreaseRank();
         }
 
         if (Input.GetKeyDown(KeyCode.Equals))
         {
-            AddReputation(debugReputationStep);
+            DebugIncreaseRank();
         }
     }
+    [ContextMenu("Debug/Increase Rank Immediately")]
+    public void DebugIncreaseRank()
+    {
+        ChangeDebugRank(1);
+    }
+
+    [ContextMenu("Debug/Decrease Rank Immediately")]
+    public void DebugDecreaseRank()
+    {
+        ChangeDebugRank(-1);
+    }
+
+    private void ChangeDebugRank(int direction)
+    {
+        int maxRank = GetMaxRankIndex();
+        int step = Mathf.Clamp(debugRankStep, 1, Mathf.Max(1, maxRank));
+        int newRank = Mathf.Clamp(GetCurrentRankIndex() + direction * step, 0, maxRank);
+
+        // Reuse the immediate restore path to cancel queued XP/animation, reset
+        // progress within the chosen rank, and refresh the entire HUD together.
+        RestoreSavedReputation(newRank, 0);
+    }
+
     public void AddReputation(int amount)
     {
         AddReputationExp(amount);

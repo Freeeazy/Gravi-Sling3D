@@ -1,4 +1,5 @@
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,6 +8,13 @@ public class QuestPointerMarker : MonoBehaviour
 {
     [Header("Refs")]
     public Image arrowImage;
+
+    [Header("Optional Distance Label")]
+    [Tooltip("Optional child TMP text. Leave empty for the original arrow-only behavior.")]
+    public TextMeshProUGUI distanceText;
+    [Tooltip("Canvas units inward from the arrow. Keeps the label away from the screen edge.")]
+    public float distanceTextInset = 40f;
+    public bool keepDistanceTextUpright = true;
 
     [Header("Highlight Materials")]
     public Material normalMaterial;
@@ -32,6 +40,24 @@ public class QuestPointerMarker : MonoBehaviour
     private Camera _cam;
     private Vector3 _targetPos;
     private bool _hasTarget;
+    private bool _visible;
+    private bool _distanceLabelVisible = true;
+
+    public bool IsPointerVisible => isActiveAndEnabled && _visible;
+    public Vector2 CanvasPosition => _rt ? _rt.anchoredPosition : Vector2.zero;
+
+    public void SetDistanceLabelVisible(bool visible)
+    {
+        _distanceLabelVisible = visible;
+        if (distanceText) distanceText.enabled = IsPointerVisible && visible;
+    }
+
+    private void OnDisable()
+    {
+        _visible = false;
+        _distanceLabelVisible = true;
+        if (distanceText) distanceText.enabled = false;
+    }
 
     private bool _highlighted;
 
@@ -172,10 +198,25 @@ public class QuestPointerMarker : MonoBehaviour
                 ang + rotationOffsetDegrees
             );
         }
+
+        if (distanceText)
+        {
+            float dist = Vector3.Distance(_cam.transform.position, _targetPos);
+            distanceText.text = $"{dist:0} Units";
+            // Position in canvas space so rotating the arrow does not swing its text.
+            RectTransform textRt = distanceText.rectTransform;
+            if (textRt != _rt)
+            {
+                textRt.position = _canvasRt.TransformPoint(arrowPos - dir * distanceTextInset);
+                if (keepDistanceTextUpright) textRt.rotation = _canvasRt.rotation;
+            }
+        }
     }
 
     private void SetVisible(bool on)
     {
+        _visible = on;
+        if (distanceText) distanceText.enabled = on && _distanceLabelVisible;
         if (arrowImage)
             arrowImage.enabled = on;
         else

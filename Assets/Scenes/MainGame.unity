@@ -37285,6 +37285,7 @@ MonoBehaviour:
   warningWidth: 300
   detectedWidth: 450
   maxProgressWidth: 350
+  scanDecayMultiplier: 0.5
 --- !u!1 &881697346
 GameObject:
   m_ObjectHideFlags: 0

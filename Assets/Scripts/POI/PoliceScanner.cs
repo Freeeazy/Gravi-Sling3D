@@ -13,8 +13,6 @@ public class PoliceScanner : MonoBehaviour
     [SerializeField, Min(0.1f)] private float heat3ScanSeconds = 8f;
     [SerializeField, Min(0.1f)] private float heat4ScanSeconds = 5f;
     [SerializeField, Min(0.1f)] private float heat5ScanSeconds = 3f;
-    [Tooltip("Progress lost outside the radius relative to scan speed. 0.5 drains at half speed.")]
-    [SerializeField, Min(0.01f)] private float scanDecayMultiplier = 0.5f;
 
     [Header("Scanning Laser")]
     [SerializeField] private LineRenderer scanningLaser;
@@ -53,15 +51,13 @@ public class PoliceScanner : MonoBehaviour
     [Tooltip("Ignore small aiming errors so the disc follows loosely instead of jittering.")]
     [SerializeField, Range(0f, 15f)] private float rotationAimTolerance = 2f;
 
-    public float ScanProgress { get; private set; }
+    public float ScanProgress => WarningUI.Instance ? WarningUI.Instance.ScanProgress : 0f;
     public bool IsScanning { get; private set; }
 
     private readonly Dictionary<Collider, float> contacts = new();
     private readonly List<Collider> staleContacts = new();
 
-    private float scanTime;
     private float sweepTime;
-    private int scanningHeat;
 
     private Transform targetTransform;
     private Collider targetCollider;
@@ -114,75 +110,28 @@ public class PoliceScanner : MonoBehaviour
     private void Update()
     {
         CleanupContacts();
-
         bool hasTarget = FindScanTarget();
-
         var wanted = WantedLevelManager.Instance;
+        var network = WarningUI.Instance;
+        int heat = wanted != null ? wanted.CargoHeatLevel : 0;
 
-        int heat = wanted != null
-            ? wanted.CargoHeatLevel
-            : 0;
-
-        if (wanted == null ||
-            wanted.IsWanted ||
-            heat < 3)
+        if (!hasTarget || wanted == null || wanted.IsWanted || heat < 3 ||
+            !network || !network.isActiveAndEnabled)
         {
-            ResetScan();
+            StopScanning();
             return;
         }
 
-        // Reset when the heat level changes.
-        if (scanningHeat != 0 && scanningHeat != heat)
-            ResetScan();
+        float duration = Mathf.Max(0.1f,
+            heat == 3 ? heat3ScanSeconds : heat == 4 ? heat4ScanSeconds : heat5ScanSeconds);
 
-        float duration = Mathf.Max(
-            0.1f,
-            heat == 3 ? heat3ScanSeconds :
-            heat == 4 ? heat4ScanSeconds :
-            heat5ScanSeconds
-        );
-
-        if (!hasTarget)
-        {
-            // Keep the scan session/UI alive while progress drains. Re-entering
-            // resumes the same timer instead of starting over.
-            if (scanningLaser) scanningLaser.enabled = false;
-            if (IsScanning)
-            {
-                scanTime = Mathf.Max(0f, scanTime - Time.deltaTime * Mathf.Max(0.01f, scanDecayMultiplier));
-                ScanProgress = Mathf.Clamp01(scanTime / duration);
-                if (WarningUI.Instance) WarningUI.Instance.UpdateScan(ScanProgress);
-                if (scanTime <= 0f) ResetScan();
-            }
-            return;
-        }
-
-        // A new scan has begun.
-        if (!IsScanning)
-        {
-            IsScanning = true;
-            scanningHeat = heat;
-            scanTime = 0f;
-            sweepTime = 0f;
-
-            if (WarningUI.Instance) WarningUI.Instance.StartScan();
-        }
-
-        scanTime += Time.deltaTime;
+        // Report contact only. The singleton advances one shared meter after all
+        // scanners update, so overlapping triggers cannot multiply scan speed.
+        network.ReportScan(this, duration);
+        IsScanning = true;
         sweepTime += Time.deltaTime;
-
-        ScanProgress = Mathf.Clamp01(scanTime / duration);
-
-        // Only track during an active in-range scan of eligible cargo.
-        // Decay and other non-scanning states preserve the current orientation.
         UpdateRotation();
         UpdateLaser();
-        if (WarningUI.Instance) WarningUI.Instance.UpdateScan(ScanProgress);
-
-        if (scanTime >= duration)
-        {
-            ResetScan(wanted.TryRescanCargo());
-        }
     }
 
 
@@ -325,20 +274,12 @@ public class PoliceScanner : MonoBehaviour
     }
 
 
-    private void ResetScan(bool completed = false)
+    private void StopScanning()
     {
-        if (IsScanning && WarningUI.Instance)
-            WarningUI.Instance.EndScan(completed);
-
-        scanTime = 0f;
+        if (WarningUI.Instance) WarningUI.Instance.UnregisterScanner(this);
         sweepTime = 0f;
-        scanningHeat = 0;
-
-        ScanProgress = 0f;
         IsScanning = false;
-
-        if (scanningLaser)
-            scanningLaser.enabled = false;
+        if (scanningLaser) scanningLaser.enabled = false;
     }
 
 
@@ -347,6 +288,6 @@ public class PoliceScanner : MonoBehaviour
         contacts.Clear();
         targetTransform = null;
         targetCollider = null;
-        ResetScan();
+        StopScanning();
     }
 }

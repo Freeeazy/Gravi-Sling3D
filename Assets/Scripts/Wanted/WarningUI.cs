@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -23,8 +24,20 @@ public class WarningUI : MonoBehaviour
     [Header("Progress Bar")]
     [SerializeField] private float maxProgressWidth = 550f;
 
+    [Header("Shared Scanner Network")]
+    [Tooltip("Progress lost with no scanner in range, relative to the last active scan speed.")]
+    [SerializeField, Min(0.01f)] private float scanDecayMultiplier = 0.5f;
+
+    public float ScanProgress { get; private set; }
+    public bool IsScanning { get; private set; }
+    public bool IsDecaying => !IsScanning && ScanProgress > 0f;
+
+    // Scanners report in Update; LateUpdate consumes those reports once per frame.
+    private readonly Dictionary<PoliceScanner, float> scanReports = new();
+    private float lastScanDuration = 1f;
+
     private Coroutine flashRoutine;
-    private bool scanning;
+    private bool warningVisible;
 
     private void Awake()
     {
@@ -39,18 +52,77 @@ public class WarningUI : MonoBehaviour
 
     private void Start()
     {
-        SetProgress(0f);
-        SetVisible(false);
+        ResetNetwork();
     }
 
-    public void StartScan()
+    public void ReportScan(PoliceScanner scanner, float duration)
     {
-        if (scanning)
+        if (!isActiveAndEnabled || !scanner || !scanner.isActiveAndEnabled)
+            return;
+        scanReports[scanner] = Mathf.Max(0.1f, duration);
+    }
+
+    public void UnregisterScanner(PoliceScanner scanner)
+    {
+        // Leaving or unloading one POI never clears shared progress.
+        scanReports.Remove(scanner);
+    }
+
+    private void LateUpdate()
+    {
+        var wanted = WantedLevelManager.Instance;
+        if (wanted == null || wanted.IsWanted || wanted.CargoHeatLevel < 3)
+        {
+            ResetNetwork();
+            return;
+        }
+
+        float duration = float.PositiveInfinity;
+        foreach (var report in scanReports)
+            if (report.Key && report.Key.isActiveAndEnabled)
+                duration = Mathf.Min(duration, report.Value);
+        scanReports.Clear();
+
+        IsScanning = !float.IsPositiveInfinity(duration);
+        if (IsScanning)
+        {
+            lastScanDuration = duration;
+            ScanProgress = Mathf.Clamp01(ScanProgress + Time.deltaTime / duration);
+        }
+        else
+        {
+            ScanProgress = Mathf.Max(0f, ScanProgress -
+                Time.deltaTime * Mathf.Max(0.01f, scanDecayMultiplier) / lastScanDuration);
+        }
+
+        if (ScanProgress >= 1f)
+        {
+            wanted.TryRescanCargo();
+            ResetNetwork();
+            return;
+        }
+
+        if (IsScanning || ScanProgress > 0f) ShowWarning();
+        else HideWarning();
+        SetProgress(ScanProgress);
+    }
+
+    private void ResetNetwork()
+    {
+        scanReports.Clear();
+        ScanProgress = 0f;
+        IsScanning = false;
+        SetProgress(0f);
+        HideWarning();
+    }
+
+    private void ShowWarning()
+    {
+        if (warningVisible)
             return;
 
-        scanning = true;
+        warningVisible = true;
 
-        SetProgress(0f);
         SetVisible(true);
 
         if (flashRoutine != null)
@@ -59,20 +131,9 @@ public class WarningUI : MonoBehaviour
         flashRoutine = StartCoroutine(FlashRoutine());
     }
 
-    public void UpdateScan(float progress)
+    private void HideWarning()
     {
-        if (!scanning)
-            return;
-
-        SetProgress(progress);
-    }
-
-    public void EndScan(bool completed)
-    {
-        if (!scanning)
-            return;
-
-        scanning = false;
+        warningVisible = false;
 
         if (flashRoutine != null)
         {
@@ -80,29 +141,28 @@ public class WarningUI : MonoBehaviour
             flashRoutine = null;
         }
 
-        SetProgress(completed ? 1f : 0f);
         SetVisible(false);
     }
 
     private IEnumerator FlashRoutine()
     {
-        while (scanning)
+        while (warningVisible)
         {
-            warningText.text = "WARNING";
-            textPanel.SetSizeWithCurrentAnchors(
+            if (warningText) warningText.text = "WARNING";
+            if (textPanel) textPanel.SetSizeWithCurrentAnchors(
                 RectTransform.Axis.Horizontal,
                 warningWidth
             );
 
-            yield return new WaitForSeconds(warningDuration);
+            yield return new WaitForSeconds(Mathf.Max(0.01f, warningDuration));
 
-            warningText.text = "SCAN DETECTED";
-            textPanel.SetSizeWithCurrentAnchors(
+            if (warningText) warningText.text = "SCAN DETECTED";
+            if (textPanel) textPanel.SetSizeWithCurrentAnchors(
                 RectTransform.Axis.Horizontal,
                 detectedWidth
             );
 
-            yield return new WaitForSeconds(detectedDuration);
+            yield return new WaitForSeconds(Mathf.Max(0.01f, detectedDuration));
         }
 
         flashRoutine = null;
@@ -112,7 +172,7 @@ public class WarningUI : MonoBehaviour
     {
         float width = Mathf.Clamp01(progress) * maxProgressWidth;
 
-        progressFill.SetSizeWithCurrentAnchors(
+        if (progressFill) progressFill.SetSizeWithCurrentAnchors(
             RectTransform.Axis.Horizontal,
             width
         );
@@ -128,6 +188,11 @@ public class WarningUI : MonoBehaviour
 
         if (progressFill)
             progressFill.gameObject.SetActive(visible);
+    }
+
+    private void OnDisable()
+    {
+        ResetNetwork();
     }
 
     private void OnDestroy()

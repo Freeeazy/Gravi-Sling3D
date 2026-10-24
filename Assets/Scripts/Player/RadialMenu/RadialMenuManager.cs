@@ -29,7 +29,7 @@ public class RadialMenuManager : MonoBehaviour
 
     private readonly List<NPCQuestManager.QuestOffer> safeQuests = new();
     private readonly List<NPCQuestManager.QuestOffer> weirdQuests = new();
-    //private readonly List<NPCQuestManager.QuestOffer> riskyQuests = new();        // Not implemented yet.
+    private readonly List<NPCQuestManager.QuestOffer> riskyQuests = new();
 
     // Temporary list populated by NPCQuestManager.
     private readonly List<NPCQuestManager.QuestOffer> availableOffers = new();
@@ -51,8 +51,8 @@ public class RadialMenuManager : MonoBehaviour
         if (weirdButton != null)
             weirdButton.onClick.AddListener(AcceptRandomWeirdQuest);
 
-        //if (riskyButton != null)
-            //riskyButton.onClick.AddListener();
+        if (riskyButton != null)
+            riskyButton.onClick.AddListener(AcceptRandomRiskyQuest);
     }
 
     private void OnDestroy()
@@ -66,8 +66,8 @@ public class RadialMenuManager : MonoBehaviour
         if (weirdButton != null)
             weirdButton.onClick.RemoveListener(AcceptRandomWeirdQuest);
 
-        //if (riskyButton != null)
-            //riskyButton.onClick.RemoveListener();
+        if (riskyButton != null)
+            riskyButton.onClick.RemoveListener(AcceptRandomRiskyQuest);
     }
 
 
@@ -79,6 +79,7 @@ public class RadialMenuManager : MonoBehaviour
     {
         safeQuests.Clear();
         weirdQuests.Clear();
+        riskyQuests.Clear();
         availableOffers.Clear();
 
         if (questManager == null)
@@ -94,13 +95,13 @@ public class RadialMenuManager : MonoBehaviour
         {
             NPCQuestManager.QuestOffer offer = availableOffers[i];
 
-            // For now:
-            //
-            // Any cargo effect = Weird
-            // No cargo effect  = Safe
-            //
-            // Later Risky can be inserted before Safe.
-            if (offer.cargoEffectType != CargoEffectType.None)
+            // Heat takes priority, including any future heat + cargo-effect quests.
+            // Each offer belongs to exactly one category.
+            if (offer.heatLevel > 0)
+            {
+                riskyQuests.Add(offer);
+            }
+            else if (offer.cargoEffectType != CargoEffectType.None)
             {
                 weirdQuests.Add(offer);
             }
@@ -126,6 +127,11 @@ public class RadialMenuManager : MonoBehaviour
     public void AcceptRandomWeirdQuest()
     {
         AcceptRandomQuest(weirdQuests, "Weird");
+    }
+
+    public void AcceptRandomRiskyQuest()
+    {
+        AcceptRandomQuest(riskyQuests, "Risky");
     }
 
     private void AcceptRandomQuest(
@@ -190,7 +196,7 @@ public class RadialMenuManager : MonoBehaviour
             weirdCountText.text = $"[ {weirdQuests.Count} ]";
 
         if (riskyCountText != null)
-            riskyCountText.text = $"[ 0 ]";  // Not implemented yet.
+            riskyCountText.text = $"[ {riskyQuests.Count} ]";
 
         // Optional:
         // prevent clicking an empty category.
@@ -201,6 +207,6 @@ public class RadialMenuManager : MonoBehaviour
             weirdButton.interactable = weirdQuests.Count > 0;
 
         if (riskyButton != null)
-            riskyButton.interactable = false;  // Not implemented yet.
+            riskyButton.interactable = riskyQuests.Count > 0;
     }
 }

@@ -146,6 +146,24 @@ public class PoliceShipAI : MonoBehaviour
     private bool locallySearching;
     private bool receivedSharedSighting;
 
+    private bool cachedBaseDifficulty;
+    private float baseMaxSpeed, baseAcceleration, baseBeamStrength;
+
+    /// <summary>Reapply from prefab values so heat changes never compound multipliers.</summary>
+    public void ApplyHeatSettings(WantedLevelManager.HeatSettings settings)
+    {
+        if (!cachedBaseDifficulty)
+        {
+            baseMaxSpeed = maxSpeed;
+            baseAcceleration = acceleration;
+            baseBeamStrength = beamStrengthAdditivePerSecond;
+            cachedBaseDifficulty = true;
+        }
+        maxSpeed = baseMaxSpeed * Mathf.Max(0.1f, settings.speedMultiplier);
+        acceleration = baseAcceleration * Mathf.Max(0.1f, settings.accelerationMultiplier);
+        beamStrengthAdditivePerSecond = baseBeamStrength * Mathf.Max(0f, settings.beamMultiplier);
+    }
+
 
     private void Awake()
     {

@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Spawns three cops per wanted star, up to fifteen. Positive star decreases leave
-/// existing cops in the chase. Escape requires every cop to lose contact.
+/// Moves an incoming squad marker toward the player before deploying real ships.
+/// Heat profiles set the current squad size. Escape requires every cop to lose contact.
 /// Requires WantedLevelManager and the existing SimpleMove tractor-beam API.
 /// </summary>
 [DisallowMultipleComponent]
@@ -17,10 +17,18 @@ public class PoliceChaseManager : MonoBehaviour
     [SerializeField] private Rigidbody playerBody;
     [Tooltip("Assign an active prefab with PoliceShipAI on its ROOT.")]
     [SerializeField] private PoliceShipAI policePrefab;
+    [SerializeField] private NPCQuestManager questManager;
 
     [Header("Spawn")]
-    [Tooltip("Random direction on a sphere this many units from the player. Keep below the cop's Lose Contact Distance.")]
-    [SerializeField, Min(1f)] private float spawnRadius = 60f;
+    [Tooltip("Incoming squads become real ships inside this player distance. Keep below the cop's Lose Contact Distance.")]
+    [SerializeField, Min(1f)] private float spawnRadius = 500f;
+    [SerializeField, Min(0f)] private float deploymentSpread = 35f;
+    [Tooltip("Outrun the incoming squad this far beyond its initial distance to start the escape timer.")]
+    [SerializeField, Min(1f)] private float incomingEscapeBuffer = 750f;
+
+    public Transform IncomingPresence { get; private set; }
+    private float incomingContactDistance;
+    private WantedLevelManager.HeatSettings currentHeat;
 
     [Header("Escape")]
     [SerializeField, Min(0.1f)] private float escapeDuration = 8f;
@@ -94,11 +102,18 @@ public class PoliceChaseManager : MonoBehaviour
             return;
         }
 
-        // Remember the peak level until the chase ends. Lowering debug stars
-        // neither removes cops nor lowers the replacement count.
-        targetPoliceCount = Mathf.Max(targetPoliceCount, Mathf.Clamp(newLevel, 1, WantedLevelManager.SupportedMaxWantedLevel) * 3);
+        currentHeat = wantedManager.GetHeatSettings(newLevel);
+        targetPoliceCount = Mathf.Max(1, currentHeat.policeCount);
         RemoveUnavailablePolice();
-        if (activePoliceShips.Count < targetPoliceCount)
+        while (activePoliceShips.Count > targetPoliceCount)
+        {
+            int last = activePoliceShips.Count - 1;
+            DestroyPolice(activePoliceShips[last]);
+            activePoliceShips.RemoveAt(last);
+        }
+        foreach (var police in activePoliceShips) police.ApplyHeatSettings(currentHeat);
+        if (activePoliceShips.Count >= targetPoliceCount) ClearIncomingPresence();
+        else if (IncomingPresence == null)
             TrySpawnPolice();
     }
 
@@ -121,23 +136,69 @@ public class PoliceChaseManager : MonoBehaviour
             return;
 
         reportedSpawnError = false;
-        ResetEscapeTimer();
+        if (IncomingPresence == null)
+        {
+            BeginIncomingPresence();
+            return;
+        }
+        if (Vector3.Distance(IncomingPresence.position, playerBody.position) > Mathf.Max(1f, spawnRadius) + 0.05f)
+            return;
+
+        Vector3 arrivalPosition = IncomingPresence.position;
+        ClearIncomingPresence();
         while (activePoliceShips.Count < targetPoliceCount)
         {
-            Vector3 position = playerBody.position + Random.onUnitSphere * spawnRadius;
+            Vector3 position = arrivalPosition + Random.insideUnitSphere * Mathf.Max(0f, deploymentSpread);
+            // Keep the entire arriving formation within the deployment/contact radius.
+            position = playerBody.position + Vector3.ClampMagnitude(position - playerBody.position,
+                Mathf.Min(Mathf.Max(1f, spawnRadius), policePrefab.LoseContactDistance * 0.9f));
             PoliceShipAI police = Instantiate(policePrefab, position, Quaternion.identity);
             police.gameObject.SetActive(true);
             police.enabled = true;
             activePoliceShips.Add(police);
             police.StateChanged += OnPoliceStateChanged;
+            police.ApplyHeatSettings(currentHeat);
             police.Initialize(playerBody);
 
-            if (spawnRadius > police.LoseContactDistance)
-                Debug.LogWarning("Spawn Radius exceeds Lose Contact Distance; the cop may lose you immediately.", this);
         }
 
         if (logChaseEvents)
             Debug.Log($"Police deployed: {activePoliceShips.Count} cop(s) in the chase.", this);
+    }
+
+    private void BeginIncomingPresence()
+    {
+        if (questManager == null) questManager = FindFirstObjectByType<NPCQuestManager>();
+        Vector3 forward = playerBody.linearVelocity.sqrMagnitude > 1f
+            ? playerBody.linearVelocity.normalized : playerBody.transform.forward;
+        if (questManager != null && questManager.HasClosestQuest)
+        {
+            Vector3 destination = questManager.ClosestQuest.toWorldPos - playerBody.position;
+            if (destination.sqrMagnitude > 1f) forward = destination.normalized;
+        }
+        Vector2 angles = currentHeat.approachAngles;
+        float minAngle = Mathf.Clamp(Mathf.Min(angles.x, angles.y), 0f, 180f);
+        float maxAngle = Mathf.Clamp(Mathf.Max(angles.x, angles.y), minAngle, 180f);
+        if (minAngle < 70f && Random.value < Mathf.Clamp01(currentHeat.forwardBias))
+            maxAngle = Mathf.Min(maxAngle, 70f);
+        float cosTheta = Random.Range(Mathf.Cos(maxAngle * Mathf.Deg2Rad), Mathf.Cos(minAngle * Mathf.Deg2Rad));
+        float azimuth = Random.Range(0f, Mathf.PI * 2f);
+        float sinTheta = Mathf.Sqrt(Mathf.Max(0f, 1f - cosTheta * cosTheta));
+        Vector3 localDirection = new Vector3(sinTheta * Mathf.Cos(azimuth), sinTheta * Mathf.Sin(azimuth), cosTheta);
+        Vector3 up = Mathf.Abs(Vector3.Dot(forward, Vector3.up)) > 0.99f ? Vector3.right : Vector3.up;
+        Vector3 direction = Quaternion.LookRotation(forward, up) * localDirection;
+        Vector2 band = currentHeat.incomingDistance;
+        float minDistance = Mathf.Max(1.1f, Mathf.Min(band.x, band.y));
+        float distance = Mathf.Max(1f, spawnRadius) * Random.Range(minDistance, Mathf.Max(minDistance, Mathf.Max(band.x, band.y)));
+        IncomingPresence = new GameObject("Incoming Police Squad").transform;
+        IncomingPresence.position = playerBody.position + direction * distance;
+        incomingContactDistance = distance + Mathf.Max(1f, incomingEscapeBuffer);
+    }
+
+    private void ClearIncomingPresence()
+    {
+        if (IncomingPresence != null) Destroy(IncomingPresence.gameObject);
+        IncomingPresence = null;
     }
 
     private void OnPoliceStateChanged(PoliceShipAI police, PoliceShipAI.ChaseState state)
@@ -292,6 +353,7 @@ private void SharePoliceSightings()
         {
             // A missing player is not an escape. Retain the target count for retry.
             DespawnAllPolice();
+            ClearIncomingPresence();
             ResetEscapeTimer();
             if (Time.time >= nextSpawnAttempt)
                 TrySpawnPolice();
@@ -299,16 +361,25 @@ private void SharePoliceSightings()
         }
 
         RemoveUnavailablePolice();
-        if (activePoliceShips.Count < targetPoliceCount)
+        if (activePoliceShips.Count < targetPoliceCount && IncomingPresence == null && Time.time >= nextSpawnAttempt)
+            TrySpawnPolice();
+
+        bool incomingHasContact = false;
+        if (IncomingPresence != null)
         {
-            // Replace only missing/disabled cops, preserving the other pursuers.
-            ResetEscapeTimer();
-            if (Time.time >= nextSpawnAttempt)
+            float distance = Vector3.Distance(IncomingPresence.position, playerBody.position);
+            incomingHasContact = distance <= incomingContactDistance;
+            // Stop at the deployment boundary, even on a long frame.
+            IncomingPresence.position = Vector3.MoveTowards(IncomingPresence.position, playerBody.position,
+                Mathf.Min(Mathf.Max(0f, distance - Mathf.Max(1f, spawnRadius)),
+                    Mathf.Max(1f, currentHeat.incomingSpeed) * Time.deltaTime));
+            if (Vector3.Distance(IncomingPresence.position, playerBody.position) <= Mathf.Max(1f, spawnRadius) + 0.01f)
                 TrySpawnPolice();
-            return;
         }
 
-        if (!AllPoliceSearching())
+        bool shipsHaveContact = activePoliceShips.Count > 0 && !AllPoliceSearching();
+        bool noPursuers = activePoliceShips.Count == 0 && IncomingPresence == null;
+        if (incomingHasContact || shipsHaveContact || noPursuers)
         {
             if (escapeTimerRunning)
                 ResetEscapeTimer();
@@ -388,6 +459,7 @@ private void SharePoliceSightings()
     {
         captureTimer = 0f;
         targetPoliceCount = 0;
+        ClearIncomingPresence();
         ResetEscapeTimer();
         DespawnAllPolice();
     }

@@ -1512,12 +1512,49 @@ MonoBehaviour:
   - {fileID: 1084127087}
   - {fileID: 349084579}
   escapeTimerText: {fileID: 296165493}
-  enableDebugKeys: 1
-  allowDebugKeysWhilePaused: 0
+  heatSettings:
+  - policeCount: 3
+    beamMultiplier: 1
+    speedMultiplier: 1
+    accelerationMultiplier: 1
+    incomingSpeed: 400
+    incomingDistance: {x: 9.6, y: 11.2}
+    approachAngles: {x: 135, y: 180}
+    forwardBias: 0
+  - policeCount: 5
+    beamMultiplier: 1.25
+    speedMultiplier: 1.08
+    accelerationMultiplier: 1.15
+    incomingSpeed: 435
+    incomingDistance: {x: 9, y: 10.6}
+    approachAngles: {x: 95, y: 165}
+    forwardBias: 0
+  - policeCount: 7
+    beamMultiplier: 1.5
+    speedMultiplier: 1.16
+    accelerationMultiplier: 1.3
+    incomingSpeed: 470
+    incomingDistance: {x: 8.4, y: 10}
+    approachAngles: {x: 60, y: 120}
+    forwardBias: 0
+  - policeCount: 9
+    beamMultiplier: 1.75
+    speedMultiplier: 1.24
+    accelerationMultiplier: 1.45
+    incomingSpeed: 505
+    incomingDistance: {x: 7.8, y: 9.4}
+    approachAngles: {x: 0, y: 180}
+    forwardBias: 0.55
+  - policeCount: 11
+    beamMultiplier: 2
+    speedMultiplier: 1.3199999
+    accelerationMultiplier: 1.6
+    incomingSpeed: 540
+    incomingDistance: {x: 7.2, y: 8.799999}
+    approachAngles: {x: 0, y: 180}
+    forwardBias: 0.8
+  testHeatLevel: 1
   logChanges: 1
-  increaseKey: 63
-  decreaseKey: 64
-  clearKey: 0
 --- !u!114 &33516512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1533,7 +1570,10 @@ MonoBehaviour:
   wantedManager: {fileID: 33516511}
   playerBody: {fileID: 1616803247}
   policePrefab: {fileID: 3975543815697745802, guid: a3c82e41e64b42449aa38baf409b342c, type: 3}
+  questManager: {fileID: 1780358253}
   spawnRadius: 500
+  deploymentSpread: 35
+  incomingEscapeBuffer: 750
   escapeDuration: 15
   logChaseEvents: 1
   captureSpeedThreshold: 20
@@ -1556,6 +1596,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f1748938e8b4c61924e9df32a3a7bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chaseManager: {fileID: 33516512}
   cam: {fileID: 330585545}
   pointerParent: {fileID: 743592314}
   beaconParent: {fileID: 938886895}
@@ -55580,8 +55621,8 @@ MonoBehaviour:
   - {fileID: 1518567634}
   - {fileID: 1957246522}
   - {fileID: 1246106513}
-  minPopulation: 2
-  maxPopulation: 8
+  minPopulation: 4
+  maxPopulation: 12
 --- !u!4 &1386587270
 Transform:
   m_ObjectHideFlags: 0
@@ -78408,8 +78449,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1429426111}
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
-  m_Value: 0.999999
-  m_Size: 0.35612306
+  m_Value: 0.99999917
+  m_Size: 0.3557051
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

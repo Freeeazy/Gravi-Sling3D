@@ -8,6 +8,7 @@ public struct QuestFlavor
     public string fullDescription;
     public string deliveryItemName;
 
+    [Range(0, 5)] public int heatLevel;
     public CargoEffectType cargoEffectType;
 
     // Faction responsible for this delivery.
@@ -333,7 +334,8 @@ public static class QuestFlavorUtil
                     "No Questions Crate",
                     "Sealed Contraband",
                     $"{npcName} wants a crate moved quietly. Very quietly.",
-                    $"Deliver the Sealed Contraband to {destinationName}. {npcName} says it is legal in at least one jurisdiction."
+                    $"Deliver the Sealed Contraband to {destinationName}. {npcName} says it is legal in at least one jurisdiction.",
+                    heatLevel: 1
                 );
             }
 
@@ -363,7 +365,8 @@ public static class QuestFlavorUtil
                     "Half the Problem",
                     "Half of a Nuclear Warhead",
                     $"{npcName} has half of something you definitely wish was less radioactive.",
-                    $"Deliver Half of a Nuclear Warhead to {destinationName}. {npcName} assures you the other half is \"somewhere safe.\""
+                    $"Deliver Half of a Nuclear Warhead to {destinationName}. {npcName} assures you the other half is \"somewhere safe.\"",
+                    heatLevel: 5
                 );
             }
 
@@ -373,7 +376,8 @@ public static class QuestFlavorUtil
                     "Burn After Delivery",
                     "Encrypted Data Drive",
                     $"{npcName} hands you a data drive and immediately forgets your name.",
-                    $"Deliver the Encrypted Data Drive to {destinationName}. Nobody involved wants a receipt."
+                    $"Deliver the Encrypted Data Drive to {destinationName}. Nobody involved wants a receipt.",
+                    heatLevel: 2
                 );
             }
 
@@ -383,7 +387,8 @@ public static class QuestFlavorUtil
                     "Unregistered Merchandise",
                     "Black-Market Implants",
                     $"{npcName} needs a case of unregistered cybernetics moved off the books.",
-                    $"Deliver the Black-Market Implants to {destinationName}. Serial numbers have been removed with impressive enthusiasm."
+                    $"Deliver the Black-Market Implants to {destinationName}. Serial numbers have been removed with impressive enthusiasm.",
+                    heatLevel: 3
                 );
             }
 
@@ -393,7 +398,8 @@ public static class QuestFlavorUtil
                     "Someone Else's Problem",
                     "Stolen Security Drone",
                     $"{npcName} has acquired a security drone through questionable circumstances.",
-                    $"Deliver the Stolen Security Drone to {destinationName}. It keeps trying to report itself missing."
+                    $"Deliver the Stolen Security Drone to {destinationName}. It keeps trying to report itself missing.",
+                    heatLevel: 4
                 );
             }
 
@@ -401,7 +407,8 @@ public static class QuestFlavorUtil
                 "Quiet Disposal",
                 "Unmarked Evidence Box",
                 $"{npcName} needs an evidence box moved somewhere evidence boxes normally do not go.",
-                $"Deliver the Unmarked Evidence Box to {destinationName}. The original label has been scratched off."
+                $"Deliver the Unmarked Evidence Box to {destinationName}. The original label has been scratched off.",
+                heatLevel: 2
             );
         }
 
@@ -780,14 +787,17 @@ public static class QuestFlavorUtil
         string item,
         string shortDesc,
         string fullDesc,
-        CargoEffectType cargoEffectType = CargoEffectType.None)
+        CargoEffectType cargoEffectType = CargoEffectType.None,
+        int heatLevel = 0)
     {
         return new QuestFlavor
         {
             questTitle = "- " + title,
             deliveryItemName = item,
-            shortDescription = shortDesc,
-            fullDescription = fullDesc,
+            shortDescription = heatLevel > 0 ? shortDesc + $" Heat: {heatLevel}/5." : shortDesc,
+            fullDescription = heatLevel > 0 ? fullDesc + $" Heat: {heatLevel}/5. Pickup alerts police."
+                + (heatLevel >= 3 ? " Security scanners can alert them again after escape." : " Escape to lose pursuit.") : fullDesc,
+            heatLevel = Mathf.Clamp(heatLevel, 0, 5),
             cargoEffectType = cargoEffectType
         };
     }

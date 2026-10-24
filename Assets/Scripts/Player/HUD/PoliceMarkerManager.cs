@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Reuses the quest marker visuals for every enabled police ship.
+/// Reuses the quest marker visuals for incoming squads and enabled police ships.
 /// Attach to an always-active HUD object and assign the police-only containers.
 /// </summary>
 [DisallowMultipleComponent]
@@ -10,6 +10,7 @@ using UnityEngine;
 public class PoliceMarkerManager : MonoBehaviour
 {
     [Header("HUD References")]
+    [SerializeField] private PoliceChaseManager chaseManager;
     [SerializeField] private Camera cam;
     [SerializeField] private RectTransform pointerParent;
     [SerializeField] private RectTransform beaconParent;
@@ -17,7 +18,7 @@ public class PoliceMarkerManager : MonoBehaviour
     [Header("Prefabs for Additional Ships")]
     [Tooltip("Existing children are reused first. Assign the PolicePointer prefab for extra slots.")]
     [SerializeField] private QuestPointerMarker pointerPrefab;
-    [Tooltip("Assign the PoliceBeacon prefab for extra slots (the chase can spawn 15 ships).")]
+    [Tooltip("Assign the PoliceBeacon prefab for extra ships and incoming squads.")]
     [SerializeField] private QuestBeaconMarker beaconPrefab;
 
     [Header("Police Ellipse")]
@@ -52,14 +53,14 @@ public class PoliceMarkerManager : MonoBehaviour
     private readonly List<QuestPointerMarker> pointers = new List<QuestPointerMarker>();
     private readonly List<QuestBeaconMarker> beacons = new List<QuestBeaconMarker>();
     private bool reportedCapacityWarning;
-    private readonly List<PoliceShipAI> displayedShips = new List<PoliceShipAI>();
+    private readonly List<Transform> displayedShips = new List<Transform>();
     private readonly List<int> labelOwners = new List<int>();
     private readonly List<bool> groupingCandidates = new List<bool>();
     // Remember identities, not UI indices: slots shift when a ship despawns.
-    private readonly Dictionary<PoliceShipAI, PoliceShipAI> previousOwners =
-        new Dictionary<PoliceShipAI, PoliceShipAI>();
-    private readonly Dictionary<PoliceShipAI, PoliceShipAI> previousPointerOwners =
-        new Dictionary<PoliceShipAI, PoliceShipAI>();
+    private readonly Dictionary<Transform, Transform> previousOwners =
+        new Dictionary<Transform, Transform>();
+    private readonly Dictionary<Transform, Transform> previousPointerOwners =
+        new Dictionary<Transform, Transform>();
 
     private void Awake()
     {
@@ -75,6 +76,7 @@ public class PoliceMarkerManager : MonoBehaviour
         // Include inactive slots so reusing the scene's prebuilt UI needs no manual arrays.
         pointers.AddRange(pointerParent.GetComponentsInChildren<QuestPointerMarker>(true));
         beacons.AddRange(beaconParent.GetComponentsInChildren<QuestBeaconMarker>(true));
+        if (!chaseManager) chaseManager = FindFirstObjectByType<PoliceChaseManager>();
         HideAll();
     }
 
@@ -90,32 +92,15 @@ public class PoliceMarkerManager : MonoBehaviour
 
         var ships = PoliceShipAI.EnabledShips;
         int slot = 0;
+        // Incoming presence gets a normal marker slot and hands it over at deployment.
+        if (chaseManager && chaseManager.IncomingPresence && EnsureSlot(slot))
+            SetMarker(slot++, chaseManager.IncomingPresence);
         for (int i = 0; i < ships.Count; i++)
         {
             PoliceShipAI ship = ships[i];
             if (!ship || !ship.isActiveAndEnabled) continue;
             if (!EnsureSlot(slot)) break;
-
-            QuestPointerMarker pointer = pointers[slot];
-            QuestBeaconMarker beacon = beacons[slot];
-            Vector3 position = ship.transform.position;
-
-            pointer.ellipseFrac = ellipseFrac;
-            pointer.ellipsePaddingPx = ellipsePaddingPx;
-            pointer.hideWhenInsideEllipse = !alwaysShowPointers;
-            pointer.hideWhenBehindCamera = false;
-            pointer.SetTarget(cam, position, true);
-            pointer.SetHighlighted(false);
-            pointer.SetSlotActive(true);
-
-            beacon.ellipseFrac = ellipseFrac;
-            beacon.ellipsePaddingPx = ellipsePaddingPx;
-            beacon.maxDistance = hideBeaconInsideDistance;
-            beacon.SetTarget(cam, position, true);
-            beacon.SetHighlighted(false);
-            beacon.SetSlotActive(true);
-            displayedShips.Add(ship);
-            slot++;
+            SetMarker(slot++, ship.transform);
         }
 
         for (int i = slot; i < pointers.Count; i++)
@@ -124,10 +109,37 @@ public class PoliceMarkerManager : MonoBehaviour
             if (beacons[i]) beacons[i].SetSlotActive(false);
     }
 
+    private void SetMarker(int slot, Transform target)
+    {
+        QuestPointerMarker pointer = pointers[slot];
+        QuestBeaconMarker beacon = beacons[slot];
+        pointer.ellipseFrac = ellipseFrac;
+        pointer.ellipsePaddingPx = ellipsePaddingPx;
+        pointer.hideWhenInsideEllipse = !alwaysShowPointers;
+        pointer.hideWhenBehindCamera = false;
+        pointer.SetTarget(cam, target.position, true);
+        pointer.SetHighlighted(false);
+        pointer.SetSlotActive(true);
+        beacon.ellipseFrac = ellipseFrac;
+        beacon.ellipsePaddingPx = ellipsePaddingPx;
+        beacon.maxDistance = hideBeaconInsideDistance;
+        beacon.SetTarget(cam, target.position, true);
+        beacon.SetHighlighted(false);
+        beacon.SetSlotActive(true);
+        displayedShips.Add(target);
+    }
+
     private void LateUpdate()
     {
         GroupLabels(false, previousOwners);
         GroupLabels(true, previousPointerOwners);
+        if (chaseManager && chaseManager.IncomingPresence && displayedShips.Count > 0 &&
+            displayedShips[0] == chaseManager.IncomingPresence && cam)
+        {
+            float distance = Vector3.Distance(cam.transform.position, displayedShips[0].position);
+            if (pointers[0].distanceText) pointers[0].distanceText.SetText("Incoming: {0:0} Units", distance);
+            if (beacons[0].distanceText) beacons[0].distanceText.SetText("Incoming: {0:0} Units", distance);
+        }
     }
 
     private bool HasBeaconLabel(int index)
@@ -145,7 +157,7 @@ public class PoliceMarkerManager : MonoBehaviour
             !(preferBeaconDistanceLabels && HasBeaconLabel(index));
     }
 
-    private void GroupLabels(bool forPointers, Dictionary<PoliceShipAI, PoliceShipAI> previousOwners)
+    private void GroupLabels(bool forPointers, Dictionary<Transform, Transform> previousOwners)
     {
         // Marker Update has resolved visibility and final positions. Hidden markers
         // must never own a group's sole label. Each marker type retains its own owners.
@@ -155,7 +167,7 @@ public class PoliceMarkerManager : MonoBehaviour
         {
             var ship = displayedShips[i];
             bool eligible = (forPointers ? groupPointerDistanceLabels : groupDistanceLabels) &&
-                cam && ship && ship.isActiveAndEnabled &&
+                cam && ship && ship.gameObject.activeInHierarchy &&
                 (forPointers ? HasPointerLabel(i) : HasBeaconLabel(i)) &&
                 Vector3.Distance(cam.transform.position, ship.transform.position) >= groupLabelsBeyondDistance;
             groupingCandidates.Add(eligible);
@@ -235,6 +247,10 @@ public class PoliceMarkerManager : MonoBehaviour
 
     private bool CanShareLabel(int member, int owner, bool wasMember, bool forPointers)
     {
+        // An incoming reinforcement squad must keep its own arrival label.
+        if (chaseManager && chaseManager.IncomingPresence &&
+            (displayedShips[member] == chaseManager.IncomingPresence ||
+             displayedShips[owner] == chaseManager.IncomingPresence)) return false;
         float worldLimit = Mathf.Max(0f, groupJoinDistance);
         float screenLimit = Mathf.Max(0f, forPointers ? pointerLabelJoinSpacing : labelJoinSpacing);
         if (wasMember)

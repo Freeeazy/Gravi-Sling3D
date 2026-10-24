@@ -233,6 +233,7 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
 
+        [Range(0, 5)] public int heatLevel;
         public CargoEffectType cargoEffectType;
         public NPCFaction sourceFaction;
 
@@ -260,6 +261,7 @@ public class NPCQuestManager : MonoBehaviour
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
 
+        [Range(0, 5)] public int heatLevel;
         public CargoEffectType cargoEffectType;
         public NPCFaction sourceFaction;
 
@@ -493,6 +495,7 @@ public class NPCQuestManager : MonoBehaviour
             deliveryTimeMultiplier = offer.deliveryTimeMultiplier,
             deliveryRewardMultiplier = offer.deliveryRewardMultiplier,
             expectedDeliveryTimeSeconds = offer.expectedDeliveryTimeSeconds,
+            heatLevel = offer.heatLevel,
             cargoEffectType = offer.cargoEffectType,
             sourceFaction = offer.sourceFaction,
             questTitle = offer.questTitle,
@@ -506,6 +509,8 @@ public class NPCQuestManager : MonoBehaviour
         if (PackageDurabilityManager.Instance != null)
             PackageDurabilityManager.Instance.RegisterQuest(q);
         RefreshClosestQuest();
+        if (WantedLevelManager.Instance != null)
+            WantedLevelManager.Instance.RegisterPackageHeat(q.questId, q.heatLevel);
         return true;
     }
 
@@ -530,6 +535,8 @@ public class NPCQuestManager : MonoBehaviour
                 if (PackageDurabilityManager.Instance != null)
                     PackageDurabilityManager.Instance.RemoveQuest(_active[i].questId);
 
+                if (WantedLevelManager.Instance != null)
+                    WantedLevelManager.Instance.RemovePackageHeat(_active[i].questId);
                 _active.RemoveAt(i);
                 completed++;
             }
@@ -564,6 +571,8 @@ public class NPCQuestManager : MonoBehaviour
             {
                 ActiveQuest failedQuest = _active[i];
 
+                if (WantedLevelManager.Instance != null)
+                    WantedLevelManager.Instance.RemovePackageHeat(_active[i].questId);
                 _active.RemoveAt(i);
                 RefreshClosestQuest();
 
@@ -783,6 +792,7 @@ public class NPCQuestManager : MonoBehaviour
         offer.fullDescription = flavor.fullDescription;
         offer.deliveryItemName = flavor.deliveryItemName;
 
+        offer.heatLevel = flavor.heatLevel;
         offer.cargoEffectType = flavor.cargoEffectType;
         offer.sourceFaction = flavor.sourceFaction;
 

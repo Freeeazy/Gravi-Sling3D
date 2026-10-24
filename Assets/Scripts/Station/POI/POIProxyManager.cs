@@ -164,6 +164,10 @@ public class POIProxyManager : MonoBehaviour
             };
 
             _active[coord] = active;
+
+            // Initialize newly created/reused proxies only. Chunk refreshes must
+            // preserve runtime poses (for example a scanner tracking the player).
+            ApplyPose(active, coord, data);
         }
 
         active.coord = coord;
@@ -171,7 +175,6 @@ public class POIProxyManager : MonoBehaviour
         active.prefab = entry.prefab;
         active.entry = entry;
 
-        ApplyPose(active, coord, data);
     }
 
     private void HandlePOIChunkRemoved(Vector3Int coord)

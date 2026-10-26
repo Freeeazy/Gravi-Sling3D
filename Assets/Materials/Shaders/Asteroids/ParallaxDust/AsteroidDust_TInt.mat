@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: AsteroidDust_TInt
-  m_Shader: {fileID: -6465566751694194690, guid: ef77ea0f782b4cb4cb4f3589b5581cea, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 5377b0969cbdd3040819f90aa0053296, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -57,14 +57,14 @@ Material:
     - _BlendModePreserveSpecular: 1
     - _CastShadows: 1
     - _Cull: 2
-    - _DitherEnd: 1000
+    - _DitherEnd: 1200
     - _DitherStart: 950
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _FarBrightness: 0.75
     - _FarCurvePower: 1.5
-    - _FarFadeEnd: 1100
-    - _FarFadeStart: 0
+    - _FarFadeEnd: 1150
+    - _FarFadeStart: 150
     - _Metallic: 0.9
     - _NearBlendDist: 1
     - _NearBrightness: 1.2

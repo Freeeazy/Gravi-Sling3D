@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_L_BrownRockShader_Lit
-  m_Shader: {fileID: -6465566751694194690, guid: aa6e97b5809e4a9428794e1a2baa5698, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 8fcecf94235464949abbbf6f6b5c0446, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -58,6 +58,8 @@ Material:
     - _CastShadows: 1
     - _Cull: 2
     - _DitherEnd: 1000
+    - _DitherFadeEnd: 1200
+    - _DitherFadeStart: 950
     - _DitherStart: 950
     - _DstBlend: 0
     - _DstBlendAlpha: 0

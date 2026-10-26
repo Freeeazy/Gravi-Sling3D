@@ -46,11 +46,11 @@ public class NPCUILink : MonoBehaviour
     public Image NameBackground;
     public Graphic NameCover;
     [NonSerialized] private Material runtimeNameCoverMaterial;
-    
+
     public Image portraitImage;
     public Image PortraitBkRnd;
     public TMP_Text questTitleText;
-    public TMP_Text questDescriptionText; 
+    public TMP_Text questDescriptionText;
     public TMP_Text distanceText;
     public TMP_Text creditsRewardText;
     public TMP_Text reputationRewardText;
@@ -72,6 +72,10 @@ public class NPCUILink : MonoBehaviour
     };
 
     public Color deliveryTypePillOffColor = new Color(0.16f, 0.16f, 0.18f, 0.65f);
+
+    [Header("Heat Level")]
+    [Tooltip("Assign the five heat/star objects in reveal order. Only the first heatLevel objects are active.")]
+    public GameObject[] heatIndicators = new GameObject[5];
 
     [Header("Difficulty")]
     public Graphic[] difficultyBars = new Graphic[0];
@@ -272,13 +276,14 @@ public class NPCUILink : MonoBehaviour
         }
 
         UpdateDifficultyDisplay(offer.difficulty);
+        UpdateHeatDisplay(offer.heatLevel);
     }
     public void ClearQuestPreview()
     {
-        if (questTitleText) 
+        if (questTitleText)
             questTitleText.text = "";
 
-        if (questDescriptionText) 
+        if (questDescriptionText)
             questDescriptionText.text = "";
 
         if (creditsRewardText)
@@ -291,6 +296,7 @@ public class NPCUILink : MonoBehaviour
             expectedDeliveryTimeText.text = "--:--";
 
         UpdateDifficultyDisplay(0);
+        UpdateHeatDisplay(0);
     }
 
     public void SetDeliveryType(NPCQuestManager.DeliveryType deliveryType)
@@ -344,6 +350,19 @@ public class NPCUILink : MonoBehaviour
             color = Color.white
         };
     }
+    private void UpdateHeatDisplay(int heatLevel)
+    {
+        if (heatIndicators == null)
+            return;
+
+        int visibleCount = Mathf.Clamp(heatLevel, 0, 5);
+        for (int i = 0; i < heatIndicators.Length; i++)
+        {
+            if (heatIndicators[i])
+                heatIndicators[i].SetActive(i < visibleCount);
+        }
+    }
+
     private void UpdateDifficultyDisplay(int difficulty)
     {
         DifficultyVisual visual = GetDifficultyVisual(difficulty);

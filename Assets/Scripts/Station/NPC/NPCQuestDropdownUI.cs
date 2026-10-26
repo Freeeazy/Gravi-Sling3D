@@ -69,6 +69,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public Image cargoEffectPillBorderImage;
     public TMP_Text cargoEffectPillText;
 
+    [Tooltip("Background color when the shared cargo pill displays heat. Heat takes priority over cargo effects.")]
+    public Color heatPillColor = new Color(1f, 0.24f, 0.24f, 1f);
+
     public CargoEffectVisual[] cargoEffectVisuals =
     {
         new CargoEffectVisual
@@ -108,6 +111,8 @@ public class NPCQuestDropdownUI : MonoBehaviour
         new DifficultyVisual { label = "Very Hard", color = new Color(0.88f, 0.26f, 0.86f, 1f) },
         new DifficultyVisual { label = "Extreme", color = new Color(0.55f, 0.32f, 1.00f, 1f) }
     };
+
+    public NPCQuestManager.QuestOffer CurrentOffer { get; private set; }
 
     private int _currentNpcId = -1;
 
@@ -191,9 +196,11 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public void ShowForNpc(int npcId)
     {
         _currentNpcId = npcId;
+        CurrentOffer = default;
 
         if (questManager && questManager.TryGetOffer(npcId, out var offer) && offer.valid)
         {
+            CurrentOffer = offer;
             if (distanceText)
                 distanceText.text = $"{offer.distance:0} Units";
 
@@ -231,6 +238,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
             if (acceptText)
                 acceptText.text = "Accepted";
         }
+
     }
 
     // Hook this to the Accept button OnClick in the inspector
@@ -265,6 +273,7 @@ public class NPCQuestDropdownUI : MonoBehaviour
     public void ResetUI()
     {
         _currentNpcId = -1;
+        CurrentOffer = default;
         if (distanceText) distanceText.text = "----";
         UpdateRewardDisplay(default);
         UpdateDifficultyDisplay(0);
@@ -502,28 +511,45 @@ public class NPCQuestDropdownUI : MonoBehaviour
     }
     private void UpdateCargoEffectDisplay(NPCQuestManager.QuestOffer offer)
     {
-        bool hasEffect =
-            offer.valid &&
-            offer.cargoEffectType != CargoEffectType.None;
+        int heatLevel = Mathf.Clamp(offer.heatLevel, 0, 5);
+        bool hasHeat = offer.valid && heatLevel > 0;
+        bool hasEffect = offer.valid && offer.cargoEffectType != CargoEffectType.None;
+        bool showPill = hasHeat || hasEffect;
 
         if (cargoEffectPillRoot)
-            cargoEffectPillRoot.SetActive(hasEffect);
+            cargoEffectPillRoot.SetActive(showPill);
 
-        if (!hasEffect)
+        if (!showPill)
+        {
+            if (cargoEffectPillText)
+                cargoEffectPillText.text = string.Empty;
             return;
+        }
 
-        CargoEffectVisual visual = GetCargoEffectVisual(offer.cargoEffectType);
+        string pillLabel;
+        Color pillColor;
+
+        // Heat wins when a package has both heat and a cargo effect.
+        if (hasHeat)
+        {
+            pillLabel = $"Heat {heatLevel}/5";
+            pillColor = heatPillColor;
+        }
+        else
+        {
+            CargoEffectVisual visual = GetCargoEffectVisual(offer.cargoEffectType);
+            pillLabel = visual.label;
+            pillColor = QuestColorUtil.GetCargoColor(
+                offer.cargoEffectType,
+                offer.sourceFaction
+            );
+        }
 
         if (cargoEffectPillText)
         {
-            cargoEffectPillText.text = visual.label;
+            cargoEffectPillText.text = pillLabel;
             cargoEffectPillText.color = Color.white;
         }
-
-        Color pillColor = QuestColorUtil.GetCargoColor(
-            offer.cargoEffectType,
-            offer.sourceFaction
-        );
 
         if (cargoEffectPillImage)
             cargoEffectPillImage.color = pillColor;

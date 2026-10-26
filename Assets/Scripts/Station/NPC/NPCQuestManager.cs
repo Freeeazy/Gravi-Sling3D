@@ -50,6 +50,13 @@ public class NPCQuestManager : MonoBehaviour
     public Vector2 relaxedTimeMultiplierRange = new Vector2(1.50f, 2.00f);
     public Vector2 relaxedRewardMultiplierRange = new Vector2(0.90f, 0.75f);
 
+    [Header("Cargo and Risk Reward Bonuses")]
+    [Tooltip("Reward multiplier for any cargo effect. 1 = no bonus. Stacks multiplicatively with urgency and heat, for both credits and reputation XP.")]
+    [Min(1f)] public float cargoEffectRewardMultiplier = 1.25f;
+
+    [Tooltip("X = heat 1 multiplier, Y = heat 5 multiplier. Heat 2-4 interpolate evenly; heat 0 gets no bonus. Stacks with urgency and cargo effects.")]
+    public Vector2 riskyRewardMultiplierRange = new Vector2(1.25f, 2.25f);
+
     [Header("Reputation XP Quality Scaling")]
     public float perfectDeliveryReputationMultiplier = 1.25f;
     public float goodDeliveryReputationMultiplier = 1f;
@@ -230,6 +237,7 @@ public class NPCQuestManager : MonoBehaviour
         public int reputationRankIndex;
         public DeliveryType deliveryType;
         public float deliveryTimeMultiplier;
+        // Combined urgency x cargo-effect x package-heat multiplier, fixed when offered.
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
 
@@ -258,6 +266,7 @@ public class NPCQuestManager : MonoBehaviour
         public int reputationRankIndex;
         public DeliveryType deliveryType;
         public float deliveryTimeMultiplier;
+        // Combined urgency x cargo-effect x package-heat multiplier, fixed when offered.
         public float deliveryRewardMultiplier;
         public float expectedDeliveryTimeSeconds;
 
@@ -796,6 +805,10 @@ public class NPCQuestManager : MonoBehaviour
         offer.cargoEffectType = flavor.cargoEffectType;
         offer.sourceFaction = flavor.sourceFaction;
 
+        // Flavor determines cargo and heat, so combine bonuses only after it is assigned.
+        // Bake this once into the existing field used by previews, acceptance and UI.
+        offer.deliveryRewardMultiplier *= GetCargoEffectRewardMultiplier(offer.cargoEffectType) * GetRiskyRewardMultiplier(offer.heatLevel);
+
         offer.valid = true;
         return offer;
     }
@@ -977,6 +990,31 @@ public class NPCQuestManager : MonoBehaviour
                 return 1f;
         }
     }
+    public float GetCargoEffectRewardMultiplier(CargoEffectType cargoEffectType)
+    {
+        return cargoEffectType == CargoEffectType.None
+            ? 1f
+            : Mathf.Max(1f, cargoEffectRewardMultiplier);
+    }
+
+    public float GetRiskyRewardMultiplier(int heatLevel)
+    {
+        if (heatLevel <= 0)
+            return 1f;
+
+        float heatT = (Mathf.Clamp(heatLevel, 1, 5) - 1) / 4f;
+        float minMultiplier = Mathf.Max(1f, riskyRewardMultiplierRange.x);
+        float maxMultiplier = Mathf.Max(minMultiplier, riskyRewardMultiplierRange.y);
+        return Mathf.Lerp(minMultiplier, maxMultiplier, heatT);
+    }
+
+    private static float ResolveDeliveryRewardMultiplier(float multiplier)
+    {
+        // Older/default quest data can have an unset (0) multiplier.
+        // Preserve positive values below 1 for relaxed deliveries.
+        return multiplier > 0f ? multiplier : 1f;
+    }
+
     private float CalculateExpectedDeliveryTimeSeconds(float distance, float timeMultiplier)
     {
         ActiveQuest previewQuest = new ActiveQuest
@@ -1126,7 +1164,8 @@ public class NPCQuestManager : MonoBehaviour
         float distanceBonus = quest.distanceAtAccept * distanceRate;
         float rawCredits = difficultyCredits + distanceBonus;
 
-        return (rawCredits * rankConfig.creditMultiplier) + rankConfig.creditBonus;
+        float rankAdjustedCredits = (rawCredits * rankConfig.creditMultiplier) + rankConfig.creditBonus;
+        return rankAdjustedCredits * ResolveDeliveryRewardMultiplier(quest.deliveryRewardMultiplier);
     }
     private int CalculateQuestReputationExp(ActiveQuest quest, PackageDurabilityManager.DeliveryQuality quality)
     {
@@ -1140,7 +1179,8 @@ public class NPCQuestManager : MonoBehaviour
         float rawReputationExp = (baseReputationExp * rankConfig.reputationMultiplier) + rankConfig.reputationBonus;
         float qualityMultiplier = GetReputationQualityMultiplier(quality);
 
-        return Mathf.RoundToInt(rawReputationExp * qualityMultiplier);
+        float deliveryMultiplier = ResolveDeliveryRewardMultiplier(quest.deliveryRewardMultiplier);
+        return Mathf.RoundToInt(rawReputationExp * deliveryMultiplier * qualityMultiplier);
     }
     private DifficultyRewardConfig GetDifficultyRewardConfig(int difficulty)
     {

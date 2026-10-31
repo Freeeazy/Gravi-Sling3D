@@ -20,6 +20,13 @@ public class RadialMenuManager : MonoBehaviour
     [SerializeField] private TMP_Text weirdCountText;
     [SerializeField] private TMP_Text riskyCountText;
 
+    [Header("Risky Heat Range")]
+    [Tooltip("Lowest available heat. Place five star objects directly under this container.")]
+    [SerializeField] private Transform leftHeatStarsRoot;
+
+    [Tooltip("Highest available heat. Place five star objects directly under this container.")]
+    [SerializeField] private Transform rightHeatStarsRoot;
+
     [Header("Debug")]
     [SerializeField] private bool logSelections = false;
 
@@ -33,7 +40,6 @@ public class RadialMenuManager : MonoBehaviour
 
     // Temporary list populated by NPCQuestManager.
     private readonly List<NPCQuestManager.QuestOffer> availableOffers = new();
-
 
     private void Awake()
     {
@@ -70,7 +76,6 @@ public class RadialMenuManager : MonoBehaviour
             riskyButton.onClick.RemoveListener(AcceptRandomRiskyQuest);
     }
 
-
     // -------------------------------------------------
     // REFRESH / SORT
     // -------------------------------------------------
@@ -84,7 +89,10 @@ public class RadialMenuManager : MonoBehaviour
 
         if (questManager == null)
         {
-            Debug.LogWarning("[RadialMenuManager] NPCQuestManager reference is missing.");
+            Debug.LogWarning(
+                "[RadialMenuManager] NPCQuestManager reference is missing."
+            );
+
             RefreshCountText();
             return;
         }
@@ -113,7 +121,6 @@ public class RadialMenuManager : MonoBehaviour
 
         RefreshCountText();
     }
-
 
     // -------------------------------------------------
     // BUTTON ACTIONS
@@ -144,7 +151,9 @@ public class RadialMenuManager : MonoBehaviour
         if (questList == null || questList.Count == 0)
         {
             if (logSelections)
-                Debug.Log($"[RadialMenuManager] No {categoryName} quests available.");
+                Debug.Log(
+                    $"[RadialMenuManager] No {categoryName} quests available."
+                );
 
             RefreshQuestLists();
             return;
@@ -178,10 +187,9 @@ public class RadialMenuManager : MonoBehaviour
         }
 
         // Rebuild afterward so the accepted quest disappears
-        // from the available pool and the counters update.
+        // from the available pool and the UI updates.
         RefreshQuestLists();
     }
-
 
     // -------------------------------------------------
     // UI
@@ -198,8 +206,6 @@ public class RadialMenuManager : MonoBehaviour
         if (riskyCountText != null)
             riskyCountText.text = $"[ {riskyQuests.Count} ]";
 
-        // Optional:
-        // prevent clicking an empty category.
         if (safeButton != null)
             safeButton.interactable = safeQuests.Count > 0;
 
@@ -208,5 +214,47 @@ public class RadialMenuManager : MonoBehaviour
 
         if (riskyButton != null)
             riskyButton.interactable = riskyQuests.Count > 0;
+
+        RefreshHeatRange();
+    }
+
+    private void RefreshHeatRange()
+    {
+        int lowestHeat = 0;
+        int highestHeat = 0;
+
+        if (riskyQuests.Count > 0)
+        {
+            lowestHeat = riskyQuests[0].heatLevel;
+            highestHeat = lowestHeat;
+
+            for (int i = 1; i < riskyQuests.Count; i++)
+            {
+                int heat = riskyQuests[i].heatLevel;
+
+                lowestHeat = Mathf.Min(lowestHeat, heat);
+                highestHeat = Mathf.Max(highestHeat, heat);
+            }
+        }
+
+        SetActiveStars(leftHeatStarsRoot, lowestHeat);
+        SetActiveStars(rightHeatStarsRoot, highestHeat);
+    }
+
+    private void SetActiveStars(Transform container, int heatLevel)
+    {
+        if (container == null)
+            return;
+
+        int activeStarCount = Mathf.Clamp(
+            heatLevel,
+            0,
+            Mathf.Min(5, container.childCount)
+        );
+
+        for (int i = 0; i < container.childCount; i++)
+        {
+            container.GetChild(i).gameObject.SetActive(i < activeStarCount);
+        }
     }
 }

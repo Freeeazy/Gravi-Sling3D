@@ -341,7 +341,7 @@ public class ModuleInventoryManager : MonoBehaviour
             usedSlots++;
         }
 
-        UpdateInventoryCounter();
+        UpdateInventoryCounter(usedSlots);
 
         int emptySlotsToCreate = Mathf.Max(0, totalSlots - usedSlots);
 
@@ -379,13 +379,12 @@ public class ModuleInventoryManager : MonoBehaviour
             Destroy(moduleListParent.GetChild(i).gameObject);
         }
     }
-    private void UpdateInventoryCounter()
+    private void UpdateInventoryCounter(int filledSlots)
     {
         if (inventoryCounterText == null)
             return;
 
-        int uniqueCount = ownedModules.Count;
-        inventoryCounterText.text = $"{uniqueCount}/{totalSlots}";
+        inventoryCounterText.text = $"{filledSlots}/{totalSlots}";
     }
 
     public void GiveXCredits(float creditsToGive)

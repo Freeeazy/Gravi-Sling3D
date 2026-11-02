@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
- 
+
 public class ModuleInventoryManager : MonoBehaviour
 {
     public static ModuleInventoryManager Instance { get; private set; }
@@ -40,6 +40,15 @@ public class ModuleInventoryManager : MonoBehaviour
     [Header("Currency Animation")]
     public float creditTickDelay = 0.02f;
     public float creditAnimationDuration = 0.75f;
+
+    [Header("Shop Purchase Feedback")]
+    [Tooltip("Separate TMP label beneath the shop balance. Keep its GameObject active; alpha hides it.")]
+    [SerializeField] private TMP_Text shopSpendText;
+    [SerializeField] private Color shopSpendColor = new Color(1f, 0.3f, 0.3f, 1f);
+    [SerializeField, Min(0f)] private float shopSpendFadeIn = 0.1f;
+    [SerializeField, Min(0f)] private float shopSpendHold = 0.55f;
+    [SerializeField, Min(0.01f)] private float shopSpendFadeOut = 0.45f;
+    private Coroutine _shopSpendRoutine;
 
     [Header("Inventory Counter")]
     public TMP_Text inventoryCounterText;
@@ -85,6 +94,12 @@ public class ModuleInventoryManager : MonoBehaviour
     {
         Instance = this;
 
+        if (shopSpendText != null)
+        {
+            shopSpendText.raycastTarget = false;
+            shopSpendText.alpha = 0f;
+        }
+
         if (moduleListParent == null)
             moduleListParent = transform;
 
@@ -110,6 +125,7 @@ public class ModuleInventoryManager : MonoBehaviour
     private void OnDisable()
     {
         _refreshInventoryQueued = false;
+        ClearShopSpendFeedback();
     }
     private void Update()
     {
@@ -481,11 +497,74 @@ public class ModuleInventoryManager : MonoBehaviour
             return null;
         }
 
+        // Only show a deduction once generation succeeds (failed purchases are refunded).
+        ShowShopSpendFeedback(cost);
+
         if (RewardPopupUI.Instance != null)
             RewardPopupUI.Instance.ShowModuleReward(boughtModule);
 
         return boughtModule;
     }
+    private void ShowShopSpendFeedback(float cost)
+    {
+        // A quick second purchase replaces the label with the latest cost.
+        ClearShopSpendFeedback();
+
+        if (cost <= 0f || !isActiveAndEnabled ||
+            shopSpendText == null || !shopSpendText.isActiveAndEnabled)
+            return;
+
+        shopSpendText.text = $"-{cost:0.##} credits";
+        shopSpendText.color = shopSpendColor;
+        shopSpendText.alpha = 0f;
+        _shopSpendRoutine = StartCoroutine(AnimateShopSpendFeedback());
+    }
+
+    private IEnumerator AnimateShopSpendFeedback()
+    {
+        float fadeIn = Mathf.Max(0f, shopSpendFadeIn);
+        float hold = Mathf.Max(0f, shopSpendHold);
+        float fadeOut = Mathf.Max(0.01f, shopSpendFadeOut);
+        float fadeOutStart = fadeIn + hold;
+        float duration = fadeOutStart + fadeOut;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            // Discard feedback when the shop closes, even if this manager stays active.
+            if (shopSpendText == null || !shopSpendText.isActiveAndEnabled)
+                break;
+
+            float opacity;
+            if (elapsed < fadeIn)
+                opacity = elapsed / fadeIn;
+            else if (elapsed < fadeOutStart)
+                opacity = 1f;
+            else
+                opacity = 1f - (elapsed - fadeOutStart) / fadeOut;
+
+            shopSpendText.alpha = Mathf.Clamp01(opacity) * shopSpendColor.a;
+            yield return null;
+            elapsed += Time.unscaledDeltaTime;
+        }
+
+        if (shopSpendText != null)
+            shopSpendText.alpha = 0f;
+        _shopSpendRoutine = null;
+    }
+
+    private void ClearShopSpendFeedback()
+    {
+        if (_shopSpendRoutine != null)
+        {
+            StopCoroutine(_shopSpendRoutine);
+            _shopSpendRoutine = null;
+        }
+
+        if (shopSpendText != null)
+            shopSpendText.alpha = 0f;
+    }
+
     private IEnumerator AnimateCreditsText()
     {
         float startCredits = _displayedCredits;
@@ -872,6 +951,8 @@ public class ModuleInventoryManager : MonoBehaviour
     }
     public void RestoreSavedCredits(float amount)
     {
+        ClearShopSpendFeedback();
+
         if (_creditsRoutine != null)
         {
             StopCoroutine(_creditsRoutine);

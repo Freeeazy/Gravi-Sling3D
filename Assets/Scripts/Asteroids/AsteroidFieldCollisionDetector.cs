@@ -341,6 +341,8 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             playerRb.MovePosition(playerRb.position + dir * smashForwardNudge);
         }
 
+        bool shieldBlocked = simpleMove != null && simpleMove.enabled && StatManager.Instance != null && StatManager.Instance.TryConsumeShieldCharge();
+
         // --- speed-scaled momentum loss on smash ---
         if (smashLossAtThreshold > 0f || smashLossAtMax > 0f)
         {
@@ -362,7 +364,7 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
             // Optional floor so you never fully stall from a smash
             keep = Mathf.Max(keep, smashMinSpeedFraction);
 
-            if (!IsShieldActive())
+            if (!shieldBlocked)
             {
                 playerRb.linearVelocity *= keep;
             }
@@ -374,19 +376,9 @@ public class AsteroidFieldCollisionDetector : MonoBehaviour
 
                 float cargoSeverity = k;
 
-                if (simpleMove != null && simpleMove.enabled && PackageDurabilityManager.Instance != null)
+                if (!shieldBlocked && simpleMove != null && simpleMove.enabled && PackageDurabilityManager.Instance != null && PackageDurabilityManager.Instance.HasActivePackage())
                 {
-                    bool hasPackage = PackageDurabilityManager.Instance.HasActivePackage();
-
-                    if (hasPackage)
-                    {
-                        bool shieldBlocked =
-                            StatManager.Instance != null &&
-                            StatManager.Instance.TryConsumeShieldCharge();
-
-                        if (!shieldBlocked)
-                            PackageDurabilityManager.Instance.ApplyImpactDamage(cargoSeverity);
-                    }
+                    PackageDurabilityManager.Instance.ApplyImpactDamage(cargoSeverity);
                 }
 
                 // Kick direction: opposite the impact (pushNormal is asteroid -> player)

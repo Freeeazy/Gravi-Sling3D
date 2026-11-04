@@ -16,6 +16,10 @@ public class OpenQuestBoard : MonoBehaviour
     [Header("UI hooks")]
     public NPCDropdownMover dropdownMover;
 
+    [Header("Optional Panels To Close")]
+    [SerializeField] private CanvasGroup shopPanelToClose;
+    [SerializeField] private OpenPanelActive combinePanelToClose;
+
     [Header("Neighbor Panels")]
     public List<OpenQuestBoard> siblingBoards = new List<OpenQuestBoard>();
 
@@ -171,6 +175,16 @@ public class OpenQuestBoard : MonoBehaviour
         dropdownMover?.ResetDropdown();
 
         SetDisabledObjects(false);
+
+    if (shopPanelToClose != null)
+    {
+        shopPanelToClose.alpha = 0f;
+        shopPanelToClose.interactable = false;
+        shopPanelToClose.blocksRaycasts = false;
+    }
+    
+    if (combinePanelToClose != null)
+        combinePanelToClose.CloseImmediately();
     }
 
     private void AcquireCursor()

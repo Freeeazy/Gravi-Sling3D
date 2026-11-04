@@ -13,6 +13,10 @@ public class ResearchManager : MonoBehaviour
     public Button confirmButton;
     public int minModulesRequired = 3;
 
+    [Header("Close Button Animation")]
+    [SerializeField] private Animator closeButtonAnimator;
+    [SerializeField] private string closeButtonNormalState = "Normal";
+
     [Header("Research Chances")]
     [Range(0f, 1f)] public float threeMatchingTierUpgradeChance = 0.40f;
     [Range(0f, 1f)] public float fourMatchingTierUpgradeChance = 0.65f;
@@ -53,11 +57,14 @@ public class ResearchManager : MonoBehaviour
         if (loadoutManagerToDisable != null)
             loadoutManagerToDisable.enabled = false;
 
+        ResetCloseButtonAnimation();
         RefreshConfirmButton();
     }
 
     private void OnDisable()
     {
+        ClearResearchSlotsAndReturnModules();
+
         if (loadoutManagerToDisable != null)
             loadoutManagerToDisable.enabled = true;
     }
@@ -312,5 +319,22 @@ public class ResearchManager : MonoBehaviour
         }
 
         RefreshConfirmButton();
+    }
+    private void ResetCloseButtonAnimation()
+    {
+        if (closeButtonAnimator == null ||
+            !closeButtonAnimator.isActiveAndEnabled ||
+            closeButtonAnimator.runtimeAnimatorController == null)
+            return;
+
+        // Remove pending Pressed/Highlighted/etc. triggers before restarting.
+        foreach (AnimatorControllerParameter parameter in closeButtonAnimator.parameters)
+        {
+            if (parameter.type == AnimatorControllerParameterType.Trigger)
+                closeButtonAnimator.ResetTrigger(parameter.name);
+        }
+
+        closeButtonAnimator.Play(closeButtonNormalState, 0, 0f);
+        closeButtonAnimator.Update(0f);
     }
 }

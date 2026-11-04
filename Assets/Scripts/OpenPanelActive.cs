@@ -34,6 +34,14 @@ public class OpenPanelActive : MonoBehaviour
         StartCoroutine(CloseDelayed());
     }
 
+    public void CloseImmediately()
+    {
+        StopAllCoroutines();
+    
+        if (panelToToggle != null)
+            panelToToggle.SetActive(false);
+    }
+    
     private IEnumerator TogglePanelDelayed()
     {
         yield return new WaitForSecondsRealtime(Delay);

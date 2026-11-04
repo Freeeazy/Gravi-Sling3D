@@ -7,6 +7,9 @@ public class OpenQuestBoardPopUp : MonoBehaviour
     [Header("Quest Board UI")]
     public GameObject questBoardUI;
 
+    [Header("Quest Board UI")]
+    public CanvasGroup WIPChatPanel;
+
     private void Awake()
     {
         // Singleton setup
@@ -31,11 +34,19 @@ public class OpenQuestBoardPopUp : MonoBehaviour
     {
         if (questBoardUI)
             questBoardUI.SetActive(false);
+
+        ToggleCanvasGroup(WIPChatPanel, false);
     }
 
     public void ToggleQuestBoard()
     {
         if (questBoardUI)
             questBoardUI.SetActive(!questBoardUI.activeSelf);
+    }
+    private void ToggleCanvasGroup(CanvasGroup group, bool show)
+    {
+        group.alpha = show ? 1f : 0f;
+        group.interactable = show;
+        group.blocksRaycasts = show;
     }
 }

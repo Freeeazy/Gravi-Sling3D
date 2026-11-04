@@ -7,6 +7,7 @@ using UnityEngine;
 public class SavedModuleData
 {
     public int amount = 1;
+    public bool isNew;
     public string iconName;
     public string moduleName;
     public string moduleType;

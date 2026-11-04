@@ -11,6 +11,8 @@ public struct QuestFlavor
     [Range(0, 5)] public int heatLevel;
     public CargoEffectType cargoEffectType;
 
+    [Min(0)] public int minimumRank;
+
     // Faction responsible for this delivery.
     public NPCFaction sourceFaction;
 
@@ -50,6 +52,43 @@ public static class QuestFlavorUtil
         return flavor;
     }
     public static QuestFlavor GenerateRaw(
+    NPCData npc,
+    NPCQuestManager.QuestOffer offer,
+    string destinationName,
+    int seed)
+    {
+        int rankIndex = Mathf.Max(0, offer.reputationRankIndex);
+        const int maxAttempts = 32;
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            int candidateSeed = unchecked(
+                seed + attempt * 104729);
+
+            QuestFlavor candidate = GenerateCandidate(
+                npc,
+                offer,
+                destinationName,
+                candidateSeed);
+
+            if (QuestFlavorRules.IsAllowed(candidate, rankIndex))
+                return candidate;
+        }
+
+        // Some personalities always select a locked category.
+        // Offer an ordinary delivery rather than looping indefinitely.
+        string npcName = string.IsNullOrWhiteSpace(npc.displayName)
+            ? "This client"
+            : npc.displayName;
+
+        return Make(
+            "Routine Supply Run",
+            "Station Supplies",
+            $"{npcName} needs ordinary supplies delivered.",
+            $"Deliver the Station Supplies to {destinationName}."
+        );
+    }
+    public static QuestFlavor GenerateCandidate(
         NPCData npc,
         NPCQuestManager.QuestOffer offer,
         string destinationName,
@@ -788,7 +827,8 @@ public static class QuestFlavorUtil
         string shortDesc,
         string fullDesc,
         CargoEffectType cargoEffectType = CargoEffectType.None,
-        int heatLevel = 0)
+        int heatLevel = 0,
+        int minimumRank = 0)
     {
         return new QuestFlavor
         {
@@ -798,7 +838,8 @@ public static class QuestFlavorUtil
             fullDescription = heatLevel > 0 ? fullDesc + $" Heat: {heatLevel}/5. Pickup alerts police."
                 + (heatLevel >= 3 ? " Security scanners can alert them again after escape." : " Escape to lose pursuit.") : fullDesc,
             heatLevel = Mathf.Clamp(heatLevel, 0, 5),
-            cargoEffectType = cargoEffectType
+            cargoEffectType = cargoEffectType,
+            minimumRank = Mathf.Max(0, minimumRank)
         };
     }
 

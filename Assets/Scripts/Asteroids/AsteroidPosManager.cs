@@ -73,6 +73,16 @@ public class AsteroidPosManager : MonoBehaviour
 
     private Vector3Int _lastCenterChunk;
 
+    public void ApplyWorldSeed(int worldSeed)
+    {
+        globalSeed = WorldSeed.Derive(worldSeed, WorldSeed.AsteroidPositions);
+
+        densitySeed = WorldSeed.Derive(worldSeed, WorldSeed.AsteroidDensity);
+
+        _densityByCoord.Clear();
+        _densitySettingsCached = false;
+    }
+
     private void Awake()
     {
         if (!player)

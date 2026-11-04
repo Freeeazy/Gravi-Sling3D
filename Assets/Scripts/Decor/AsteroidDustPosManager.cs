@@ -21,6 +21,10 @@ public class AsteroidDustPosManager : MonoBehaviour
     public int seed = 12345;
     public bool regenerateOnStart = true;
 
+    [Tooltip("Unique generation stream ID for this dust manager.")]
+    [SerializeField, Min(3)]
+    private int seedStreamId = WorldSeed.Dust;
+
     [Header("Box Shell (in oriented axis-space)")]
     public Vector3 outerHalfExtents = new Vector3(600f, 600f, 600f);
     public Vector3 innerHalfExtents = new Vector3(80f, 80f, 80f);
@@ -75,6 +79,11 @@ public class AsteroidDustPosManager : MonoBehaviour
 
     public event Action OnRegenerated;
 
+    public void ApplyWorldSeed(int worldSeed)
+    {
+        seed = WorldSeed.Derive(worldSeed, seedStreamId);
+        _rng = new System.Random(seed);
+    }
     private void Awake()
     {
         if (!player)
@@ -102,7 +111,8 @@ public class AsteroidDustPosManager : MonoBehaviour
         _driftVel = new Vector3[count];
         _hideFrames = new int[count];
 
-        if (_rng == null) _rng = new System.Random(seed);
+        // Regeneration repeats the layout for the current seed.
+        _rng = new System.Random(seed);
         OrientedBasis basis = GetBasis();
         Vector3 center = player ? player.position : transform.position;
         _hasPositionDrift = false;

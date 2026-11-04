@@ -56,7 +56,7 @@ public class ModuleSlotUI : MonoBehaviour,
             ModuleTooltipUI.Instance.Hide();
 
         if (returnReplacedToInventory && replacedModule != null && ModuleInventoryManager.Instance != null)
-            ModuleInventoryManager.Instance.AddModule(replacedModule, 1);
+            ModuleInventoryManager.Instance.AddModule(replacedModule, 1, markAsNew: false);
 
         if (recalculateStats && ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
             ModuleLoadoutManager.Instance.RecalculateStats();
@@ -83,7 +83,7 @@ public class ModuleSlotUI : MonoBehaviour,
             ModuleTooltipUI.Instance.Hide();
 
         if (returnToInventory && ModuleInventoryManager.Instance != null && removedModule != null)
-            ModuleInventoryManager.Instance.AddModule(removedModule, 1);
+            ModuleInventoryManager.Instance.AddModule(removedModule, 1, markAsNew: false);
 
         if (ModuleLoadoutManager.Instance != null && ModuleLoadoutManager.Instance.isActiveAndEnabled)
             ModuleLoadoutManager.Instance.RecalculateStats();

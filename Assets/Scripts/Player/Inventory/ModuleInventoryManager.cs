@@ -75,6 +75,8 @@ public class ModuleInventoryManager : MonoBehaviour
 
     private readonly Dictionary<ModuleData, int> ownedModules = new Dictionary<ModuleData, int>();
 
+    private readonly HashSet<ModuleData> unreadModules = new HashSet<ModuleData>();
+
     private float _displayedCredits = 0f;
     private float _pendingCreditGain = 0f;
     private Coroutine _creditsRoutine;
@@ -271,12 +273,13 @@ public class ModuleInventoryManager : MonoBehaviour
 
         return generatedModule;
     }
-    public void AddModule(ModuleData moduleData, int amount = 1)
+    public void AddModule(ModuleData moduleData, int amount = 1, bool markAsNew = true)
     {
         if (moduleData == null || amount <= 0)
             return;
 
         ModuleData existingMatch = FindMatchingOwnedModule(moduleData);
+        ModuleData inventoryModule = existingMatch != null ? existingMatch : moduleData;
 
         if (existingMatch != null)
         {
@@ -286,6 +289,9 @@ public class ModuleInventoryManager : MonoBehaviour
         {
             ownedModules.Add(moduleData, amount);
         }
+
+        if (markAsNew)
+            unreadModules.Add(inventoryModule);
 
         RequestInventoryRefresh();
     }
@@ -301,7 +307,10 @@ public class ModuleInventoryManager : MonoBehaviour
         ownedModules[moduleData] -= amount;
 
         if (ownedModules[moduleData] <= 0)
+        {
             ownedModules.Remove(moduleData);
+            unreadModules.Remove(moduleData);
+        }   
 
         RequestInventoryRefresh();
     }
@@ -353,6 +362,11 @@ public class ModuleInventoryManager : MonoBehaviour
             newSlot.parentScrollRect = parentScrollRect;
             newSlot.uiCamera = uiCamera;
             newSlot.SetAmount(amount);
+
+            ModuleNewIndicator indicator = newSlotObject.GetComponent<ModuleNewIndicator>();
+
+            if (indicator != null)
+                indicator.SetNew(IsModuleNew(data));
 
             usedSlots++;
         }
@@ -879,6 +893,9 @@ public class ModuleInventoryManager : MonoBehaviour
 
             destination[index].Capture(
                 pair.Key, pair.Value, GetSavedIconName(pair.Key));
+
+            destination[index].isNew = IsModuleNew(pair.Key);
+
             index++;
         }
 
@@ -894,6 +911,7 @@ public class ModuleInventoryManager : MonoBehaviour
     public void RestoreSavedModules(List<SavedModuleData> savedModules)
     {
         ownedModules.Clear();
+        unreadModules.Clear();
 
         // Keep old recreated objects alive until OnDestroy, since other UI or
         // equipment components may still reference them during this frame.
@@ -906,6 +924,8 @@ public class ModuleInventoryManager : MonoBehaviour
 
                 ModuleData module = RecreateSavedModule(saved);
                 ownedModules.Add(module, saved.amount);
+                if (saved.isNew)
+                    unreadModules.Add(module);
             }
         }
 
@@ -964,5 +984,15 @@ public class ModuleInventoryManager : MonoBehaviour
         _pendingCreditGain = 0f;
 
         UpdateCreditsText();
+    }
+    public bool IsModuleNew(ModuleData module)
+    {
+        return module != null && unreadModules.Contains(module);
+    }
+
+    public void MarkModuleSeen(ModuleData module)
+    {
+        if (module != null)
+            unreadModules.Remove(module);
     }
 }

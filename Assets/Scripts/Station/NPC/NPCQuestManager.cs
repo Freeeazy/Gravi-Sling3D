@@ -341,6 +341,14 @@ public class NPCQuestManager : MonoBehaviour
             return false;
         }
 
+        int currentRank = GetCurrentReputationRankIndex();
+
+        if (currentRank != _currentOfferRankIndex)
+        {
+            _currentOfferRankIndex = currentRank;
+            _offersByNpc.Clear();
+        }
+
         if (_offersByNpc.TryGetValue(npcId, out offer) && offer.valid)
             return true;
 

@@ -333,11 +333,32 @@ public class SaveManager : MonoBehaviour
         }
     }
 
+    private void ApplyMainGameSeeds(Scene scene)
+    {
+        if (Current == null || scene.name != mainScene)
+            return;
+
+        foreach (GameObject root in scene.GetRootGameObjects())
+        {
+            foreach (AsteroidPosManager manager in root.GetComponentsInChildren<AsteroidPosManager>(true))
+            {
+                manager.ApplyWorldSeed(Current.seed);
+            }
+
+            foreach (AsteroidDustPosManager manager in root.GetComponentsInChildren<AsteroidDustPosManager>(true))
+            {
+                manager.ApplyWorldSeed(Current.seed);
+            }
+        }
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // This implementation expects your existing single-scene flow.
         if (mode == LoadSceneMode.Additive || Current == null)
             return;
+
+        ApplyMainGameSeeds(scene);
 
         // Capture completion flags changed by the outgoing tutorial.
         CaptureTutorialFlags();

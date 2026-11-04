@@ -395,6 +395,7 @@ GameObject:
   - component: {fileID: 922912762643947555}
   - component: {fileID: 1576070351609367529}
   - component: {fileID: 1316584100501145616}
+  - component: {fileID: 6891219834284418659}
   m_Layer: 5
   m_Name: ModuleListObjectEmpty
   m_TagString: Untagged
@@ -528,6 +529,26 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6891219834284418659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5661327767489755835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3918d6aab6acc194c8c6dc3e84e86585, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetImage: {fileID: 5594965984536597094}
+  newModuleMaterial: {fileID: 2100000, guid: 1d54a3c9317b6d34da818668757970cd, type: 2}
+  minStrength: 5
+  maxStrength: 12
+  cycleSeconds: 2
+  slotButton: {fileID: 1316584100501145616}
+  backgroundLift: 0.3
+  waveFlair: 0.12
 --- !u!1 &6492248947482892441
 GameObject:
   m_ObjectHideFlags: 0
@@ -585,7 +606,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Material: {fileID: 2100000, guid: 5d1322a8729acab489146d9cce253b1e, type: 2}
+  m_Material: {fileID: 2100000, guid: 1d54a3c9317b6d34da818668757970cd, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}

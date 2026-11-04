@@ -250,7 +250,7 @@ public class ModuleLoadoutManager : MonoBehaviour
                 {
                     // Preserve the item if its original slot no longer exists
                     // or another saved entry already occupied that slot.
-                    inventory.AddModule(module, 1);
+                    inventory.AddModule(module, 1, markAsNew: false);
 
                     Debug.LogWarning(
                         $"[Loadout] Saved slot {saved.slotIndex} is unavailable. " +

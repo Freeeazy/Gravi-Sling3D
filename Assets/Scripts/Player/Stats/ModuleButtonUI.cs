@@ -79,6 +79,14 @@ public class ModuleButtonUI : MonoBehaviour,
         if (moduleData == null)
             return;
 
+        if (ModuleInventoryManager.Instance != null)
+            ModuleInventoryManager.Instance.MarkModuleSeen(moduleData);
+
+        ModuleNewIndicator indicator = GetComponent<ModuleNewIndicator>();
+
+        if (indicator != null)
+            indicator.SetNew(false);
+
         if (ModuleTooltipUI.Instance != null)
             ModuleTooltipUI.Instance.ShowDelayed(moduleData);
     }

@@ -864,7 +864,7 @@ MonoBehaviour:
   lightDamage: 1
   heavyDamage: 50
   heavySeverity: 1
-  baseDeliveryTime: 30
+  baseDeliveryTime: 45
   secondsPer1000Units: 1
   maxLateSecondsBeforeExpire: 15
   distanceUpdateInterval: 0.25
@@ -105954,7 +105954,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1429426110}
   m_Direction: 2
   m_Value: 0.99999917
-  m_Size: 0.35624877
+  m_Size: 0.35615173
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -127199,6 +127199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   questManager: {fileID: 1780358253}
+  questBoard: {fileID: 1616803251}
   distanceText: {fileID: 1551106408}
   creditsText: {fileID: 432674582}
   reputationRewardText: {fileID: 1952986948}

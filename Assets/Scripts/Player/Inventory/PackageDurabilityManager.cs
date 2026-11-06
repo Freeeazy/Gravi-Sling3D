@@ -21,6 +21,7 @@ public class PackageDurabilityManager : MonoBehaviour
         public string deliveryItem;
         public float integrity;
         public float timeRemaining;
+        public OpenQuestBoard timerStartBoard;
         public ActiveContractCardUI card;
         public CargoEffectType cargoEffectType;
         public Color deliveryItemColor;
@@ -117,6 +118,15 @@ public class PackageDurabilityManager : MonoBehaviour
         foreach (var pair in _packagesByQuestId)
         {
             TrackedPackage package = pair.Value;
+
+            if (package.timerStartBoard)
+            {
+                if (package.timerStartBoard.IsOpen && package.timerStartBoard.isActiveAndEnabled)
+                    continue;
+            
+                package.timerStartBoard = null;
+            }
+
             package.timeRemaining -= Time.deltaTime;
 
             if (package.timeRemaining <= -maxLateSecondsBeforeExpire)
@@ -135,6 +145,15 @@ public class PackageDurabilityManager : MonoBehaviour
         {
             ExpirePackage(questId);
         }
+    }
+
+    public void DeferQuestTimerUntilBoardCloses(int questId, OpenQuestBoard board)
+    {
+        if (!board || !board.IsOpen)
+            return;
+    
+        if (_packagesByQuestId.TryGetValue(questId, out var package))
+            package.timerStartBoard = board;
     }
 
     public void RegisterQuest(NPCQuestManager.ActiveQuest quest)

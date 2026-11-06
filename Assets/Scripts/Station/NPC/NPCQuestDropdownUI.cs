@@ -31,6 +31,9 @@ public class NPCQuestDropdownUI : MonoBehaviour
     [Header("Refs")]
     public NPCQuestManager questManager;
 
+    [Tooltip("QuestBoard controller whose closing starts newly accepted delivery timers.")]
+    public OpenQuestBoard questBoard;
+
     [Tooltip("Distance text in the dropdown panel")]
     public TMP_Text distanceText;
 
@@ -263,6 +266,8 @@ public class NPCQuestDropdownUI : MonoBehaviour
 
         if (ok)
         {
+            if (PackageDurabilityManager.Instance != null)
+                PackageDurabilityManager.Instance.DeferQuestTimerUntilBoardCloses(_currentNpcId, questBoard);
             if (acceptButton)
                 acceptButton.enabled = false;
             if (acceptText)

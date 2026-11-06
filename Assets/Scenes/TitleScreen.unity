@@ -1109,6 +1109,7 @@ MonoBehaviour:
   count: 2000
   seed: 1234
   regenerateOnStart: 1
+  seedStreamId: 3
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
@@ -2890,6 +2891,7 @@ MonoBehaviour:
   count: 2000
   seed: 123
   regenerateOnStart: 1
+  seedStreamId: 3
   outerHalfExtents: {x: 600, y: 600, z: 600}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
@@ -7559,6 +7561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd754bca7fa85dd4da14923bdb3ea007, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useVSync: 1
   fpsText: {fileID: 100012740}
   updateInterval: 0.1
   toggleKey: 105
@@ -7710,6 +7713,7 @@ MonoBehaviour:
   count: 600
   seed: 12345
   regenerateOnStart: 1
+  seedStreamId: 3
   outerHalfExtents: {x: 1300, y: 1300, z: 1300}
   innerHalfExtents: {x: 1, y: 1, z: 1}
   surfaceEpsilon: 0.5
@@ -16401,7 +16405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3188087184461558563, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -400
+      value: -250
       objectReference: {fileID: 0}
     - target: {fileID: 3637961318388385270, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -16579,9 +16583,13 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -400
       objectReference: {fileID: 0}
+    - target: {fileID: 7816753943301519482, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8245673777124064529, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -250
+      value: -400
       objectReference: {fileID: 0}
     - target: {fileID: 9038131072567918009, guid: e393a4c1dbf2adc4bbc2301e7afc1c79, type: 3}
       propertyPath: simpleMove

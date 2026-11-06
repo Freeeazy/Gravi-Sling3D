@@ -10,6 +10,12 @@ public class FPSCounterTMP : MonoBehaviour
     public const int DEFAULT_FPS = 120;
     public const int UNLIMITED_FPS = -1;
 
+    [Header("Frame Pacing")]
+    [Tooltip("Sync to the display refresh rate. When enabled, VSync overrides the saved FPS cap. When disabled, the saved FPS cap applies.")]
+    [SerializeField] private bool useVSync = false;
+
+    public bool VSyncEnabled => useVSync;
+
     [Header("UI")]
     public TMP_Text fpsText;
 
@@ -23,6 +29,7 @@ public class FPSCounterTMP : MonoBehaviour
     private float _timer;
     private int _frames;
     private float _accumulatedTime;
+    private bool _appliedVSync;
 
     public int CurrentTargetFPS { get; private set; } = DEFAULT_FPS;
 
@@ -40,9 +47,6 @@ public class FPSCounterTMP : MonoBehaviour
         // Keep this object alive between scene changes.
         DontDestroyOnLoad(gameObject);
 
-        // Disable V-Sync so Application.targetFrameRate controls the cap.
-        QualitySettings.vSyncCount = 0;
-
         // Load saved FPS setting.
         int savedFPS = PlayerPrefs.GetInt(FPS_PREF_KEY, DEFAULT_FPS);
 
@@ -51,6 +55,10 @@ public class FPSCounterTMP : MonoBehaviour
 
     private void Update()
     {
+        // Apply Inspector changes during Play Mode, even when the counter is hidden.
+        if (_appliedVSync != useVSync)
+            ApplyFramePacing();
+
         // Toggle FPS display with F12.
         if (Keyboard.current != null &&
             Keyboard.current[toggleKey].wasPressedThisFrame)
@@ -85,20 +93,32 @@ public class FPSCounterTMP : MonoBehaviour
 
     /// <summary>
     /// Changes the application's FPS cap.
-    /// Use -1 for unlimited.
+    /// Use -1 for unlimited. VSync takes precedence while enabled.
     /// </summary>
     public void SetTargetFPS(int fps, bool save = true)
     {
         CurrentTargetFPS = fps;
 
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = fps;
+        ApplyFramePacing();
 
         if (save)
         {
             PlayerPrefs.SetInt(FPS_PREF_KEY, fps);
             PlayerPrefs.Save();
         }
+    }
+
+    private void ApplyFramePacing()
+    {
+        QualitySettings.vSyncCount = useVSync ? 1 : 0;
+        Application.targetFrameRate = useVSync ? UNLIMITED_FPS : CurrentTargetFPS;
+        _appliedVSync = useVSync;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
     }
 
     /// <summary>
